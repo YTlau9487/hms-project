@@ -1,27 +1,16 @@
 import React from 'react';
 import { Star, Wifi, Coffee, Maximize2, Users, ArrowRight } from 'lucide-react';
 import { ImageWithFallback } from './ImageWithFallback';
+import { Room as APIRoom } from '../services/api';
+
+// Re-export API Room type for compatibility
+export type Room = APIRoom;
 
 export interface RoomPackage {
   id: string;
   name: string;
   description: string;
   priceMultiplier: number; // Percentage to add to base price (e.g., 0.15 = 15%)
-}
-
-export interface Room {
-  id: string;
-  name: string;
-  type: string;
-  price: number;
-  image: string;
-  size: string;
-  occupancy: string;
-  amenities: string[];
-  description: string;
-  packages?: RoomPackage[];
-  status?: 'available' | 'maintenance';
-  featured?: boolean; // For hero section promotion
 }
 
 interface RoomCardProps {
@@ -35,13 +24,15 @@ export const RoomCard = ({ room, onViewDetails, onBookNow }: RoomCardProps) => {
     <div className="group bg-card border border-border rounded-xl overflow-hidden hover:shadow-xl transition-all duration-300">
       <div className="relative h-64 overflow-hidden cursor-pointer" onClick={() => onViewDetails(room)}>
         <ImageWithFallback
-          src={room.image}
+          src={room.image_url || ''}
           alt={room.name}
           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
         />
-        <div className="absolute top-4 right-4 bg-background/90 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-bold shadow-sm">
-          {room.type}
-        </div>
+        {room.featured && (
+          <div className="absolute top-4 right-4 bg-primary text-primary-foreground px-3 py-1 rounded-full text-xs font-bold shadow-sm">
+            Featured
+          </div>
+        )}
       </div>
       
       <div className="p-6">
@@ -57,23 +48,19 @@ export const RoomCard = ({ room, onViewDetails, onBookNow }: RoomCardProps) => {
           {room.description}
         </p>
 
-        {room.packages && room.packages.length > 0 && (
-          <div className="mb-4">
-            <span className="text-xs font-semibold text-accent-foreground bg-accent/20 px-2 py-1 rounded-full border border-accent/30">
-              {room.packages.length} Package{room.packages.length > 1 ? 's' : ''} Available
-            </span>
-          </div>
-        )}
-
         <div className="grid grid-cols-2 gap-4 mb-6">
-          <div className="flex items-center gap-2 text-muted-foreground">
-            <Maximize2 className="w-4 h-4" />
-            <span className="text-xs">{room.size}</span>
-          </div>
-          <div className="flex items-center gap-2 text-muted-foreground">
-            <Users className="w-4 h-4" />
-            <span className="text-xs">{room.occupancy}</span>
-          </div>
+          {room.size && (
+            <div className="flex items-center gap-2 text-muted-foreground">
+              <Maximize2 className="w-4 h-4" />
+              <span className="text-xs">{room.size}</span>
+            </div>
+          )}
+          {room.occupancy && (
+            <div className="flex items-center gap-2 text-muted-foreground">
+              <Users className="w-4 h-4" />
+              <span className="text-xs">{room.occupancy}</span>
+            </div>
+          )}
           <div className="flex items-center gap-2 text-muted-foreground">
             <Wifi className="w-4 h-4" />
             <span className="text-xs">Free Wifi</span>

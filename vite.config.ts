@@ -19,4 +19,14 @@ export default defineConfig({
 
   // File types to support raw imports. Never add .css, .tsx, or .ts files to this.
   assetsInclude: ['**/*.svg', '**/*.csv'],
+
+  // API proxy to backend
+  server: {
+    proxy: {
+      '/api': {
+        target: process.env.DOCKER_ENV ? 'http://backend:8000' : 'http://localhost:8000',
+        changeOrigin: true,
+      },
+    },
+  },
 })

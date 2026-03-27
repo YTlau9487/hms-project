@@ -1,12 +1,12 @@
 # HMS Project (Hotel Management System)
 
-A modern hotel management system built with React, Vite, and Material-UI.
+A full-stack hotel management system built with React, Vite, Tailwind CSS (frontend) and FastAPI, SQLite (backend).
 
 ## 🚀 Quick Start
 
-### Option 1: Using Docker (Recommended)
+### Using Docker (Recommended)
 
-The Docker setup provides a consistent development environment across all operating systems.
+The Docker setup provides a complete development environment with both frontend and backend services.
 
 #### Prerequisites
 - Docker Desktop installed and running on your system
@@ -16,96 +16,143 @@ The Docker setup provides a consistent development environment across all operat
 
 **Windows Users:**
 1. Double-click `start-dev.bat` to start the development environment
-2. Or run in command prompt: `docker-compose up --build dev`
+2. Or run in command prompt: `docker-compose up --build`
 
 **Linux/macOS Users:**
 1. Make the script executable: `chmod +x start-dev.sh`
 2. Run the script: `./start-dev.sh`
-3. Or run directly: `docker-compose up --build dev`
+3. Or run directly: `docker-compose up --build`
 
-The application will be available at `http://localhost:3000`
+#### Access Points
+- **Frontend**: http://localhost:3000
+- **Backend API**: http://localhost:8000
+- **API Documentation**: http://localhost:8000/docs
 
-#### Development with Docker Compose
+#### Test Credentials
+The system automatically seeds test accounts on startup:
+- **Customer**: `customer@test.com` / `password123`
+- **Staff**: `staff@test.com` / `password123`
+
+#### Docker Commands
 ```bash
-# Start development environment
-docker-compose up dev
+# Start all services
+docker-compose up
 
-# Stop the container
+# Stop all services
 docker-compose down
 
-# Run in detached mode
-docker-compose up -d dev
+# Rebuild and start
+docker-compose up --build
 
 # View logs
-docker-compose logs -f dev
+docker-compose logs -f
+
+# Start only backend
+docker-compose up backend
+
+# Start only frontend (dev mode)
+docker-compose up dev
 ```
-
-### Option 2: Local Development (Not Recommended)
-
-If you prefer not to use Docker, you can set up the project locally:
-
-#### Prerequisites
-- Node.js (v18 or higher)
-- pnpm package manager
-
-#### Installation
-```bash
-# Install dependencies
-pnpm i
-
-# Start development server
-pnpm dev
-```
-
-The application will be available at `http://localhost:3000`
 
 ## 📁 Project Structure
 
 ```
-src/
-├── app/
-│   ├── components/     # React components
-│   │   ├── ui/        # Reusable UI components
-│   │   └── ...        # Feature-specific components
-│   └── App.tsx         # Main App component
-├── components/         # Shared components
-├── styles/            # CSS and styling files
-└── main.tsx           # Entry point
+├── backend/                    # FastAPI backend
+│   ├── routers/               # API route handlers
+│   │   ├── auth.py           # Authentication endpoints
+│   │   ├── rooms.py          # Room management
+│   │   ├── bookings.py       # Booking management
+│   │   └── admin.py          # Admin endpoints
+│   ├── models.py             # Database models
+│   ├── schemas.py            # Pydantic schemas
+│   ├── database.py           # Database configuration
+│   ├── seed.py               # Database seeding script
+│   └── main.py               # FastAPI application
+├── src/                        # React frontend
+│   ├── app/
+│   │   ├── components/       # React components
+│   │   ├── context/          # React context (AuthContext)
+│   │   ├── layouts/          # Layout components
+│   │   ├── pages/            # Page components
+│   │   └── services/         # API service layer
+│   ├── locales/              # i18n translations
+│   └── main.tsx              # Entry point
+├── docker-compose.yml          # Docker orchestration
+├── Dockerfile                  # Production frontend build
+├── Dockerfile.dev              # Development frontend build
+└── backend/Dockerfile          # Backend Docker build
 ```
+
+## 🔐 Authentication & Authorization
+
+### User Roles
+- **Customer**: Can view rooms, make bookings, view their bookings
+- **Staff**: Can manage rooms, view all bookings, access admin dashboard
+
+### Protected Routes
+- `/account/*` - Requires customer role
+- `/admin/*` - Requires staff role
+
+### API Endpoints
+- `POST /api/auth/register` - Register new user
+- `POST /api/auth/login` - Login and get JWT token
+- `GET /api/auth/me` - Get current user info
+- `GET /api/rooms/` - List all rooms
+- `GET /api/rooms/{id}` - Get room details
+- `POST /api/bookings/` - Create booking
+- `GET /api/bookings/my` - Get user's bookings
+- `GET /api/admin/stats` - Get dashboard statistics (staff only)
+- `GET /api/admin/bookings` - Get all bookings (staff only)
 
 ## 🛠️ Development
 
-### Adding New Components
-1. Create component files in the appropriate directory
-2. Follow the existing naming conventions
-3. Import and use the component in your application
-
-### Styling
-The project uses Tailwind CSS for styling. Component-specific styles should be included in the component file.
-
-### Building for Production
+### Frontend Development
 ```bash
-# Build the application
+# Install dependencies
+pnpm install
+
+# Start development server
+pnpm dev
+
+# Build for production
 pnpm build
 
-# Preview the production build
+# Preview production build
 pnpm preview
 ```
 
-## 🐳 Docker Development
+### Backend Development
+```bash
+cd backend
 
-### Files
-- `Dockerfile` - Production-optimized multi-stage build
-- `Dockerfile.dev` - Development-specific build
-- `docker-compose.yml` - Orchestration for development and production
-- `.dockerignore` - Excludes unnecessary files from Docker build context
-- `start-dev.bat` / `start-dev.sh` - Cross-platform startup scripts
+# Install dependencies
+pip install -r requirements.txt
 
-### Features
-- **Consistent Environment**: Works the same on Windows, macOS, and Linux
-- **Real-time Updates**: Changes to React components are immediately reflected
-- **Isolated Dependencies**: Node.js and pnpm are contained within the Docker image
-- **Volume Mounting**: Code changes are reflected immediately without rebuilding
+# Run database seed
+python seed.py
+
+# Start development server
+uvicorn main:app --reload --host 0.0.0.0 --port 8000
+```
+
+### API Documentation
+The backend provides automatic API documentation:
+- **Swagger UI**: http://localhost:8000/docs
+- **ReDoc**: http://localhost:8000/redoc
+
+## 🐳 Docker Configuration
+
+### Services
+- **backend**: FastAPI server on port 8000
+- **dev**: Vite development server on port 3000
+
+### Volumes
+- `backend-data`: SQLite database persistence
+- `pnpm-store`: pnpm package cache
+
+### Environment Variables
+- `DOCKER_ENV=true`: Enables Docker-specific configuration
+- `VITE_API_URL`: Backend API URL for frontend proxy
 
 ## 📚 Documentation
 

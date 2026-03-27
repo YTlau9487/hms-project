@@ -1,0 +1,28 @@
+{
+  "navbar": {
+    "brand": "GOLDEN MILE",
+    "rooms": "Rooms",
+    "amenities": "Amenities",
+    "login": "Login",
+    "myBookings": "My Bookings",
+    "myProfile": "My Profile",
+    "customerView": "Customer View",
+    "staffDashboard": "Staff Dashboard",
+    "loginRegister": "Login / Register"
+  },
+  "hero": {
+    "badge": "FEATURED LUXURY EXPERIENCE",
+    "titleLine1": "Experience Luxury in our",
+    "subtitle": "Discover unparalleled comfort and elegance in our signature accommodation.",
+    "viewOffers": "View Offers",
+    "exploreRooms": "Explore All Rooms",
+    "titleFallback1": "Elevate Your",
+    "titleFallback2": "Urban Escape",
+    "subtitleFallback": "Experience unparalleled luxury in the heart of Hong Kong. Discover a world of comfort, elegance, and personalized service.",
+    "bookYourStay": "Book Your Stay",
+    "checkIn": "Check In",
+    "checkOut": "Check Out",
+    "guests": "Guests",
+    "checkAvailability": "Check Availability"
+  }
+}

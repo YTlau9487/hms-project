@@ -17,13 +17,13 @@ export const Footer = () => {
               Redefining luxury hospitality in Hong Kong since 1975. Experience the perfect blend of tradition and modern comfort.
             </p>
             <div className="flex gap-4">
-              <button className="w-8 h-8 rounded-full bg-primary-foreground/10 flex items-center justify-center hover:bg-primary-foreground/20 transition-colors">
+              <button className="w-8 h-8 rounded-full bg-primary-foreground/10 flex items-center justify-center hover:bg-primary-foreground/20 transition-colors cursor-pointer">
                 <Instagram className="w-4 h-4" />
               </button>
-              <button className="w-8 h-8 rounded-full bg-primary-foreground/10 flex items-center justify-center hover:bg-primary-foreground/20 transition-colors">
+              <button className="w-8 h-8 rounded-full bg-primary-foreground/10 flex items-center justify-center hover:bg-primary-foreground/20 transition-colors cursor-pointer">
                 <Facebook className="w-4 h-4" />
               </button>
-              <button className="w-8 h-8 rounded-full bg-primary-foreground/10 flex items-center justify-center hover:bg-primary-foreground/20 transition-colors">
+              <button className="w-8 h-8 rounded-full bg-primary-foreground/10 flex items-center justify-center hover:bg-primary-foreground/20 transition-colors cursor-pointer">
                 <Twitter className="w-4 h-4" />
               </button>
             </div>
@@ -66,7 +66,7 @@ export const Footer = () => {
                 placeholder="Email address"
                 className="flex-1 bg-primary-foreground/10 border-none rounded-md px-3 py-2 text-sm focus:ring-1 focus:ring-primary-foreground/30"
               />
-              <button className="bg-background text-primary px-4 py-2 rounded-md text-sm font-bold hover:opacity-90 transition-opacity">
+              <button className="bg-background text-primary px-4 py-2 rounded-md text-sm font-bold hover:opacity-90 transition-opacity cursor-pointer">
                 Join
               </button>
             </div>

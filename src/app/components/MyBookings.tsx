@@ -4,6 +4,7 @@ import { Calendar, MapPin, CreditCard, ChevronRight, Clock, CheckCircle, XCircle
 import { ImageWithFallback } from './ImageWithFallback';
 import { ConfirmationDialog } from './ConfirmationDialog';
 import { toast } from 'sonner';
+import { Booking as APIBooking } from '../services/api';
 
 interface Booking {
   id: string;
@@ -17,12 +18,23 @@ interface Booking {
 }
 
 interface MyBookingsProps {
-  bookings: Booking[];
+  bookings: APIBooking[];
   onBack: () => void;
   onCancelBooking: (bookingId: string) => void;
 }
 
 export const MyBookings = ({ bookings, onBack, onCancelBooking }: MyBookingsProps) => {
+  // Map API bookings to component format
+  const mappedBookings: Booking[] = bookings.map(b => ({
+    id: b.id.toString(),
+    roomName: b.room?.name || 'Unknown Room',
+    roomImage: b.room?.image_url || '',
+    checkIn: b.check_in,
+    checkOut: b.check_out,
+    total: b.total_price,
+    status: b.status,
+    package: b.package_name || 'Room Only'
+  }));
   const [cancelDialog, setCancelDialog] = useState<{ isOpen: boolean; bookingId: string; roomName: string }>({
     isOpen: false,
     bookingId: '',
@@ -59,7 +71,7 @@ export const MyBookings = ({ bookings, onBack, onCancelBooking }: MyBookingsProp
         </button>
       </div>
 
-      {bookings.length === 0 ? (
+      {mappedBookings.length === 0 ? (
         <div className="bg-muted/30 border-2 border-dashed border-border rounded-2xl p-16 text-center">
           <Calendar className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
           <h3 className="text-xl font-bold">No Bookings Found</h3>
@@ -75,7 +87,7 @@ export const MyBookings = ({ bookings, onBack, onCancelBooking }: MyBookingsProp
         </div>
       ) : (
         <div className="space-y-6">
-          {bookings.map((booking) => (
+          {mappedBookings.map((booking) => (
             <motion.div 
               key={booking.id}
               initial={{ opacity: 0, x: -20 }}
