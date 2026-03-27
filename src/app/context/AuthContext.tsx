@@ -1,0 +1,94 @@
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { authAPI, setAuthToken, User } from '../services/api';
+
+interface AuthContextType {
+  user: User | null;
+  loading: boolean;
+  login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
+  register: (data: { email: string; password: string; name: string; phone?: string }) => Promise<{ success: boolean; error?: string }>;
+  logout: () => void;
+  refreshUser: () => Promise<void>;
+}
+
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+export const AuthProvider = ({ children }: { children: ReactNode }) => {
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  // Try to restore session on mount
+  useEffect(() => {
+    const initAuth = async () => {
+      const token = localStorage.getItem('hms_token');
+      if (token) {
+        setAuthToken(token);
+        try {
+          const userData = await authAPI.me();
+          setUser(userData);
+        } catch (error) {
+          // Token invalid or expired
+          localStorage.removeItem('hms_token');
+          setAuthToken(null);
+        }
+      }
+      setLoading(false);
+    };
+    initAuth();
+  }, []);
+
+  const login = async (email: string, password: string): Promise<{ success: boolean; error?: string }> => {
+    try {
+      const tokenData = await authAPI.login({ email, password });
+      localStorage.setItem('hms_token', tokenData.access_token);
+      setAuthToken(tokenData.access_token);
+      
+      const userData = await authAPI.me();
+      setUser(userData);
+      
+      return { success: true };
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Login failed';
+      return { success: false, error: errorMessage };
+    }
+  };
+
+  const register = async (data: { email: string; password: string; name: string; phone?: string }): Promise<{ success: boolean; error?: string }> => {
+    try {
+      await authAPI.register(data);
+      // Auto-login after registration
+      return await login(data.email, data.password);
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Registration failed';
+      return { success: false, error: errorMessage };
+    }
+  };
+
+  const logout = () => {
+    setUser(null);
+    localStorage.removeItem('hms_token');
+    setAuthToken(null);
+  };
+
+  const refreshUser = async () => {
+    try {
+      const userData = await authAPI.me();
+      setUser(userData);
+    } catch (error) {
+      logout();
+    }
+  };
+
+  return (
+    <AuthContext.Provider value={{ user, loading, login, register, logout, refreshUser }}>
+      {children}
+    </AuthContext.Provider>
+  );
+};
+
+export const useAuth = () => {
+  const context = useContext(AuthContext);
+  if (context === undefined) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  return context;
+};

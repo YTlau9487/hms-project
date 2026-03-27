@@ -108,7 +108,6 @@ export const AdminPanel = ({ rooms = [], onUpdateRoom, onAddPackage, onRemovePac
   const handleStatusChange = (id: string, status: 'confirmed' | 'cancelled') => {
     setBookings(prev => prev.map(b => b.id === id ? { ...b, status } : b));
     
-    // Create notification
     const booking = bookings.find(b => b.id === id);
     if (booking) {
       const newNotification: Notification = {
@@ -149,52 +148,8 @@ export const AdminPanel = ({ rooms = [], onUpdateRoom, onAddPackage, onRemovePac
   });
 
   return (
-    <div className="flex min-h-[calc(100vh-64px)] bg-muted/30">
-      {/* Sidebar */}
-      <aside className="w-64 bg-background border-r border-border hidden lg:block">
-        <div className="p-6 space-y-6">
-          <div className="space-y-1">
-            <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-widest px-2 mb-2">Main Menu</h3>
-            {[
-              { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
-              { id: 'bookings', label: 'Manage Bookings', icon: CalendarCheck },
-              { id: 'rooms', label: 'Manage Rooms', icon: DoorOpen },
-              { id: 'customers', label: 'Customer Database', icon: Users },
-            ].map((item) => (
-              <button
-                key={item.id}
-                onClick={() => setActiveTab(item.id)}
-                className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                  activeTab === item.id ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:bg-muted'
-                }`}
-              >
-                <item.icon className="w-4 h-4" />
-                {item.label}
-              </button>
-            ))}
-          </div>
-
-          <div className="space-y-1">
-            <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-widest px-2 mb-2">System</h3>
-            <button className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-muted-foreground hover:bg-muted">
-              <Bell className="w-4 h-4" />
-              Notifications
-              {notifications.filter(n => !n.read).length > 0 && (
-                <span className="ml-auto bg-destructive text-white text-[10px] px-1.5 py-0.5 rounded-full font-bold">
-                  {notifications.filter(n => !n.read).length}
-                </span>
-              )}
-            </button>
-            <button className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-muted-foreground hover:bg-muted">
-              <Settings className="w-4 h-4" />
-              Settings
-            </button>
-          </div>
-        </div>
-      </aside>
-
-      {/* Main Content */}
-      <main className="flex-1 p-6 md:p-8">
+    <div className="bg-muted/30">
+      <div className="p-6 md:p-8">
         <div className="max-w-6xl mx-auto">
           <header className="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
@@ -224,7 +179,6 @@ export const AdminPanel = ({ rooms = [], onUpdateRoom, onAddPackage, onRemovePac
             </div>
           </header>
 
-          {/* Stats Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
             {stats.map((stat, i) => (
               <motion.div 
@@ -248,7 +202,6 @@ export const AdminPanel = ({ rooms = [], onUpdateRoom, onAddPackage, onRemovePac
             ))}
           </div>
 
-          {/* Tab Content */}
           {activeTab === 'rooms' ? (
             <ManageRooms 
               rooms={rooms}
@@ -267,7 +220,6 @@ export const AdminPanel = ({ rooms = [], onUpdateRoom, onAddPackage, onRemovePac
               <p>Customer information and history will be displayed here.</p>
             </div>
           ) : (
-            /* Bookings Table */
             <div className="bg-background rounded-xl border border-border shadow-sm overflow-hidden">
               <div className="p-6 border-b border-border flex justify-between items-center">
                 <h3 className="font-bold">Recent Bookings</h3>
@@ -275,83 +227,82 @@ export const AdminPanel = ({ rooms = [], onUpdateRoom, onAddPackage, onRemovePac
               </div>
               <div className="overflow-x-auto">
                 <table className="w-full text-left">
-                <thead className="bg-muted/50 text-xs font-bold uppercase text-muted-foreground border-b border-border">
-                  <tr>
-                    <th className="px-6 py-4">Booking ID</th>
-                    <th className="px-6 py-4">Customer</th>
-                    <th className="px-6 py-4">Room Type</th>
-                    <th className="px-6 py-4">Stay Dates</th>
-                    <th className="px-6 py-4">Status</th>
-                    <th className="px-6 py-4">Amount</th>
-                    <th className="px-6 py-4">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-border">
-                  {filteredBookings.length === 0 ? (
+                  <thead className="bg-muted/50 text-xs font-bold uppercase text-muted-foreground border-b border-border">
                     <tr>
-                      <td colSpan={7} className="px-6 py-12 text-center text-muted-foreground">
-                        <p>No bookings found matching your search.</p>
-                      </td>
+                      <th className="px-6 py-4">Booking ID</th>
+                      <th className="px-6 py-4">Customer</th>
+                      <th className="px-6 py-4">Room Type</th>
+                      <th className="px-6 py-4">Stay Dates</th>
+                      <th className="px-6 py-4">Status</th>
+                      <th className="px-6 py-4">Amount</th>
+                      <th className="px-6 py-4">Actions</th>
                     </tr>
-                  ) : (
-                    filteredBookings.map((booking) => (
-                      <tr key={booking.id} className="text-sm hover:bg-muted/30 transition-colors">
-                        <td className="px-6 py-4 font-mono text-xs font-bold">{booking.id}</td>
-                        <td className="px-6 py-4 font-medium">{booking.customerName}</td>
-                        <td className="px-6 py-4 text-muted-foreground">{booking.roomType}</td>
-                      <td className="px-6 py-4">
-                        <div className="flex flex-col">
-                          <span>{booking.checkIn}</span>
-                          <span className="text-[10px] text-muted-foreground font-mono">to {booking.checkOut}</span>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${
-                          booking.status === 'confirmed' ? 'bg-green-100 text-green-700' :
-                          booking.status === 'pending' ? 'bg-orange-100 text-orange-700' :
-                          'bg-red-100 text-red-700'
-                        }`}>
-                          {booking.status}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 font-bold">${booking.total}</td>
-                      <td className="px-6 py-4">
-                        <div className="flex gap-2">
-                          {booking.status === 'pending' && (
-                            <button 
-                              onClick={() => setConfirmDialog({ isOpen: true, bookingId: booking.id, action: 'confirm' })}
-                              className="p-1.5 rounded-lg bg-green-50 text-green-600 hover:bg-green-100"
-                              title="Confirm booking"
-                            >
-                              <CheckCircle className="w-4 h-4" />
-                            </button>
-                          )}
-                          {booking.status !== 'cancelled' && (
-                            <button 
-                              onClick={() => setConfirmDialog({ isOpen: true, bookingId: booking.id, action: 'cancel' })}
-                              className="p-1.5 rounded-lg bg-red-50 text-red-600 hover:bg-red-100"
-                              title="Cancel booking"
-                            >
-                              <XCircle className="w-4 h-4" />
-                            </button>
-                          )}
-                          <button className="p-1.5 rounded-lg bg-muted text-muted-foreground hover:bg-border">
-                            <MoreVertical className="w-4 h-4" />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))
-                  )}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody className="divide-y divide-border">
+                    {filteredBookings.length === 0 ? (
+                      <tr>
+                        <td colSpan={7} className="px-6 py-12 text-center text-muted-foreground">
+                          <p>No bookings found matching your search.</p>
+                        </td>
+                      </tr>
+                    ) : (
+                      filteredBookings.map((booking) => (
+                        <tr key={booking.id} className="text-sm hover:bg-muted/30 transition-colors">
+                          <td className="px-6 py-4 font-mono text-xs font-bold">{booking.id}</td>
+                          <td className="px-6 py-4 font-medium">{booking.customerName}</td>
+                          <td className="px-6 py-4 text-muted-foreground">{booking.roomType}</td>
+                          <td className="px-6 py-4">
+                            <div className="flex flex-col">
+                              <span>{booking.checkIn}</span>
+                              <span className="text-[10px] text-muted-foreground font-mono">to {booking.checkOut}</span>
+                            </div>
+                          </td>
+                          <td className="px-6 py-4">
+                            <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+                              booking.status === 'confirmed' ? 'bg-green-100 text-green-700' :
+                              booking.status === 'pending' ? 'bg-orange-100 text-orange-700' :
+                              'bg-red-100 text-red-700'
+                            }`}>
+                              {booking.status}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4 font-bold">${booking.total}</td>
+                          <td className="px-6 py-4">
+                            <div className="flex gap-2">
+                              {booking.status === 'pending' && (
+                                <button 
+                                  onClick={() => setConfirmDialog({ isOpen: true, bookingId: booking.id, action: 'confirm' })}
+                                  className="p-1.5 rounded-lg bg-green-50 text-green-600 hover:bg-green-100"
+                                  title="Confirm booking"
+                                >
+                                  <CheckCircle className="w-4 h-4" />
+                                </button>
+                              )}
+                              {booking.status !== 'cancelled' && (
+                                <button 
+                                  onClick={() => setConfirmDialog({ isOpen: true, bookingId: booking.id, action: 'cancel' })}
+                                  className="p-1.5 rounded-lg bg-red-50 text-red-600 hover:bg-red-100"
+                                  title="Cancel booking"
+                                >
+                                  <XCircle className="w-4 h-4" />
+                                </button>
+                              )}
+                              <button className="p-1.5 rounded-lg bg-muted text-muted-foreground hover:bg-border">
+                                <MoreVertical className="w-4 h-4" />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
             </div>
-          </div>
           )}
         </div>
-      </main>
+      </div>
 
-      {/* Confirmation Dialog */}
       <ConfirmationDialog
         isOpen={confirmDialog.isOpen}
         onClose={() => setConfirmDialog({ isOpen: false, bookingId: '', action: 'cancel' })}

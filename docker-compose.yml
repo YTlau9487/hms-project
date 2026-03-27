@@ -1,4 +1,18 @@
 services:
+  # Backend service (FastAPI)
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app
+      - backend-data:/app/data
+    environment:
+      - PYTHONUNBUFFERED=1
+    restart: unless-stopped
+
   # Development service
   dev:
     build:
@@ -14,22 +28,10 @@ services:
       - pnpm-store:/pnpm-store
     environment:
       - NODE_ENV=development
+      - DOCKER_ENV=true
     command: sh -c "pnpm dev --host 0.0.0.0 --port 3000"
-    restart: unless-stopped
-
-  # Production service
-  prod:
-    build:
-      context: .
-      dockerfile: Dockerfile
-      args:
-        - NODE_ENV=production
-    ports:
-      - "3000:3000"
-    environment:
-      - NODE_ENV=production
-    command: HOSTNAME="0.0.0.0" node server.js
     restart: unless-stopped
 
 volumes:
   pnpm-store:
+  backend-data:

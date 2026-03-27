@@ -1,0 +1,28 @@
+{
+  "navbar": {
+    "brand": "黃金英里",
+    "rooms": "客房",
+    "amenities": "設施",
+    "login": "登入",
+    "myBookings": "我的預訂",
+    "myProfile": "我的資料",
+    "customerView": "客戶視圖",
+    "staffDashboard": "員工儀表板",
+    "loginRegister": "登入 / 註冊"
+  },
+  "hero": {
+    "badge": "精選奢華體驗",
+    "titleLine1": "體驗我們的奢華",
+    "subtitle": "在我們的標誌性住宿中，發現無與倫比的舒適與優雅。",
+    "viewOffers": "查看優惠",
+    "exploreRooms": "探索所有客房",
+    "titleFallback1": "提升您的",
+    "titleFallback2": "城市假期",
+    "subtitleFallback": "在香港市中心體驗無與倫比的奢華。探索一個充滿舒適、優雅和個性化服務的世界。",
+    "bookYourStay": "預訂住宿",
+    "checkIn": "入住",
+    "checkOut": "退房",
+    "guests": "賓客",
+    "checkAvailability": "查詢空房"
+  }
+}
