@@ -32,19 +32,49 @@ class User(SQLModel, table=True):
     bookings: List["Booking"] = Relationship(back_populates="user")
 
 
+class RoomAmenity(SQLModel, table=True):
+    room_id: int = Field(foreign_key="room.id", primary_key=True)
+    amenity_id: int = Field(foreign_key="amenity.id", primary_key=True)
+
+
 class Room(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
-    name: str
-    description: str
     price: float
     image_url: Optional[str] = None
     size: Optional[str] = None
     occupancy: Optional[str] = None
-    amenities: Optional[str] = None  # JSON string of amenities list
     status: RoomStatus = Field(default=RoomStatus.AVAILABLE)
     featured: bool = Field(default=False)
 
-    bookings: List["Booking"] = Relationship(back_populates="room")
+    bookings: List["Booking"] = Relationship(back_populates="room", cascade_delete=True)
+    translations: List["RoomTranslation"] = Relationship(back_populates="room", cascade_delete=True)
+    amenities: List["Amenity"] = Relationship(back_populates="rooms", link_model=RoomAmenity)
+
+
+class RoomTranslation(SQLModel, table=True):
+    id: Optional[int] = Field(default=None, primary_key=True)
+    room_id: int = Field(foreign_key="room.id", index=True)
+    language: str = Field(index=True)  # "en", "zh-TW", "zh-CN"
+    name: str
+    description: str
+
+    room: Optional[Room] = Relationship(back_populates="translations")
+
+
+class Amenity(SQLModel, table=True):
+    id: Optional[int] = Field(default=None, primary_key=True)
+
+    translations: List["AmenityTranslation"] = Relationship(back_populates="amenity")
+    rooms: List[Room] = Relationship(back_populates="amenities", link_model=RoomAmenity)
+
+
+class AmenityTranslation(SQLModel, table=True):
+    id: Optional[int] = Field(default=None, primary_key=True)
+    amenity_id: int = Field(foreign_key="amenity.id", index=True)
+    language: str = Field(index=True)
+    name: str
+
+    amenity: Optional[Amenity] = Relationship(back_populates="translations")
 
 
 class Booking(SQLModel, table=True):

@@ -5,3 +5,8 @@ guidelines
 memory-bank/
 implementation_plan.md
 dist/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python

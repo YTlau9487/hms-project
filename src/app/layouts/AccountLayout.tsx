@@ -7,8 +7,9 @@ import { useAuth } from '../context/AuthContext';
 export const AccountLayout = () => {
   const { user } = useAuth();
 
-  // Route guard: redirect to login if not authenticated or not a customer
-  if (!user || user.role !== 'customer') {
+  // Route guard: redirect to login if not authenticated
+  // Allow both customer and staff roles to access account pages
+  if (!user) {
     return <Navigate to="/login" replace />;
   }
 

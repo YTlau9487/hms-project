@@ -6,29 +6,86 @@ This script is idempotent - it only creates data if it doesn't already exist.
 
 from sqlmodel import Session, select
 from database import engine, init_db
-from models import User, Room, Booking, UserRole, RoomStatus, BookingStatus
+from models import (
+    User, Room, Booking, UserRole, RoomStatus, BookingStatus,
+    RoomTranslation, Amenity, AmenityTranslation, RoomAmenity
+)
 from argon2 import PasswordHasher
 from datetime import date, datetime, timedelta
 
 ph = PasswordHasher()
 
+# Translation data for rooms
+ROOM_TRANSLATIONS = {
+    0: [  # Premier King Room
+        {"language": "en", "name": "Premier King Room", "description": "Luxurious king-sized room with stunning city views, featuring modern amenities and elegant design."},
+        {"language": "zh-TW", "name": "豪華大床房", "description": "寬敞豪華的大床房，享有壯麗的城市景觀，配備現代化設施和優雅設計。"},
+        {"language": "zh-CN", "name": "豪华大床房", "description": "宽敞豪华的大床房，享有壮丽的城市景观，配备现代化设施和优雅设计。"},
+    ],
+    1: [  # Deluxe Twin Room
+        {"language": "en", "name": "Deluxe Twin Room", "description": "Comfortable twin room perfect for friends or colleagues traveling together."},
+        {"language": "zh-TW", "name": "豪華雙床房", "description": "舒適的雙床房，非常適合朋友或同事一起旅行。"},
+        {"language": "zh-CN", "name": "豪华双床房", "description": "舒适的双床房，非常适合朋友或同事一起旅行。"},
+    ],
+    2: [  # Presidential Suite
+        {"language": "en", "name": "Presidential Suite", "description": "The ultimate luxury experience with panoramic harbor views and exclusive butler service."},
+        {"language": "zh-TW", "name": "總統套房", "description": "極致奢華體驗，享有全景海港景觀和專屬管家服務。"},
+        {"language": "zh-CN", "name": "总统套房", "description": "极致奢华体验，享有全景海港景观和专属管家服务。"},
+    ],
+    3: [  # Harbor View Executive
+        {"language": "en", "name": "Harbor View Executive", "description": "Executive room with the best harbor views, perfect for business travelers."},
+        {"language": "zh-TW", "name": "海港景觀行政房", "description": "享有最佳海港景觀的行政房，非常適合商務旅客。"},
+        {"language": "zh-CN", "name": "海港景观行政房", "description": "享有最佳海港景观的行政房，非常适合商务旅客。"},
+    ],
+}
+
+# Amenity translations: each tuple is (en, zh-TW, zh-CN)
+AMENITY_TRANSLATIONS = [
+    ("King Bed", "大床", "大床"),
+    ("City View", "城市景觀", "城市景观"),
+    ("Free WiFi", "免費WiFi", "免费WiFi"),
+    ("Smart TV", "智能電視", "智能电视"),
+    ("Minibar", "迷你吧", "迷你吧"),
+    ("Twin Beds", "雙床", "双床"),
+    ("Garden View", "花園景觀", "花园景观"),
+    ("Rain Shower", "花灑", "花洒"),
+    ("Work Desk", "工作桌", "工作桌"),
+    ("Master Suite", "主套房", "主套房"),
+    ("Living Area", "客廳區域", "客厅区域"),
+    ("Personal Butler", "專屬管家", "专属管家"),
+    ("Kitchenette", "小廚房", "小厨房"),
+    ("Panoramic View", "全景景觀", "全景景观"),
+    ("Lounge Access", "酒廊使用權", "酒廊使用权"),
+    ("Harbor View", "海港景觀", "海港景观"),
+    ("Nespresso", "Nespresso咖啡機", "Nespresso咖啡机"),
+    ("High-Speed WiFi", "高速WiFi", "高速WiFi"),
+]
+
+# Room-amenity mapping: room index -> list of amenity indices
+ROOM_AMENITY_MAP = {
+    0: [0, 1, 2, 3, 4],       # Premier King: King Bed, City View, Free WiFi, Smart TV, Minibar
+    1: [5, 6, 2, 7, 8],       # Deluxe Twin: Twin Beds, Garden View, Free WiFi, Rain Shower, Work Desk
+    2: [9, 10, 11, 12, 13],   # Presidential: Master Suite, Living Area, Personal Butler, Kitchenette, Panoramic View
+    3: [14, 15, 16, 8, 17],   # Harbor Exec: Lounge Access, Harbor View, Nespresso, Work Desk, High-Speed WiFi
+}
+
 
 def seed_database():
     """Seed database with test data"""
     print("🌱 Starting database seeding...")
-    
+
     # Initialize database tables
     init_db()
-    
+
     with Session(engine) as session:
         # Check if data already exists
         existing_users = session.exec(select(User)).all()
         if existing_users:
             print("✅ Database already seeded. Skipping...")
             return
-        
+
         print("📝 Creating test accounts...")
-        
+
         # Create test customer
         customer = User(
             email="customer@test.com",
@@ -38,7 +95,7 @@ def seed_database():
             role=UserRole.CUSTOMER
         )
         session.add(customer)
-        
+
         # Create test staff
         staff = User(
             email="staff@test.com",
@@ -48,75 +105,106 @@ def seed_database():
             role=UserRole.STAFF
         )
         session.add(staff)
-        
+
         session.commit()
         session.refresh(customer)
         session.refresh(staff)
-        
+
         print(f"✅ Created customer: {customer.email} (ID: {customer.id})")
         print(f"✅ Created staff: {staff.email} (ID: {staff.id})")
-        
-        print("🏨 Creating sample rooms...")
-        
+
+        print("🏷️ Creating amenities with translations...")
+
+        # Create amenities and their translations
+        amenity_objects = []
+        for en_name, tw_name, cn_name in AMENITY_TRANSLATIONS:
+            amenity = Amenity()
+            session.add(amenity)
+            session.commit()
+            session.refresh(amenity)
+
+            for lang, name in [("en", en_name), ("zh-TW", tw_name), ("zh-CN", cn_name)]:
+                trans = AmenityTranslation(
+                    amenity_id=amenity.id,
+                    language=lang,
+                    name=name
+                )
+                session.add(trans)
+
+            amenity_objects.append(amenity)
+            print(f"✅ Created amenity: {en_name}")
+
+        session.commit()
+
+        print("🏨 Creating sample rooms with translations...")
+
         # Create sample rooms
         rooms_data = [
             {
-                "name": "Premier King Room",
-                "description": "Luxurious king-sized room with stunning city views, featuring modern amenities and elegant design.",
                 "price": 280.0,
                 "image_url": "https://images.unsplash.com/photo-1590490359854-dfba19688d70?w=800",
                 "size": "38 sq.m",
                 "occupancy": "2 Adults",
-                "amenities": "King Bed,City View,Free WiFi,Smart TV,Minibar",
                 "status": RoomStatus.AVAILABLE,
                 "featured": False
             },
             {
-                "name": "Deluxe Twin Room",
-                "description": "Comfortable twin room perfect for friends or colleagues traveling together.",
                 "price": 240.0,
                 "image_url": "https://images.unsplash.com/photo-1566665797739-1674de7a421a?w=800",
                 "size": "35 sq.m",
                 "occupancy": "2 Adults",
-                "amenities": "Twin Beds,Garden View,Free WiFi,Rain Shower,Work Desk",
                 "status": RoomStatus.AVAILABLE,
                 "featured": False
             },
             {
-                "name": "Presidential Suite",
-                "description": "The ultimate luxury experience with panoramic harbor views and exclusive butler service.",
                 "price": 850.0,
                 "image_url": "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=800",
                 "size": "120 sq.m",
                 "occupancy": "4 Adults",
-                "amenities": "Master Suite,Living Area,Personal Butler,Kitchenette,Panoramic View",
                 "status": RoomStatus.AVAILABLE,
                 "featured": True
             },
             {
-                "name": "Harbor View Executive",
-                "description": "Executive room with the best harbor views, perfect for business travelers.",
                 "price": 420.0,
                 "image_url": "https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=800",
                 "size": "45 sq.m",
                 "occupancy": "2 Adults",
-                "amenities": "Lounge Access,Harbor View,Nespresso,Work Desk,High-Speed WiFi",
                 "status": RoomStatus.AVAILABLE,
                 "featured": False
             }
         ]
-        
+
         created_rooms = []
-        for room_data in rooms_data:
+        for i, room_data in enumerate(rooms_data):
             room = Room(**room_data)
             session.add(room)
             session.commit()
             session.refresh(room)
+
+            # Add translations
+            for trans_data in ROOM_TRANSLATIONS[i]:
+                trans = RoomTranslation(
+                    room_id=room.id,
+                    language=trans_data["language"],
+                    name=trans_data["name"],
+                    description=trans_data["description"]
+                )
+                session.add(trans)
+
+            # Add amenity links
+            for amenity_idx in ROOM_AMENITY_MAP[i]:
+                link = RoomAmenity(
+                    room_id=room.id,
+                    amenity_id=amenity_objects[amenity_idx].id
+                )
+                session.add(link)
+
+            session.commit()
             created_rooms.append(room)
-            print(f"✅ Created room: {room.name} (ID: {room.id})")
-        
+            print(f"✅ Created room: {ROOM_TRANSLATIONS[i][0]['name']} (ID: {room.id})")
+
         print("📅 Creating sample bookings...")
-        
+
         # Create sample bookings for customer
         today = date.today()
         bookings_data = [
@@ -139,21 +227,22 @@ def seed_database():
                 "package_name": "Ultimate VIP"
             }
         ]
-        
+
         for booking_data in bookings_data:
             booking = Booking(**booking_data)
             session.add(booking)
             session.commit()
             session.refresh(booking)
             print(f"✅ Created booking: {booking.id} for room {booking.room_id}")
-        
+
         print("\n" + "="*50)
         print("🎉 Database seeding completed successfully!")
         print("="*50)
         print("\n📋 Test Credentials:")
         print("   Customer: customer@test.com / password123")
         print("   Staff:    staff@test.com / password123")
-        print("\n🏨 Sample Rooms: 4 rooms created")
+        print("\n🏨 Sample Rooms: 4 rooms created (with en/zh-TW/zh-CN translations)")
+        print("🏷️ Amenities: 18 amenities created (with translations)")
         print("📅 Sample Bookings: 2 bookings created")
         print("="*50)
 

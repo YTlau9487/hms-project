@@ -93,8 +93,8 @@ export interface Room {
   image_url: string | null;
   size: string | null;
   occupancy: string | null;
-  amenities: string | null;
-  status: 'available' | 'occupied' | 'maintenance';
+  amenities: string[];
+  status: 'available' | 'unavailable';
   featured: boolean;
 }
 
@@ -120,6 +120,57 @@ export interface DashboardStats {
   total_revenue: number;
 }
 
+// Admin types for multilingual room management
+export interface RoomTranslationData {
+  language: string;
+  name: string;
+  description: string;
+}
+
+export interface AmenityTranslationData {
+  language: string;
+  name: string;
+}
+
+export interface AmenityAdminData {
+  id: number;
+  translations: AmenityTranslationData[];
+}
+
+export interface RoomAdminData {
+  id: number;
+  price: number;
+  image_url: string | null;
+  size: string | null;
+  occupancy: string | null;
+  status: 'available' | 'unavailable';
+  featured: boolean;
+  translations: RoomTranslationData[];
+  amenities: AmenityAdminData[];
+}
+
+export interface RoomCreatePayload {
+  price: number;
+  image_url?: string;
+  size?: string;
+  occupancy?: string;
+  status: 'available' | 'unavailable';
+  featured: boolean;
+  translations: RoomTranslationData[];
+  amenities: { translations: AmenityTranslationData[] }[];
+}
+
+export interface RoomUpdatePayload {
+  price?: number;
+  image_url?: string;
+  size?: string;
+  occupancy?: string;
+  status?: 'available' | 'unavailable';
+  featured?: boolean;
+  translations?: RoomTranslationData[];
+  amenities?: { translations: AmenityTranslationData[] }[];
+}
+
 // Auth API
 export const authAPI = {
   register: (data: { email: string; password: string; name: string; phone?: string }) =>
@@ -139,24 +190,30 @@ export const authAPI = {
 
 // Rooms API
 export const roomsAPI = {
-  list: (params?: { status?: string; featured?: boolean }) => {
+  list: (params?: { status?: string; featured?: boolean; lang?: string }) => {
     const searchParams = new URLSearchParams();
     if (params?.status) searchParams.append('status', params.status);
     if (params?.featured !== undefined) searchParams.append('featured', String(params.featured));
+    if (params?.lang) searchParams.append('lang', params.lang);
     const query = searchParams.toString();
     return fetchAPI<Room[]>(`/rooms/${query ? `?${query}` : ''}`);
   },
 
-  getById: (id: number) => fetchAPI<Room>(`/rooms/${id}`),
+  getById: (id: number, lang?: string) => {
+    const query = lang ? `?lang=${lang}` : '';
+    return fetchAPI<Room>(`/rooms/${id}${query}`);
+  },
 
-  create: (data: Omit<Room, 'id'>) =>
-    fetchAPI<Room>('/rooms/', {
+  getByIdAdmin: (id: number) => fetchAPI<RoomAdminData>(`/rooms/${id}/admin`),
+
+  create: (data: RoomCreatePayload) =>
+    fetchAPI<RoomAdminData>('/rooms/', {
       method: 'POST',
       body: JSON.stringify(data),
     }),
 
-  update: (id: number, data: Partial<Room>) =>
-    fetchAPI<Room>(`/rooms/${id}`, {
+  update: (id: number, data: RoomUpdatePayload) =>
+    fetchAPI<RoomAdminData>(`/rooms/${id}`, {
       method: 'PUT',
       body: JSON.stringify(data),
     }),
@@ -169,15 +226,23 @@ export const roomsAPI = {
 
 // Bookings API
 export const bookingsAPI = {
-  my: () => fetchAPI<Booking[]>('/bookings/my'),
+  my: (lang?: string) => {
+    const query = lang ? `?lang=${lang}` : '';
+    return fetchAPI<Booking[]>(`/bookings/my${query}`);
+  },
 
-  create: (data: { room_id: number; check_in: string; check_out: string; package_name?: string }) =>
-    fetchAPI<Booking>('/bookings/', {
+  create: (data: { room_id: number; check_in: string; check_out: string; package_name?: string }, lang?: string) => {
+    const query = lang ? `?lang=${lang}` : '';
+    return fetchAPI<Booking>(`/bookings/${query}`, {
       method: 'POST',
       body: JSON.stringify(data),
-    }),
+    });
+  },
 
-  getById: (id: number) => fetchAPI<Booking>(`/bookings/${id}`),
+  getById: (id: number, lang?: string) => {
+    const query = lang ? `?lang=${lang}` : '';
+    return fetchAPI<Booking>(`/bookings/${id}${query}`);
+  },
 
   cancel: (id: number) =>
     fetchAPI<void>(`/bookings/${id}`, {
@@ -189,13 +254,18 @@ export const bookingsAPI = {
 export const adminAPI = {
   stats: () => fetchAPI<DashboardStats>('/admin/stats'),
 
-  bookings: () => fetchAPI<Booking[]>('/admin/bookings'),
+  bookings: (lang?: string) => {
+    const query = lang ? `?lang=${lang}` : '';
+    return fetchAPI<Booking[]>(`/admin/bookings${query}`);
+  },
 
-  updateBooking: (id: number, data: { status: string }) =>
-    fetchAPI<Booking>(`/admin/bookings/${id}`, {
+  updateBooking: (id: number, data: { status: string }, lang?: string) => {
+    const query = lang ? `?lang=${lang}` : '';
+    return fetchAPI<Booking>(`/admin/bookings/${id}${query}`, {
       method: 'PUT',
       body: JSON.stringify(data),
-    }),
+    });
+  },
 
   users: () => fetchAPI<User[]>('/admin/users'),
 };

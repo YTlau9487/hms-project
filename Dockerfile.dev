@@ -14,9 +14,6 @@ COPY package.json pnpm-lock.yaml* ./
 # Install dependencies
 RUN pnpm i --frozen-lockfile
 
-# Copy source code
-COPY . .
-
 # Expose port
 EXPOSE 3000
 

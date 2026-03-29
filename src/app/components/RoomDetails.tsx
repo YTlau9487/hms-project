@@ -11,30 +11,34 @@ interface RoomDetailsProps {
   onBookNow: (room: Room) => void;
 }
 
+const amenityIcons: Record<string, React.ComponentType<{ className?: string }>> = {
+  'WiFi': Wifi, 'Free WiFi': Wifi, 'High-Speed WiFi': Wifi, '免費WiFi': Wifi, '免费WiFi': Wifi, '高速WiFi': Wifi,
+  'Coffee': Coffee, 'Nespresso': Coffee, 'Nespresso咖啡機': Coffee, 'Nespresso咖啡机': Coffee,
+  'TV': Tv, 'Smart TV': Tv, '智能電視': Tv, '智能电视': Tv,
+  'Safe': Shield, 'Digital Safe': Shield,
+  'Pool': Waves, 'Pool Access': Waves,
+  'AC': Wind, 'Climate Control': Wind,
+  'Parking': Car, 'Valet Parking': Car,
+  'Dining': Utensils, 'Room Service': Utensils,
+};
+
 export const RoomDetails = ({ room, onBack, onBookNow }: RoomDetailsProps) => {
   const { t } = useTranslation();
   const [selectedImage, setSelectedImage] = React.useState<string | null>(null);
-  
-  const allAmenities = [
-    { icon: Wifi, label: t('roomDetails.highSpeedWifi') },
-    { icon: Coffee, label: t('roomDetails.complimentaryBreakfast') },
-    { icon: Tv, label: t('roomDetails.smartTv') },
-    { icon: Shield, label: t('roomDetails.digitalSafe') },
-    { icon: Waves, label: t('roomDetails.poolAccess') },
-    { icon: Wind, label: t('roomDetails.climateControl') },
-    { icon: Car, label: t('roomDetails.valetParking') },
-    { icon: Utensils, label: t('roomDetails.roomService') },
-  ];
+
+  const displayAmenities = room.amenities && room.amenities.length > 0
+    ? room.amenities
+    : [];
 
   return (
-    <motion.div 
+    <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       className="bg-background min-h-screen"
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <button 
+        <button
           onClick={onBack}
           className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-8 group cursor-pointer"
         >
@@ -45,7 +49,7 @@ export const RoomDetails = ({ room, onBack, onBookNow }: RoomDetailsProps) => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
           {/* Gallery Section */}
           <div className="space-y-4">
-            <div 
+            <div
               className="rounded-2xl overflow-hidden aspect-[4/3] shadow-lg cursor-pointer hover:opacity-95 transition-opacity"
               onClick={() => setSelectedImage(room.image_url)}
             >
@@ -53,15 +57,15 @@ export const RoomDetails = ({ room, onBack, onBookNow }: RoomDetailsProps) => {
             </div>
             <div className="grid grid-cols-3 gap-4">
               {[1, 2, 3].map((i) => (
-                <div 
-                  key={i} 
+                <div
+                  key={i}
                   className="rounded-xl overflow-hidden aspect-square shadow-md hover:opacity-80 transition-opacity cursor-pointer"
                   onClick={() => setSelectedImage(room.image_url || null)}
                 >
-                  <ImageWithFallback 
-                    src={room.image_url || ''} 
-                    alt={`View ${i}`} 
-                    className="w-full h-full object-cover" 
+                  <ImageWithFallback
+                    src={room.image_url || ''}
+                    alt={`View ${i}`}
+                    className="w-full h-full object-cover"
                   />
                 </div>
               ))}
@@ -81,14 +85,18 @@ export const RoomDetails = ({ room, onBack, onBookNow }: RoomDetailsProps) => {
               </div>
               <h1 className="text-4xl md:text-5xl font-bold mb-4">{room.name}</h1>
               <div className="flex items-center gap-6 text-muted-foreground mb-6">
-                <div className="flex items-center gap-2">
-                  <Maximize2 className="w-5 h-5" />
-                  <span>{t('roomCard.sizeLabel', { value: room.size_value })}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Users className="w-5 h-5" />
-                  <span>{t('roomCard.occupancyLabel', { count: room.occupancy_count })}</span>
-                </div>
+                {room.size && (
+                  <div className="flex items-center gap-2">
+                    <Maximize2 className="w-5 h-5" />
+                    <span>{room.size}</span>
+                  </div>
+                )}
+                {room.occupancy && (
+                  <div className="flex items-center gap-2">
+                    <Users className="w-5 h-5" />
+                    <span>{room.occupancy}</span>
+                  </div>
+                )}
               </div>
               <p className="text-lg text-muted-foreground leading-relaxed">
                 {room.description}
@@ -98,12 +106,15 @@ export const RoomDetails = ({ room, onBack, onBookNow }: RoomDetailsProps) => {
             <div>
               <h3 className="text-xl font-bold mb-4">{t('roomDetails.whatThisRoomOffers')}</h3>
               <div className="grid grid-cols-2 gap-y-4 gap-x-8">
-                {allAmenities.map((amenity, i) => (
-                  <div key={i} className="flex items-center gap-3">
-                    <amenity.icon className="w-5 h-5 text-primary" />
-                    <span className="text-sm font-medium">{amenity.label}</span>
-                  </div>
-                ))}
+                {displayAmenities.map((amenity, i) => {
+                  const IconComponent = amenityIcons[amenity] || Check;
+                  return (
+                    <div key={i} className="flex items-center gap-3">
+                      <IconComponent className="w-5 h-5 text-primary" />
+                      <span className="text-sm font-medium">{amenity}</span>
+                    </div>
+                  );
+                })}
               </div>
             </div>
 
@@ -113,12 +124,14 @@ export const RoomDetails = ({ room, onBack, onBookNow }: RoomDetailsProps) => {
                 <span className="text-muted-foreground"> {t('roomDetails.perNight')}</span>
                 <p className="text-xs text-muted-foreground mt-1">{t('roomDetails.inclusiveTaxes')}</p>
               </div>
-              <button 
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
                 onClick={() => onBookNow(room)}
-                className="w-full md:w-auto px-12 py-4 bg-primary text-primary-foreground text-lg font-bold rounded-xl hover:scale-105 transition-transform shadow-xl cursor-pointer"
+                className="w-full md:w-auto px-12 py-4 bg-primary text-primary-foreground text-lg font-bold rounded-xl hover:opacity-90 transition-opacity shadow-xl cursor-pointer"
               >
                 {t('roomDetails.reserveNow')}
-              </button>
+              </motion.button>
             </div>
           </div>
         </div>
@@ -127,21 +140,21 @@ export const RoomDetails = ({ room, onBack, onBookNow }: RoomDetailsProps) => {
       {/* Image Lightbox */}
       <AnimatePresence>
         {selectedImage && (
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="fixed inset-0 z-[200] bg-black/90 backdrop-blur-sm flex items-center justify-center p-4 cursor-pointer"
             onClick={() => setSelectedImage(null)}
           >
-            <motion.div 
+            <motion.div
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
               className="relative max-w-5xl w-full aspect-video"
             >
               <ImageWithFallback src={selectedImage} alt="Enlarged view" className="w-full h-full object-contain" />
-              <button 
+              <button
                 className="absolute top-4 right-4 bg-white/10 hover:bg-white/20 text-white p-2 rounded-full transition-colors cursor-pointer hover:opacity-80"
                 onClick={() => setSelectedImage(null)}
               >

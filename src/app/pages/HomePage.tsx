@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router';
+import { useNavigate, useSearchParams } from 'react-router';
+import { motion } from 'motion/react';
 import { EnhancedHero } from '../components/EnhancedHero';
 import { RoomCard, Room } from '../components/RoomCard';
 import { toast } from 'sonner';
@@ -7,14 +8,24 @@ import { roomsAPI, getErrorMessage } from '../services/api';
 import { LoadingSpinner } from '../components/LoadingSpinner';
 import { ErrorMessage } from '../components/ErrorMessage';
 import { useTranslation } from 'react-i18next';
+import { useAuth } from '../context/AuthContext';
 
 interface HomePageProps {
   onBookNow: (room: Room) => void;
 }
 
 export const HomePage = ({ onBookNow }: HomePageProps) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const { user } = useAuth();
+  
+  // Redirect staff users to admin dashboard (unless they explicitly chose customer view)
+  useEffect(() => {
+    if (user?.role === 'staff' && searchParams.get('view') !== 'customer') {
+      navigate('/admin/dashboard');
+    }
+  }, [user, navigate, searchParams]);
   const [rooms, setRooms] = useState<Room[]>([]);
   const [activeFilter, setActiveFilter] = useState(t('homePage.allRooms'));
   const [isLoading, setIsLoading] = useState(true);
@@ -22,13 +33,13 @@ export const HomePage = ({ onBookNow }: HomePageProps) => {
 
   useEffect(() => {
     fetchRooms();
-  }, []);
+  }, [i18n.language]);
 
   const fetchRooms = async () => {
     try {
       setIsLoading(true);
       setError(null);
-      const data = await roomsAPI.list({ status: 'available' });
+      const data = await roomsAPI.list({ status: 'available', lang: i18n.language });
       setRooms(data);
     } catch (err) {
       const errorMessage = err instanceof Error ? getErrorMessage(err) : t('homePage.loadingRooms');
@@ -40,9 +51,14 @@ export const HomePage = ({ onBookNow }: HomePageProps) => {
 
   const featuredRoom = rooms.find(room => room.featured && room.status === 'available') || null;
 
-  const filteredRooms = rooms.filter(room => 
-    activeFilter === 'All Rooms' || room.status === 'available'
-  );
+  const filteredRooms = rooms.filter(room => {
+    if (activeFilter === t('homePage.allRooms')) {
+      return room.status === 'available';
+    }
+    // For other filters, we would need to filter by room type
+    // Since the current API doesn't support room types, we'll show all available rooms
+    return room.status === 'available';
+  });
 
   const handleViewDetails = (room: Room) => {
     navigate(`/rooms/${room.id}`);
@@ -116,13 +132,19 @@ export const HomePage = ({ onBookNow }: HomePageProps) => {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {filteredRooms.length > 0 ? (
-            filteredRooms.map((room) => (
-              <RoomCard 
-                key={room.id} 
-                room={room} 
-                onViewDetails={handleViewDetails}
-                onBookNow={onBookNow}
-              />
+            filteredRooms.map((room, i) => (
+              <motion.div
+                key={room.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.1, duration: 0.3 }}
+              >
+                <RoomCard
+                  room={room}
+                  onViewDetails={handleViewDetails}
+                  onBookNow={onBookNow}
+                />
+              </motion.div>
             ))
           ) : (
             <div className="col-span-full py-12 text-center text-muted-foreground">

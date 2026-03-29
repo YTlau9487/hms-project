@@ -1,5 +1,6 @@
 import React from 'react';
 import { Star, Wifi, Coffee, Maximize2, Users, ArrowRight } from 'lucide-react';
+import { motion } from 'motion/react';
 import { ImageWithFallback } from './ImageWithFallback';
 import { Room as APIRoom } from '../services/api';
 import { useTranslation } from 'react-i18next';
@@ -51,16 +52,20 @@ export const RoomCard = ({ room, onViewDetails, onBookNow }: RoomCardProps) => {
         </p>
 
         <div className="grid grid-cols-2 gap-4 mb-6">
-          {room.size_value && (
+          {room.size && (
             <div className="flex items-center gap-2 text-muted-foreground">
               <Maximize2 className="w-4 h-4" />
-              <span className="text-xs">{t('roomCard.sizeLabel', { value: room.size_value })}</span>
+              <span className="text-xs">
+                {t('roomCard.sizeLabel', { value: room.size.replace(/(\d+)\s*sq\.m/i, '$1') })}
+              </span>
             </div>
           )}
-          {room.occupancy_count && (
+          {room.occupancy && (
             <div className="flex items-center gap-2 text-muted-foreground">
               <Users className="w-4 h-4" />
-              <span className="text-xs">{t('roomCard.occupancyLabel', { count: room.occupancy_count })}</span>
+              <span className="text-xs">
+                {t('roomCard.occupancyLabel', { count: parseInt(room.occupancy.replace(/(\d+)\s*Adult/i, '$1')) })}
+              </span>
             </div>
           )}
           <div className="flex items-center gap-2 text-muted-foreground">
@@ -85,12 +90,14 @@ export const RoomCard = ({ room, onViewDetails, onBookNow }: RoomCardProps) => {
             >
             {t('roomCard.details')}
             </button>
-            <button 
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
               onClick={() => onBookNow(room)}
               className="px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-bold hover:opacity-90 transition-opacity flex items-center gap-2 cursor-pointer"
             >
               {t('roomCard.book')} <ArrowRight className="w-4 h-4" />
-            </button>
+            </motion.button>
           </div>
         </div>
       </div>

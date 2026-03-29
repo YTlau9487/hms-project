@@ -1,36 +1,46 @@
 import React, { useState, useEffect } from 'react';
-import { Edit, Trash2, Plus, X, Save } from 'lucide-react';
+import { Edit, Trash2, Plus, X, Save, Globe, CheckCircle, Tag, Image as ImageIcon } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Room } from '../components/RoomCard';
-import { roomsAPI, getErrorMessage } from '../services/api';
+import { roomsAPI, getErrorMessage, RoomAdminData, RoomTranslationData, AmenityTranslationData } from '../services/api';
 import { LoadingSpinner } from '../components/LoadingSpinner';
 import { ErrorMessage } from '../components/ErrorMessage';
 import { ConfirmationDialog } from '../components/ConfirmationDialog';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 
-interface RoomFormData {
-  name: string;
-  description: string;
+const LANGUAGES = [
+  { code: 'en', label: 'EN', fullLabel: 'English' },
+  { code: 'zh-TW', label: '繁體', fullLabel: '繁體中文' },
+  { code: 'zh-CN', label: '简体', fullLabel: '简体中文' },
+];
+
+interface RoomFormState {
   price: number;
   image_url: string;
   size: string;
   occupancy: string;
-  amenities: string;
-  status: 'available' | 'occupied' | 'maintenance';
+  status: 'available' | 'unavailable';
   featured: boolean;
+  translations: RoomTranslationData[];
+  amenities: { translations: AmenityTranslationData[] }[];
 }
 
-const emptyForm: RoomFormData = {
+const emptyTranslations: RoomTranslationData[] = LANGUAGES.map(l => ({
+  language: l.code,
   name: '',
   description: '',
+}));
+
+const emptyForm: RoomFormState = {
   price: 0,
   image_url: '',
   size: '',
   occupancy: '',
-  amenities: '',
   status: 'available',
   featured: false,
+  translations: emptyTranslations,
+  amenities: [],
 };
 
 export const AdminRoomsPage = () => {
@@ -40,7 +50,8 @@ export const AdminRoomsPage = () => {
   const [error, setError] = useState<string | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [editingRoom, setEditingRoom] = useState<Room | null>(null);
-  const [formData, setFormData] = useState<RoomFormData>(emptyForm);
+  const [formData, setFormData] = useState<RoomFormState>(emptyForm);
+  const [activeLangTab, setActiveLangTab] = useState('en');
   const [deleteDialog, setDeleteDialog] = useState<{ isOpen: boolean; roomId: number; roomName: string }>({
     isOpen: false,
     roomId: 0,
@@ -68,39 +79,74 @@ export const AdminRoomsPage = () => {
 
   const openCreateModal = () => {
     setEditingRoom(null);
-    setFormData(emptyForm);
+    setFormData({ ...emptyForm, translations: emptyTranslations.map(t => ({ ...t })) });
+    setActiveLangTab('en');
     setModalOpen(true);
   };
 
-  const openEditModal = (room: Room) => {
+  const openEditModal = async (room: Room) => {
     setEditingRoom(room);
-    setFormData({
-      name: room.name,
-      description: room.description,
-      price: room.price,
-      image_url: room.image_url || '',
-      size: room.size || '',
-      occupancy: room.occupancy || '',
-      amenities: room.amenities || '',
-      status: room.status,
-      featured: room.featured,
-    });
+    setActiveLangTab('en');
+    try {
+      const adminData = await roomsAPI.getByIdAdmin(room.id);
+      setFormData({
+        price: adminData.price,
+        image_url: adminData.image_url || '',
+        size: adminData.size || '',
+        occupancy: adminData.occupancy || '',
+        status: adminData.status,
+        featured: adminData.featured,
+        translations: adminData.translations.length > 0
+          ? adminData.translations
+          : emptyTranslations.map(t => ({ ...t })),
+        amenities: adminData.amenities.map(a => ({
+          translations: a.translations.length > 0
+            ? a.translations
+            : LANGUAGES.map(l => ({ language: l.code, name: '' })),
+        })),
+      });
+    } catch (err) {
+      const errorMessage = err instanceof Error ? getErrorMessage(err) : 'Failed to load room data';
+      toast.error(errorMessage);
+      setFormData({
+        price: room.price,
+        image_url: room.image_url || '',
+        size: room.size || '',
+        occupancy: room.occupancy || '',
+        status: room.status,
+        featured: room.featured,
+        translations: emptyTranslations.map(t => ({ ...t })),
+        amenities: [],
+      });
+    }
     setModalOpen(true);
   };
 
   const handleSave = async () => {
-    if (!formData.name.trim() || formData.price <= 0) {
-      toast.error('Room name and price are required');
+    const hasAnyName = formData.translations.some(t => t.name.trim());
+    if (!hasAnyName || formData.price <= 0) {
+      toast.error('Room name (at least one language) and price are required');
       return;
     }
 
     setIsSaving(true);
     try {
+      const payload = {
+        price: formData.price,
+        image_url: formData.image_url || undefined,
+        size: formData.size || undefined,
+        occupancy: formData.occupancy || undefined,
+        status: formData.status,
+        featured: formData.featured,
+        translations: formData.translations,
+        amenities: formData.amenities,
+      };
+
       if (editingRoom) {
-        await roomsAPI.update(editingRoom.id, formData);
+        await roomsAPI.update(editingRoom.id, payload);
         toast.success('Room updated successfully');
       } else {
-        await roomsAPI.create(formData);
+        await roomsAPI.create(payload);
         toast.success('Room created successfully');
       }
       setModalOpen(false);
@@ -127,6 +173,51 @@ export const AdminRoomsPage = () => {
       toast.error(errorMessage);
     }
     setDeleteDialog({ isOpen: false, roomId: 0, roomName: '' });
+  };
+
+  const updateTranslation = (lang: string, field: 'name' | 'description', value: string) => {
+    setFormData({
+      ...formData,
+      translations: formData.translations.map(t =>
+        t.language === lang ? { ...t, [field]: value } : t
+      ),
+    });
+  };
+
+  const updateAmenityTranslation = (amenityIdx: number, lang: string, value: string) => {
+    setFormData({
+      ...formData,
+      amenities: formData.amenities.map((a, i) =>
+        i === amenityIdx
+          ? { ...a, translations: a.translations.map(t => t.language === lang ? { ...t, name: value } : t) }
+          : a
+      ),
+    });
+  };
+
+  const addAmenity = () => {
+    setFormData({
+      ...formData,
+      amenities: [
+        ...formData.amenities,
+        { translations: LANGUAGES.map(l => ({ language: l.code, name: '' })) },
+      ],
+    });
+  };
+
+  const removeAmenity = (idx: number) => {
+    setFormData({
+      ...formData,
+      amenities: formData.amenities.filter((_, i) => i !== idx),
+    });
+  };
+
+  const getTranslationStatus = (translations: { language: string; name: string; description?: string }[]) => {
+    return LANGUAGES.map(lang => {
+      const t = translations.find(tr => tr.language === lang.code);
+      const filled = t ? (t.name && (t.description === undefined || t.description)) : false;
+      return { ...lang, filled };
+    });
   };
 
   if (isLoading) {
@@ -157,19 +248,19 @@ export const AdminRoomsPage = () => {
         <table className="w-full">
           <thead className="bg-muted/50">
             <tr>
-                  <th className="text-left px-6 py-4 text-sm font-medium text-muted-foreground">{t('adminRooms.room')}</th>
-                  <th className="text-left px-6 py-4 text-sm font-medium text-muted-foreground">{t('adminRooms.type')}</th>
-                  <th className="text-left px-6 py-4 text-sm font-medium text-muted-foreground">{t('adminRooms.price')}</th>
-                  <th className="text-left px-6 py-4 text-sm font-medium text-muted-foreground">{t('adminRooms.status')}</th>
-                  <th className="text-left px-6 py-4 text-sm font-medium text-muted-foreground">{t('adminRooms.actions')}</th>
+              <th className="text-left px-6 py-4 text-sm font-medium text-muted-foreground">{t('adminRooms.room')}</th>
+              <th className="text-left px-6 py-4 text-sm font-medium text-muted-foreground">{t('adminRooms.type')}</th>
+              <th className="text-left px-6 py-4 text-sm font-medium text-muted-foreground">{t('adminRooms.price')}</th>
+              <th className="text-left px-6 py-4 text-sm font-medium text-muted-foreground">{t('adminRooms.status')}</th>
+              <th className="text-left px-6 py-4 text-sm font-medium text-muted-foreground">{t('adminRooms.actions')}</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-border">
             {rooms.length === 0 ? (
               <tr>
-                    <td colSpan={5} className="px-6 py-12 text-center text-muted-foreground">
-                      {t('adminRooms.noRoomsFound')}
-                    </td>
+                <td colSpan={5} className="px-6 py-12 text-center text-muted-foreground">
+                  {t('adminRooms.noRoomsFound')}
+                </td>
               </tr>
             ) : (
               rooms.map((room) => (
@@ -194,16 +285,14 @@ export const AdminRoomsPage = () => {
                       {room.featured ? t('adminRooms.featured') : t('adminRooms.standard')}
                     </span>
                   </td>
-                    <td className="px-6 py-4 font-medium">${room.price}{t('adminRooms.perNight')}</td>
+                  <td className="px-6 py-4 font-medium">${room.price}{t('adminRooms.perNight')}</td>
                   <td className="px-6 py-4">
                     <span className={`px-2 py-1 rounded-full text-xs font-medium ${
                       room.status === 'available' 
                         ? 'bg-green-100 text-green-700' 
-                        : room.status === 'maintenance'
-                        ? 'bg-orange-100 text-orange-700'
-                        : 'bg-red-100 text-red-700'
+                        : 'bg-orange-100 text-orange-700'
                     }`}>
-                      {room.status === 'available' ? t('adminRooms.available') : room.status === 'maintenance' ? t('adminRooms.maintenance') : t('adminRooms.occupied')}
+                      {room.status === 'available' ? t('adminRooms.available') : t('adminRooms.maintenance')}
                     </span>
                   </td>
                   <td className="px-6 py-4">
@@ -239,7 +328,7 @@ export const AdminRoomsPage = () => {
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              className="bg-background rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto border border-border"
+              className="bg-background rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-y-auto border border-border"
             >
               {/* Header */}
               <div className="sticky top-0 bg-background border-b border-border p-6 flex items-center justify-between z-10">
@@ -260,19 +349,23 @@ export const AdminRoomsPage = () => {
               </div>
 
               {/* Form */}
-              <div className="p-6 space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <label className="text-sm font-bold mb-2 block">{t('adminRooms.roomName')} *</label>
-                    <input
-                      type="text"
-                      value={formData.name}
-                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                      className="w-full px-4 py-2 bg-input-background border border-border rounded-lg focus:ring-2 focus:ring-primary"
-                      placeholder={t('adminRooms.roomNamePlaceholder')}
-                    />
-                  </div>
+              <div className="p-6 space-y-8">
+                {/* Image */}
+                <div>
+                  <label className="flex items-center gap-2 text-sm font-bold mb-3">
+                    <ImageIcon className="w-4 h-4" /> {t('adminRooms.imageUrl')}
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.image_url}
+                    onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
+                    className="w-full px-4 py-2 bg-input-background border border-border rounded-lg focus:ring-2 focus:ring-primary"
+                    placeholder={t('adminRooms.imageUrlPlaceholder')}
+                  />
+                </div>
 
+                {/* Basic Info */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <label className="text-sm font-bold mb-2 block">{t('adminRooms.pricePerNight')} *</label>
                     <input
@@ -288,36 +381,43 @@ export const AdminRoomsPage = () => {
 
                   <div>
                     <label className="text-sm font-bold mb-2 block">{t('adminRooms.size')}</label>
-                    <input
-                      type="text"
-                      value={formData.size}
-                      onChange={(e) => setFormData({ ...formData, size: e.target.value })}
-                      className="w-full px-4 py-2 bg-input-background border border-border rounded-lg focus:ring-2 focus:ring-primary"
-                      placeholder={t('adminRooms.sizePlaceholder')}
-                    />
+                    <div className="relative">
+                      <input
+                        type="number"
+                        value={formData.size}
+                        onChange={(e) => setFormData({ ...formData, size: e.target.value })}
+                        className="w-full px-4 py-2 pr-16 bg-input-background border border-border rounded-lg focus:ring-2 focus:ring-primary"
+                        placeholder="35"
+                        min="0"
+                      />
+                      <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">sqm</span>
+                    </div>
                   </div>
 
                   <div>
                     <label className="text-sm font-bold mb-2 block">{t('adminRooms.occupancy')}</label>
-                    <input
-                      type="text"
-                      value={formData.occupancy}
-                      onChange={(e) => setFormData({ ...formData, occupancy: e.target.value })}
-                      className="w-full px-4 py-2 bg-input-background border border-border rounded-lg focus:ring-2 focus:ring-primary"
-                      placeholder={t('adminRooms.occupancyPlaceholder')}
-                    />
+                    <div className="relative">
+                      <input
+                        type="number"
+                        value={formData.occupancy}
+                        onChange={(e) => setFormData({ ...formData, occupancy: e.target.value })}
+                        className="w-full px-4 py-2 pr-20 bg-input-background border border-border rounded-lg focus:ring-2 focus:ring-primary"
+                        placeholder="2"
+                        min="1"
+                      />
+                      <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">guests</span>
+                    </div>
                   </div>
 
                   <div>
                     <label className="text-sm font-bold mb-2 block">{t('adminRooms.roomStatus')}</label>
                     <select
                       value={formData.status}
-                      onChange={(e) => setFormData({ ...formData, status: e.target.value as RoomFormData['status'] })}
+                      onChange={(e) => setFormData({ ...formData, status: e.target.value as 'available' | 'unavailable' })}
                       className="w-full px-4 py-2 bg-input-background border border-border rounded-lg focus:ring-2 focus:ring-primary"
                     >
                       <option value="available">{t('adminRooms.available')}</option>
-                      <option value="occupied">{t('adminRooms.occupied')}</option>
-                      <option value="maintenance">{t('adminRooms.maintenance')}</option>
+                      <option value="unavailable">{t('adminRooms.maintenance')}</option>
                     </select>
                   </div>
 
@@ -334,38 +434,118 @@ export const AdminRoomsPage = () => {
                   </div>
                 </div>
 
+                {/* Multilingual Name & Description */}
                 <div>
-                  <label className="text-sm font-bold mb-2 block">{t('adminRooms.imageUrl')}</label>
-                  <input
-                    type="text"
-                    value={formData.image_url}
-                    onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
-                    className="w-full px-4 py-2 bg-input-background border border-border rounded-lg focus:ring-2 focus:ring-primary"
-                    placeholder={t('adminRooms.imageUrlPlaceholder')}
-                  />
+                  <div className="flex items-center gap-2 mb-4">
+                    <Globe className="w-4 h-4" />
+                    <h4 className="font-bold text-lg">Room Name & Description</h4>
+                  </div>
+
+                  {/* Language Tabs */}
+                  <div className="flex gap-2 mb-4">
+                    {getTranslationStatus(formData.translations).map(lang => (
+                      <button
+                        key={lang.code}
+                        onClick={() => setActiveLangTab(lang.code)}
+                        className={`px-4 py-2 rounded-lg text-sm font-bold transition-all cursor-pointer flex items-center gap-2 ${
+                          activeLangTab === lang.code
+                            ? 'bg-primary text-primary-foreground'
+                            : 'bg-muted text-muted-foreground hover:bg-muted/80'
+                        }`}
+                      >
+                        {lang.label}
+                        {activeLangTab === lang.code ? (
+                          <CheckCircle className="w-3 h-3 text-green-400" />
+                        ) : lang.filled ? (
+                          <CheckCircle className="w-3 h-3 text-green-500" />
+                        ) : (
+                          <span className="w-3 h-3 rounded-full border border-muted-foreground/30" />
+                        )}
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* Active Language Inputs */}
+                  {formData.translations.filter(t => t.language === activeLangTab).map(trans => (
+                    <div key={trans.language} className="space-y-4">
+                      <div>
+                        <label className="text-sm font-bold mb-2 block">Name *</label>
+                        <input
+                          type="text"
+                          value={trans.name}
+                          onChange={(e) => updateTranslation(trans.language, 'name', e.target.value)}
+                          className="w-full px-4 py-2 bg-input-background border border-border rounded-lg focus:ring-2 focus:ring-primary"
+                          placeholder="Room name"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-sm font-bold mb-2 block">Description</label>
+                        <textarea
+                          value={trans.description}
+                          onChange={(e) => updateTranslation(trans.language, 'description', e.target.value)}
+                          rows={3}
+                          className="w-full px-4 py-2 bg-input-background border border-border rounded-lg focus:ring-2 focus:ring-primary resize-none"
+                          placeholder="Room description"
+                        />
+                      </div>
+                    </div>
+                  ))}
                 </div>
 
+                {/* Multilingual Amenities */}
                 <div>
-                  <label className="text-sm font-bold mb-2 block">{t('adminRooms.amenities')}</label>
-                  <input
-                    type="text"
-                    value={formData.amenities}
-                    onChange={(e) => setFormData({ ...formData, amenities: e.target.value })}
-                    className="w-full px-4 py-2 bg-input-background border border-border rounded-lg focus:ring-2 focus:ring-primary"
-                    placeholder={t('adminRooms.amenitiesPlaceholder')}
-                  />
-                  <p className="text-xs text-muted-foreground mt-1">{t('adminRooms.amenitiesNote')}</p>
-                </div>
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center gap-2">
+                      <Tag className="w-4 h-4" />
+                      <h4 className="font-bold text-lg">Amenities</h4>
+                    </div>
+                    <button
+                      onClick={addAmenity}
+                      className="px-4 py-2 bg-accent text-accent-foreground rounded-lg font-bold hover:opacity-80 cursor-pointer flex items-center gap-2"
+                    >
+                      <Plus className="w-4 h-4" /> Add Amenity
+                    </button>
+                  </div>
 
-                <div>
-                  <label className="text-sm font-bold mb-2 block">{t('adminRooms.description')}</label>
-                  <textarea
-                    value={formData.description}
-                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                    rows={4}
-                    className="w-full px-4 py-2 bg-input-background border border-border rounded-lg focus:ring-2 focus:ring-primary resize-none"
-                    placeholder={t('adminRooms.descriptionPlaceholder')}
-                  />
+                  <div className="space-y-4">
+                    {formData.amenities.map((amenity, amenityIdx) => {
+                      const status = getTranslationStatus(amenity.translations);
+                      return (
+                        <div key={amenityIdx} className="p-4 bg-muted/30 rounded-lg border border-border space-y-3">
+                          <div className="flex items-center justify-between">
+                            <div className="flex gap-1">
+                              {status.map(lang => (
+                                <span key={lang.code} className={`text-xs px-2 py-0.5 rounded ${lang.filled ? 'bg-green-100 text-green-700' : 'bg-muted text-muted-foreground'}`}>
+                                  {lang.label} {lang.filled ? '✓' : '○'}
+                                </span>
+                              ))}
+                            </div>
+                            <button
+                              onClick={() => removeAmenity(amenityIdx)}
+                              className="p-1 text-red-500 hover:bg-red-50 rounded cursor-pointer"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </div>
+                          <div className="grid grid-cols-3 gap-2">
+                            {amenity.translations.map((trans: AmenityTranslationData) => (
+                              <input
+                                key={trans.language}
+                                type="text"
+                                value={trans.name}
+                                onChange={(e) => updateAmenityTranslation(amenityIdx, trans.language, e.target.value)}
+                                className="px-3 py-1.5 bg-background border border-border rounded text-sm focus:ring-2 focus:ring-primary"
+                                placeholder={LANGUAGES.find(l => l.code === trans.language)?.label}
+                              />
+                            ))}
+                          </div>
+                        </div>
+                      );
+                    })}
+                    {formData.amenities.length === 0 && (
+                      <p className="text-sm text-muted-foreground text-center py-4">No amenities added yet. Click "Add Amenity" to add one.</p>
+                    )}
+                  </div>
                 </div>
               </div>
 

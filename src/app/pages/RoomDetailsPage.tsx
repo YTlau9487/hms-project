@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router';
+import { motion } from 'motion/react';
 import { RoomDetails } from '../components/RoomDetails';
 import { Room } from '../components/RoomCard';
 import { roomsAPI, getErrorMessage } from '../services/api';
@@ -12,7 +13,7 @@ interface RoomDetailsPageProps {
 }
 
 export const RoomDetailsPage = ({ onBookNow }: RoomDetailsPageProps) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { roomId } = useParams<{ roomId: string }>();
   const navigate = useNavigate();
   const [room, setRoom] = useState<Room | null>(null);
@@ -23,13 +24,13 @@ export const RoomDetailsPage = ({ onBookNow }: RoomDetailsPageProps) => {
     if (roomId) {
       fetchRoom(parseInt(roomId));
     }
-  }, [roomId]);
+  }, [roomId, i18n.language]);
 
   const fetchRoom = async (id: number) => {
     try {
       setIsLoading(true);
       setError(null);
-      const data = await roomsAPI.getById(id);
+      const data = await roomsAPI.getById(id, i18n.language);
       setRoom(data);
     } catch (err) {
       const errorMessage = err instanceof Error ? getErrorMessage(err) : t('homePage.loadingRooms');
@@ -67,10 +68,16 @@ export const RoomDetailsPage = ({ onBookNow }: RoomDetailsPageProps) => {
   }
 
   return (
-    <RoomDetails 
-      room={room} 
-      onBack={() => navigate('/')} 
-      onBookNow={onBookNow}
-    />
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.3 }}
+    >
+      <RoomDetails
+        room={room}
+        onBack={() => navigate('/')}
+        onBookNow={onBookNow}
+      />
+    </motion.div>
   );
 };

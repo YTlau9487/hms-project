@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlmodel import Session, select
 from typing import List
 
@@ -6,12 +6,14 @@ from database import get_session
 from models import User, Booking, BookingStatus, Room
 from schemas import BookingResponse, BookingUpdate, UserResponse
 from routers.auth import get_current_staff
+from routers.rooms import build_localized_room
 
 router = APIRouter(prefix="/api/admin", tags=["admin"])
 
 
 @router.get("/bookings", response_model=List[BookingResponse])
 def list_all_bookings(
+    lang: str = Query("en"),
     current_user = Depends(get_current_staff),
     session: Session = Depends(get_session)
 ):
@@ -19,15 +21,15 @@ def list_all_bookings(
     bookings = session.exec(
         select(Booking).order_by(Booking.created_at.desc())
     ).all()
-    
-    # Load room data for each booking
+
+    # Load room data for each booking with localization
     result = []
     for booking in bookings:
         room = session.get(Room, booking.room_id)
         booking_dict = booking.dict()
-        booking_dict["room"] = room
+        booking_dict["room"] = build_localized_room(room, lang, session) if room else None
         result.append(BookingResponse(**booking_dict))
-    
+
     return result
 
 
@@ -35,6 +37,7 @@ def list_all_bookings(
 def update_booking_status(
     booking_id: int,
     booking_data: BookingUpdate,
+    lang: str = Query("en"),
     current_user = Depends(get_current_staff),
     session: Session = Depends(get_session)
 ):
@@ -53,11 +56,11 @@ def update_booking_status(
     session.commit()
     session.refresh(booking)
     
-    # Load room data
+    # Load room data with localization
     room = session.get(Room, booking.room_id)
     booking_dict = booking.dict()
-    booking_dict["room"] = room
-    
+    booking_dict["room"] = build_localized_room(room, lang, session) if room else None
+
     return BookingResponse(**booking_dict)
 
 

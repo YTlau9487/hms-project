@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router';
 import { Mail, Lock, User, Phone } from 'lucide-react';
 import { toast } from 'sonner';
@@ -10,6 +10,17 @@ export const RegisterPage = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { register, user } = useAuth();
+  
+  // Redirect if user is already logged in
+  useEffect(() => {
+    if (user) {
+      if (user.role === 'staff') {
+        navigate('/admin/dashboard');
+      } else {
+        navigate('/');
+      }
+    }
+  }, [user, navigate]);
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
@@ -32,7 +43,9 @@ export const RegisterPage = () => {
       
       if (result.success) {
         toast.success(t('registerPage.registerSuccess'));
-        if (result.user?.role === 'staff') {
+        // After successful registration, user is auto-logged in via login() call in register()
+        // The user state will be updated, so we can check user.role
+        if (user?.role === 'staff') {
           navigate('/admin/dashboard');
         } else {
           navigate('/');
