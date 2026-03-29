@@ -6,10 +6,12 @@ import { LoadingSpinner } from '../components/LoadingSpinner';
 import { ErrorMessage } from '../components/ErrorMessage';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
+import { useAuth } from '../context/AuthContext';
 
 export const AccountBookingsPage = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -59,7 +61,13 @@ export const AccountBookingsPage = () => {
   return (
     <MyBookings 
       bookings={bookings}
-      onBack={() => navigate('/')}
+      onBack={() => {
+        if (user?.role === 'staff') {
+          navigate('/?view=customer');
+        } else {
+          navigate('/');
+        }
+      }}
       onCancelBooking={handleCancelBooking}
     />
   );

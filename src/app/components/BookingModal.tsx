@@ -5,6 +5,15 @@ import { ImageWithFallback } from './ImageWithFallback';
 import { Room } from './RoomCard';
 import { useTranslation } from 'react-i18next';
 
+const amenityIcons: Record<string, React.ComponentType<{ className?: string }>> = {
+  'WiFi': Wifi, 'Free WiFi': Wifi, 'High-Speed WiFi': Wifi, '免費WiFi': Wifi, '免费WiFi': Wifi, '高速WiFi': Wifi,
+  'Coffee': Coffee, 'Nespresso': Coffee, 'Nespresso咖啡機': Coffee, 'Nespresso咖啡机': Coffee,
+  'TV': Tv, 'Smart TV': Tv, '智能電視': Tv, '智能电视': Tv,
+  'Safe': Shield, 'Digital Safe': Shield,
+  'Pool': Waves, 'Pool Access': Waves,
+  'Parking': Car, 'Valet Parking': Car,
+};
+
 interface BookingModalProps {
   room: Room | null;
   isOpen: boolean;
@@ -118,18 +127,14 @@ export const BookingModal = ({ room, isOpen, onClose, onConfirm, user }: Booking
             <div>
               <h3 className="text-xs font-bold uppercase text-muted-foreground tracking-widest mb-3">Room Features</h3>
               <div className="grid grid-cols-2 gap-3">
-                <div className="flex items-center gap-2 text-xs">
-                  <Wifi className="w-3.5 h-3.5 text-primary" /> {t('roomCard.freeWifi')}
-                </div>
-                <div className="flex items-center gap-2 text-xs">
-                  <Waves className="w-3.5 h-3.5 text-primary" /> {t('roomDetails.poolAccess')}
-                </div>
-                <div className="flex items-center gap-2 text-xs">
-                  <Tv className="w-3.5 h-3.5 text-primary" /> {t('roomDetails.smartTv')}
-                </div>
-                <div className="flex items-center gap-2 text-xs">
-                  <Shield className="w-3.5 h-3.5 text-primary" /> {t('roomDetails.digitalSafe')}
-                </div>
+                {(room.amenities || []).slice(0, 4).map((amenity, i) => {
+                  const IconComponent = amenityIcons[amenity] || Check;
+                  return (
+                    <div key={i} className="flex items-center gap-2 text-xs">
+                      <IconComponent className="w-3.5 h-3.5 text-primary" /> {amenity}
+                    </div>
+                  );
+                })}
               </div>
             </div>
             <div>

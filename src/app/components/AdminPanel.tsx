@@ -10,7 +10,7 @@ import {
   CalendarCheck,
   Users,
 } from 'lucide-react';
-import { motion } from 'motion/react';
+import { motion, AnimatePresence } from 'motion/react';
 import { NotificationDropdown, Notification } from './NotificationDropdown';
 import { ConfirmationDialog } from './ConfirmationDialog';
 import { ManageRooms } from './ManageRooms';
@@ -155,25 +155,55 @@ export const AdminPanel = ({
             ))}
           </div>
 
-          {activeTab === 'rooms' ? (
-            <ManageRooms 
-              rooms={rooms}
-              onUpdateRoom={onUpdateRoom || (() => {})}
-              onAddPackage={onAddPackage || (() => {})}
-              onRemovePackage={onRemovePackage || (() => {})}
-            />
-          ) : activeTab === 'dashboard' ? (
-            <div className="text-center py-12 text-muted-foreground">
-              <h3 className="text-xl font-bold mb-2">Dashboard View</h3>
-              <p>Revenue analytics and booking statistics will be displayed here.</p>
-            </div>
-          ) : activeTab === 'customers' ? (
-            <div className="text-center py-12 text-muted-foreground">
-              <h3 className="text-xl font-bold mb-2">Customer Database</h3>
-              <p>Customer information and history will be displayed here.</p>
-            </div>
-          ) : (
-            <div className="bg-background rounded-xl border border-border shadow-sm overflow-hidden">
+          <AnimatePresence mode="wait">
+            {activeTab === 'rooms' ? (
+              <motion.div
+                key="rooms"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.2 }}
+              >
+                <ManageRooms
+                  rooms={rooms}
+                  onUpdateRoom={onUpdateRoom || (() => {})}
+                  onAddPackage={onAddPackage || (() => {})}
+                  onRemovePackage={onRemovePackage || (() => {})}
+                />
+              </motion.div>
+            ) : activeTab === 'dashboard' ? (
+              <motion.div
+                key="dashboard"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.2 }}
+                className="text-center py-12 text-muted-foreground"
+              >
+                <h3 className="text-xl font-bold mb-2">Dashboard View</h3>
+                <p>Revenue analytics and booking statistics will be displayed here.</p>
+              </motion.div>
+            ) : activeTab === 'customers' ? (
+              <motion.div
+                key="customers"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.2 }}
+                className="text-center py-12 text-muted-foreground"
+              >
+                <h3 className="text-xl font-bold mb-2">Customer Database</h3>
+                <p>Customer information and history will be displayed here.</p>
+              </motion.div>
+            ) : (
+              <motion.div
+                key="bookings"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.2 }}
+                className="bg-background rounded-xl border border-border shadow-sm overflow-hidden"
+              >
             <div className="p-6 border-b border-border flex justify-between items-center">
               <h3 className="font-bold">{t('adminPanel.recentBookings')}</h3>
             </div>
@@ -256,8 +286,9 @@ export const AdminPanel = ({
                   </tbody>
                 </table>
               </div>
-            </div>
-          )}
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </div>
 

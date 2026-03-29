@@ -42,14 +42,11 @@ export const AdminDashboardPage = () => {
   const handleUpdateRoom = async (roomId: string, updates: Partial<Room>) => {
     try {
       await roomsAPI.update(parseInt(roomId), {
-        name: updates.name,
-        description: updates.description,
         price: updates.price,
-        image_url: updates.image_url,
-        size: updates.size,
-        occupancy: updates.occupancy,
-        amenities: Array.isArray(updates.amenities) ? updates.amenities.join(',') : updates.amenities,
-        status: updates.status as 'available' | 'occupied' | 'maintenance',
+        image_url: updates.image_url || undefined,
+        size: updates.size || undefined,
+        occupancy: updates.occupancy || undefined,
+        status: updates.status as 'available' | 'unavailable',
         featured: updates.featured
       });
       toast.success('Room updated successfully');

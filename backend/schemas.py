@@ -34,7 +34,24 @@ class UserResponse(BaseModel):
         from_attributes = True
 
 
-# Room schemas
+# Room schemas - Public (localized)
+class RoomLocalizedResponse(BaseModel):
+    id: int
+    name: str
+    description: str
+    price: float
+    image_url: Optional[str]
+    size: Optional[str]
+    occupancy: Optional[str]
+    amenities: List[str]
+    status: RoomStatus
+    featured: bool
+
+    class Config:
+        from_attributes = True
+
+
+# Room schemas - Legacy (kept for backward compat in booking response)
 class RoomResponse(BaseModel):
     id: int
     name: str
@@ -51,28 +68,83 @@ class RoomResponse(BaseModel):
         from_attributes = True
 
 
-class RoomCreate(BaseModel):
+# Translation input schemas for admin create/update
+class TranslationInput(BaseModel):
+    language: str
     name: str
     description: str
+
+
+class AmenityTranslationInput(BaseModel):
+    language: str
+    name: str
+
+
+class AmenityInput(BaseModel):
+    translations: List[AmenityTranslationInput]
+
+
+class RoomCreate(BaseModel):
     price: float
     image_url: Optional[str] = None
     size: Optional[str] = None
     occupancy: Optional[str] = None
-    amenities: Optional[str] = None
     status: RoomStatus = RoomStatus.AVAILABLE
     featured: bool = False
+    translations: List[TranslationInput]
+    amenities: List[AmenityInput] = []
 
 
 class RoomUpdate(BaseModel):
-    name: Optional[str] = None
-    description: Optional[str] = None
     price: Optional[float] = None
     image_url: Optional[str] = None
     size: Optional[str] = None
     occupancy: Optional[str] = None
-    amenities: Optional[str] = None
     status: Optional[RoomStatus] = None
     featured: Optional[bool] = None
+    translations: Optional[List[TranslationInput]] = None
+    amenities: Optional[List[AmenityInput]] = None
+
+
+# Admin response schemas (full translation data)
+class RoomTranslationAdmin(BaseModel):
+    language: str
+    name: str
+    description: str
+
+    class Config:
+        from_attributes = True
+
+
+class AmenityTranslationAdmin(BaseModel):
+    language: str
+    name: str
+
+    class Config:
+        from_attributes = True
+
+
+class AmenityAdmin(BaseModel):
+    id: int
+    translations: List[AmenityTranslationAdmin]
+
+    class Config:
+        from_attributes = True
+
+
+class RoomAdminResponse(BaseModel):
+    id: int
+    price: float
+    image_url: Optional[str]
+    size: Optional[str]
+    occupancy: Optional[str]
+    status: RoomStatus
+    featured: bool
+    translations: List[RoomTranslationAdmin]
+    amenities: List[AmenityAdmin]
+
+    class Config:
+        from_attributes = True
 
 
 # Booking schemas
@@ -93,7 +165,7 @@ class BookingResponse(BaseModel):
     total_price: float
     package_name: Optional[str]
     created_at: datetime
-    room: Optional[RoomResponse] = None
+    room: Optional[RoomLocalizedResponse] = None
 
     class Config:
         from_attributes = True

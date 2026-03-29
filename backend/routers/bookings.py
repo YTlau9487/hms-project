@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlmodel import Session, select
 from typing import List
 from datetime import date
@@ -7,12 +7,14 @@ from database import get_session
 from models import Booking, BookingStatus, Room, RoomStatus
 from schemas import BookingCreate, BookingResponse, BookingUpdate
 from routers.auth import get_current_user, get_current_staff
+from routers.rooms import build_localized_room
 
 router = APIRouter(prefix="/api/bookings", tags=["bookings"])
 
 
 @router.get("/my", response_model=List[BookingResponse])
 def get_my_bookings(
+    lang: str = Query("en"),
     current_user = Depends(get_current_user),
     session: Session = Depends(get_session)
 ):
@@ -22,21 +24,22 @@ def get_my_bookings(
         .where(Booking.user_id == current_user.id)
         .order_by(Booking.created_at.desc())
     ).all()
-    
-    # Load room data for each booking
+
+    # Load room data for each booking with localization
     result = []
     for booking in bookings:
         room = session.get(Room, booking.room_id)
         booking_dict = booking.dict()
-        booking_dict["room"] = room
+        booking_dict["room"] = build_localized_room(room, lang, session) if room else None
         result.append(BookingResponse(**booking_dict))
-    
+
     return result
 
 
 @router.post("/", response_model=BookingResponse, status_code=status.HTTP_201_CREATED)
 def create_booking(
     booking_data: BookingCreate,
+    lang: str = Query("en"),
     current_user = Depends(get_current_user),
     session: Session = Depends(get_session)
 ):
@@ -87,16 +90,17 @@ def create_booking(
     session.commit()
     session.refresh(booking)
     
-    # Load room data
+    # Load room data with localization
     booking_dict = booking.dict()
-    booking_dict["room"] = room
-    
+    booking_dict["room"] = build_localized_room(room, lang, session)
+
     return BookingResponse(**booking_dict)
 
 
 @router.get("/{booking_id}", response_model=BookingResponse)
 def get_booking(
     booking_id: int,
+    lang: str = Query("en"),
     current_user = Depends(get_current_user),
     session: Session = Depends(get_session)
 ):
@@ -115,11 +119,11 @@ def get_booking(
             detail="Not enough permissions"
         )
     
-    # Load room data
+    # Load room data with localization
     room = session.get(Room, booking.room_id)
     booking_dict = booking.dict()
-    booking_dict["room"] = room
-    
+    booking_dict["room"] = build_localized_room(room, lang, session) if room else None
+
     return BookingResponse(**booking_dict)
 
 
@@ -127,6 +131,7 @@ def get_booking(
 def update_booking(
     booking_id: int,
     booking_data: BookingUpdate,
+    lang: str = Query("en"),
     current_user = Depends(get_current_staff),
     session: Session = Depends(get_session)
 ):
@@ -145,11 +150,11 @@ def update_booking(
     session.commit()
     session.refresh(booking)
     
-    # Load room data
+    # Load room data with localization
     room = session.get(Room, booking.room_id)
     booking_dict = booking.dict()
-    booking_dict["room"] = room
-    
+    booking_dict["room"] = build_localized_room(room, lang, session) if room else None
+
     return BookingResponse(**booking_dict)
 
 

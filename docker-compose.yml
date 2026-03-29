@@ -32,6 +32,18 @@ services:
     command: sh -c "pnpm dev --host 0.0.0.0 --port 3000"
     restart: unless-stopped
 
+  # Database reset helper (run once to reset DB after schema changes)
+  # Usage: docker compose run --rm reset-db
+  reset-db:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    volumes:
+      - backend-data:/app/data
+    entrypoint: ["sh", "-c", "rm -f /app/data/hotel.db && python seed.py && echo 'Database reset complete!'"]
+    profiles:
+      - tools
+
 volumes:
   pnpm-store:
   backend-data:

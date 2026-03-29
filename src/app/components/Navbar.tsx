@@ -1,5 +1,5 @@
 import React from 'react';
-import { Menu, User, LogIn, LogOut, Bell, ShieldCheck, Languages } from 'lucide-react';
+import { Menu, User, LogIn, LogOut, Bell, ShieldCheck, Languages, Eye, LayoutDashboard } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useNavigate, useLocation } from 'react-router';
 import { useTranslation } from 'react-i18next';
@@ -34,7 +34,11 @@ export const Navbar = () => {
             <div 
               className="flex-shrink-0 flex items-center gap-2 cursor-pointer group" 
               onClick={() => {
-                navigate('/');
+                if (user?.role === 'staff' && !location.pathname.startsWith('/admin')) {
+                  navigate('/?view=customer');
+                } else {
+                  navigate('/');
+                }
                 setIsMobileMenuOpen(false);
               }}
             >
@@ -45,31 +49,41 @@ export const Navbar = () => {
             </div>
             
             <div className="hidden md:flex items-center space-x-4">
-              <button 
-                onClick={() => navigate('/')}
-                className={`px-3 py-2 text-sm font-bold transition-colors cursor-pointer ${isActive('/') ? 'text-primary' : 'text-muted-foreground hover:text-foreground'}`}
-              >
-                {t('navbar.rooms')}
-              </button>
-              {user && (
+              {(user?.role !== 'staff' || location.pathname === '/' || location.pathname.startsWith('/account')) && (
                 <>
                   <button 
-                    onClick={() => navigate('/account/bookings')}
-                    className={`px-3 py-2 text-sm font-bold transition-colors cursor-pointer ${isActive('/account/bookings') ? 'text-primary' : 'text-muted-foreground hover:text-foreground'}`}
+                    onClick={() => {
+                      if (user?.role === 'staff') {
+                        navigate('/?view=customer');
+                      } else {
+                        navigate('/');
+                      }
+                    }}
+                    className={`px-3 py-2 text-sm font-bold transition-colors cursor-pointer ${isActive('/') ? 'text-primary' : 'text-muted-foreground hover:text-foreground'}`}
                   >
-                    {t('navbar.myBookings')}
+                    {t('navbar.rooms')}
                   </button>
-                  <button 
-                    onClick={() => navigate('/account/profile')}
-                    className={`px-3 py-2 text-sm font-bold transition-colors cursor-pointer ${isActive('/account/profile') ? 'text-primary' : 'text-muted-foreground hover:text-foreground'}`}
-                  >
-                    {t('navbar.myProfile')}
+                  {user && (
+                    <>
+                      <button 
+                        onClick={() => navigate('/account/bookings')}
+                        className={`px-3 py-2 text-sm font-bold transition-colors cursor-pointer ${isActive('/account/bookings') ? 'text-primary' : 'text-muted-foreground hover:text-foreground'}`}
+                      >
+                        {t('navbar.myBookings')}
+                      </button>
+                      <button 
+                        onClick={() => navigate('/account/profile')}
+                        className={`px-3 py-2 text-sm font-bold transition-colors cursor-pointer ${isActive('/account/profile') ? 'text-primary' : 'text-muted-foreground hover:text-foreground'}`}
+                      >
+                        {t('navbar.myProfile')}
+                      </button>
+                    </>
+                  )}
+                  <button className="px-3 py-2 text-sm font-bold text-muted-foreground hover:text-foreground transition-colors cursor-pointer">
+                    {t('navbar.amenities')}
                   </button>
                 </>
               )}
-              <button className="px-3 py-2 text-sm font-bold text-muted-foreground hover:text-foreground transition-colors cursor-pointer">
-                {t('navbar.amenities')}
-              </button>
             </div>
           </div>
 
@@ -88,25 +102,37 @@ export const Navbar = () => {
               <button 
                 onClick={() => {
                   if (location.pathname.startsWith('/admin')) {
-                    navigate('/');
+                    navigate('/?view=customer');
                   } else {
                     navigate('/admin/dashboard');
                   }
                   setIsMobileMenuOpen(false);
                 }}
-                className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-accent text-accent-foreground text-xs font-semibold uppercase tracking-wider transition-all hover:opacity-90"
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition-all cursor-pointer ${
+                  location.pathname.startsWith('/admin')
+                    ? 'bg-blue-100 text-blue-700 hover:bg-blue-200 border border-blue-300'
+                    : 'bg-amber-100 text-amber-700 hover:bg-amber-200 border border-amber-300'
+                }`}
+                title={location.pathname.startsWith('/admin') ? 'Switch to customer browsing view' : 'Switch to staff management dashboard'}
               >
-                <ShieldCheck className="w-4 h-4" />
-                {location.pathname.startsWith('/admin') ? t('navbar.customerView') : t('navbar.staffDashboard')}
+                {location.pathname.startsWith('/admin') ? (
+                  <>
+                    <Eye className="w-4 h-4" />
+                    <span className="hidden sm:inline">{t('navbar.customerView')}</span>
+                    <span className="sm:hidden">Customer</span>
+                  </>
+                ) : (
+                  <>
+                    <LayoutDashboard className="w-4 h-4" />
+                    <span className="hidden sm:inline">{t('navbar.staffDashboard')}</span>
+                    <span className="sm:hidden">Staff</span>
+                  </>
+                )}
               </button>
             )}
 
             {user ? (
               <div className="flex items-center gap-4">
-                <button className="relative p-2 text-muted-foreground hover:text-foreground transition-colors cursor-pointer hover:opacity-80">
-                  <Bell className="w-5 h-5" />
-                  <span className="absolute top-2 right-2 w-2 h-2 bg-destructive rounded-full" />
-                </button>
                 <div className="flex items-center gap-2 pl-4 border-l border-border">
                   <div className="hidden sm:block text-right">
                     <p className="text-sm font-medium leading-none">{user.name}</p>
@@ -149,40 +175,48 @@ export const Navbar = () => {
             className="md:hidden border-t border-border bg-background overflow-hidden"
           >
             <div className="px-4 py-6 space-y-4">
-              <button 
-                onClick={() => {
-                  navigate('/');
-                  setIsMobileMenuOpen(false);
-                }}
-                className={`block w-full text-left px-3 py-2 rounded-lg text-base font-bold cursor-pointer hover:opacity-80 ${isActive('/') ? 'bg-primary/10 text-primary' : 'text-muted-foreground'}`}
-              >
-                {t('navbar.rooms')}
-              </button>
-              {user && (
+              {(user?.role !== 'staff' || location.pathname === '/' || location.pathname.startsWith('/account')) && (
                 <>
                   <button 
                     onClick={() => {
-                      navigate('/account/bookings');
+                      if (user?.role === 'staff') {
+                        navigate('/?view=customer');
+                      } else {
+                        navigate('/');
+                      }
                       setIsMobileMenuOpen(false);
                     }}
-                    className={`block w-full text-left px-3 py-2 rounded-lg text-base font-bold cursor-pointer hover:opacity-80 ${isActive('/account/bookings') ? 'bg-primary/10 text-primary' : 'text-muted-foreground'}`}
+                    className={`block w-full text-left px-3 py-2 rounded-lg text-base font-bold cursor-pointer hover:opacity-80 ${isActive('/') ? 'bg-primary/10 text-primary' : 'text-muted-foreground'}`}
                   >
-                    {t('navbar.myBookings')}
+                    {t('navbar.rooms')}
                   </button>
-                  <button 
-                    onClick={() => {
-                      navigate('/account/profile');
-                      setIsMobileMenuOpen(false);
-                    }}
-                    className={`block w-full text-left px-3 py-2 rounded-lg text-base font-bold cursor-pointer hover:opacity-80 ${isActive('/account/profile') ? 'bg-primary/10 text-primary' : 'text-muted-foreground'}`}
-                  >
-                    {t('navbar.myProfile')}
+                  {user && (
+                    <>
+                      <button 
+                        onClick={() => {
+                          navigate('/account/bookings');
+                          setIsMobileMenuOpen(false);
+                        }}
+                        className={`block w-full text-left px-3 py-2 rounded-lg text-base font-bold cursor-pointer hover:opacity-80 ${isActive('/account/bookings') ? 'bg-primary/10 text-primary' : 'text-muted-foreground'}`}
+                      >
+                        {t('navbar.myBookings')}
+                      </button>
+                      <button 
+                        onClick={() => {
+                          navigate('/account/profile');
+                          setIsMobileMenuOpen(false);
+                        }}
+                        className={`block w-full text-left px-3 py-2 rounded-lg text-base font-bold cursor-pointer hover:opacity-80 ${isActive('/account/profile') ? 'bg-primary/10 text-primary' : 'text-muted-foreground'}`}
+                      >
+                        {t('navbar.myProfile')}
+                      </button>
+                    </>
+                  )}
+                  <button className="block w-full text-left px-3 py-2 rounded-lg text-base font-bold text-muted-foreground cursor-pointer hover:opacity-80">
+                    {t('navbar.amenities')}
                   </button>
                 </>
               )}
-              <button className="block w-full text-left px-3 py-2 rounded-lg text-base font-bold text-muted-foreground cursor-pointer hover:opacity-80">
-                {t('navbar.amenities')}
-              </button>
               {!user && (
                 <button 
                   onClick={() => {
