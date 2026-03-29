@@ -1,28 +1,38 @@
 import React, { useState, useEffect } from 'react';
 import { AdminPanel } from '../components/AdminPanel';
 import { Room, RoomPackage } from '../components/RoomCard';
-import { roomsAPI, adminAPI, getErrorMessage } from '../services/api';
+import { roomsAPI, adminAPI, getErrorMessage, Booking, DashboardStats } from '../services/api';
 import { LoadingSpinner } from '../components/LoadingSpinner';
 import { ErrorMessage } from '../components/ErrorMessage';
 import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
 
 export const AdminDashboardPage = () => {
+  const { t } = useTranslation();
   const [rooms, setRooms] = useState<Room[]>([]);
+  const [bookings, setBookings] = useState<Booking[]>([]);
+  const [stats, setStats] = useState<DashboardStats | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetchRooms();
+    fetchData();
   }, []);
 
-  const fetchRooms = async () => {
+  const fetchData = async () => {
     try {
       setIsLoading(true);
       setError(null);
-      const data = await roomsAPI.list();
-      setRooms(data);
+      const [roomsData, bookingsData, statsData] = await Promise.all([
+        roomsAPI.list(),
+        adminAPI.bookings(),
+        adminAPI.stats(),
+      ]);
+      setRooms(roomsData);
+      setBookings(bookingsData);
+      setStats(statsData);
     } catch (err) {
-      const errorMessage = err instanceof Error ? getErrorMessage(err) : '無法取得房型資料';
+      const errorMessage = err instanceof Error ? getErrorMessage(err) : t('common.error');
       setError(errorMessage);
     } finally {
       setIsLoading(false);
@@ -43,31 +53,40 @@ export const AdminDashboardPage = () => {
         featured: updates.featured
       });
       toast.success('Room updated successfully');
-      await fetchRooms();
+      await fetchData();
     } catch (err) {
       const errorMessage = err instanceof Error ? getErrorMessage(err) : 'Failed to update room';
       toast.error(errorMessage);
     }
   };
 
-  const handleAddPackage = async (roomId: string, packageData: RoomPackage) => {
-    // Note: Backend doesn't have package support yet
+  const handleAddPackage = async (_roomId: string, _packageData: RoomPackage) => {
     toast.info('Package management coming soon');
   };
 
-  const handleRemovePackage = async (roomId: string, packageId: string) => {
-    // Note: Backend doesn't have package support yet
+  const handleRemovePackage = async (_roomId: string, _packageId: string) => {
     toast.info('Package management coming soon');
+  };
+
+  const handleStatusChange = async (bookingId: number, status: 'confirmed' | 'cancelled') => {
+    try {
+      await adminAPI.updateBooking(bookingId, { status });
+      toast.success(`Booking #${bookingId} ${status} successfully`);
+      await fetchData();
+    } catch (err) {
+      const errorMessage = err instanceof Error ? getErrorMessage(err) : 'Failed to update booking';
+      toast.error(errorMessage);
+    }
   };
 
   if (isLoading) {
-    return <LoadingSpinner message="載入管理面板中..." />;
+    return <LoadingSpinner message={t('common.loading')} />;
   }
 
   if (error) {
     return (
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
-        <ErrorMessage message={error} onRetry={fetchRooms} />
+        <ErrorMessage message={error} onRetry={fetchData} />
       </div>
     );
   }
@@ -75,9 +94,12 @@ export const AdminDashboardPage = () => {
   return (
     <AdminPanel 
       rooms={rooms}
+      bookings={bookings}
+      stats={stats}
       onUpdateRoom={handleUpdateRoom}
       onAddPackage={handleAddPackage}
       onRemovePackage={handleRemovePackage}
+      onStatusChange={handleStatusChange}
     />
   );
 };

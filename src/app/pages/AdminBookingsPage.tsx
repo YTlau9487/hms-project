@@ -4,8 +4,10 @@ import { adminAPI, getErrorMessage, Booking } from '../services/api';
 import { LoadingSpinner } from '../components/LoadingSpinner';
 import { ErrorMessage } from '../components/ErrorMessage';
 import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
 
 export const AdminBookingsPage = () => {
+  const { t } = useTranslation();
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -21,7 +23,7 @@ export const AdminBookingsPage = () => {
       const data = await adminAPI.bookings();
       setBookings(data);
     } catch (err) {
-      const errorMessage = err instanceof Error ? getErrorMessage(err) : '無法取得訂單資料';
+      const errorMessage = err instanceof Error ? getErrorMessage(err) : t('adminBookings.loadingError');
       setError(errorMessage);
     } finally {
       setIsLoading(false);
@@ -43,8 +45,8 @@ export const AdminBookingsPage = () => {
     <div>
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-3xl font-bold">Booking Management</h1>
-          <p className="text-muted-foreground mt-1">View and manage all hotel bookings</p>
+          <h1 className="text-3xl font-bold">{t('adminBookings.title')}</h1>
+          <p className="text-muted-foreground mt-1">{t('adminBookings.subtitle')}</p>
         </div>
       </div>
 
@@ -52,22 +54,22 @@ export const AdminBookingsPage = () => {
         <table className="w-full">
           <thead className="bg-muted/50">
             <tr>
-              <th className="text-left px-6 py-4 text-sm font-medium text-muted-foreground">Booking ID</th>
-              <th className="text-left px-6 py-4 text-sm font-medium text-muted-foreground">Guest</th>
-              <th className="text-left px-6 py-4 text-sm font-medium text-muted-foreground">Room</th>
-              <th className="text-left px-6 py-4 text-sm font-medium text-muted-foreground">Check-in</th>
-              <th className="text-left px-6 py-4 text-sm font-medium text-muted-foreground">Check-out</th>
-              <th className="text-left px-6 py-4 text-sm font-medium text-muted-foreground">Status</th>
-              <th className="text-left px-6 py-4 text-sm font-medium text-muted-foreground">Total</th>
-              <th className="text-left px-6 py-4 text-sm font-medium text-muted-foreground">Actions</th>
+                  <th className="text-left px-6 py-4 text-sm font-medium text-muted-foreground">{t('adminBookings.bookingId')}</th>
+                  <th className="text-left px-6 py-4 text-sm font-medium text-muted-foreground">{t('adminBookings.guest')}</th>
+                  <th className="text-left px-6 py-4 text-sm font-medium text-muted-foreground">{t('adminBookings.room')}</th>
+                  <th className="text-left px-6 py-4 text-sm font-medium text-muted-foreground">{t('adminBookings.checkIn')}</th>
+                  <th className="text-left px-6 py-4 text-sm font-medium text-muted-foreground">{t('adminBookings.checkOut')}</th>
+                  <th className="text-left px-6 py-4 text-sm font-medium text-muted-foreground">{t('adminBookings.status')}</th>
+                  <th className="text-left px-6 py-4 text-sm font-medium text-muted-foreground">{t('adminBookings.total')}</th>
+                  <th className="text-left px-6 py-4 text-sm font-medium text-muted-foreground">{t('adminBookings.actions')}</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-border">
             {isLoading ? (
               <tr>
-                <td colSpan={8} className="px-6 py-12 text-center">
-                  <LoadingSpinner message="載入訂單資料中..." />
-                </td>
+                    <td colSpan={8} className="px-6 py-12 text-center">
+                      <LoadingSpinner message={t('adminBookings.loadingBookings')} />
+                    </td>
               </tr>
             ) : error ? (
               <tr>
@@ -77,9 +79,9 @@ export const AdminBookingsPage = () => {
               </tr>
             ) : bookings.length === 0 ? (
               <tr>
-                <td colSpan={8} className="px-6 py-12 text-center text-muted-foreground">
-                  No bookings found
-                </td>
+                    <td colSpan={8} className="px-6 py-12 text-center text-muted-foreground">
+                      {t('adminBookings.noBookingsFound')}
+                    </td>
               </tr>
             ) : (
               bookings.map((booking) => (
@@ -97,32 +99,32 @@ export const AdminBookingsPage = () => {
                         ? 'bg-yellow-100 text-yellow-700'
                         : 'bg-red-100 text-red-700'
                     }`}>
-                      {booking.status}
+                      {booking.status === 'confirmed' ? t('adminBookings.confirmed') : booking.status === 'pending' ? t('adminBookings.pending') : t('adminBookings.cancelled')}
                     </span>
                   </td>
                   <td className="px-6 py-4 font-medium">${booking.total_price}</td>
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-2">
-                      <button className="p-2 hover:bg-muted rounded-lg transition-colors" title="View Details">
+                      <button className="p-2 hover:bg-muted rounded-lg transition-colors cursor-pointer hover:opacity-80" title={t('adminBookings.viewDetails')}>
                         <Eye className="w-4 h-4 text-muted-foreground" />
                       </button>
                       {booking.status === 'pending' && (
-                        <>
-                          <button 
-                            onClick={() => handleUpdateStatus(booking.id, 'confirmed')}
-                            className="p-2 hover:bg-green-100 rounded-lg transition-colors" 
-                            title="Confirm"
-                          >
-                            <Check className="w-4 h-4 text-green-600" />
-                          </button>
-                          <button 
-                            onClick={() => handleUpdateStatus(booking.id, 'cancelled')}
-                            className="p-2 hover:bg-red-100 rounded-lg transition-colors" 
-                            title="Cancel"
-                          >
-                            <X className="w-4 h-4 text-red-600" />
-                          </button>
-                        </>
+                        <button 
+                          onClick={() => handleUpdateStatus(booking.id, 'confirmed')}
+                          className="p-2 hover:bg-green-100 rounded-lg transition-colors cursor-pointer hover:opacity-80" 
+                          title={t('adminBookings.confirm')}
+                        >
+                          <Check className="w-4 h-4 text-green-600" />
+                        </button>
+                      )}
+                      {booking.status !== 'cancelled' && (
+                        <button 
+                          onClick={() => handleUpdateStatus(booking.id, 'cancelled')}
+                          className="p-2 hover:bg-red-100 rounded-lg transition-colors cursor-pointer hover:opacity-80" 
+                          title={t('adminBookings.cancel')}
+                        >
+                          <X className="w-4 h-4 text-red-600" />
+                        </button>
                       )}
                     </div>
                   </td>

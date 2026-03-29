@@ -18,6 +18,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { ImageWithFallback } from './ImageWithFallback';
 import { Room, RoomPackage } from './RoomCard';
 import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
 
 interface ManageRoomsProps {
   rooms: Room[];
@@ -27,6 +28,7 @@ interface ManageRoomsProps {
 }
 
 export const ManageRooms = ({ rooms, onUpdateRoom, onAddPackage, onRemovePackage }: ManageRoomsProps) => {
+  const { t } = useTranslation();
   const [editingRoom, setEditingRoom] = useState<Room | null>(null);
   const [editFormData, setEditFormData] = useState<Partial<Room>>({});
   const [newPackage, setNewPackage] = useState<Partial<RoomPackage>>({});
@@ -39,7 +41,7 @@ export const ManageRooms = ({ rooms, onUpdateRoom, onAddPackage, onRemovePackage
 
   const handleSaveRoom = () => {
     if (editingRoom) {
-      onUpdateRoom(editingRoom.id, editFormData);
+      onUpdateRoom(String(editingRoom.id), editFormData);
       toast.success('Room updated successfully!');
       setEditingRoom(null);
       setEditFormData({});
@@ -52,9 +54,9 @@ export const ManageRooms = ({ rooms, onUpdateRoom, onAddPackage, onRemovePackage
         id: `pkg-${Date.now()}`,
         name: newPackage.name,
         description: newPackage.description,
-        priceMultiplier: newPackage.priceMultiplier / 100, // Convert percentage to decimal
+        priceMultiplier: newPackage.priceMultiplier / 100,
       };
-      onAddPackage(editingRoom.id, packageData);
+      onAddPackage(String(editingRoom.id), packageData);
       toast.success(`Package "${packageData.name}" added!`);
       setNewPackage({});
       setShowPackageForm(false);
@@ -64,7 +66,6 @@ export const ManageRooms = ({ rooms, onUpdateRoom, onAddPackage, onRemovePackage
   };
 
   const handleImageUpload = () => {
-    // Simulate image upload
     const mockImages = [
       'https://images.unsplash.com/photo-1590490359854-dfba19688d70?w=1080',
       'https://images.unsplash.com/photo-1759221793465-4795ba2eaafc?w=1080',
@@ -72,7 +73,7 @@ export const ManageRooms = ({ rooms, onUpdateRoom, onAddPackage, onRemovePackage
       'https://images.unsplash.com/photo-1761049862641-16616dea7b32?w=1080',
     ];
     const randomImage = mockImages[Math.floor(Math.random() * mockImages.length)];
-    setEditFormData({ ...editFormData, image: randomImage });
+    setEditFormData({ ...editFormData, image_url: randomImage });
     toast.success('Image uploaded successfully!');
   };
 
@@ -80,8 +81,8 @@ export const ManageRooms = ({ rooms, onUpdateRoom, onAddPackage, onRemovePackage
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold">Manage Rooms</h2>
-          <p className="text-sm text-muted-foreground">Update room details, pricing, and packages</p>
+          <h2 className="text-2xl font-bold">{t('manageRooms.title')}</h2>
+          <p className="text-sm text-muted-foreground">{t('manageRooms.subtitle')}</p>
         </div>
       </div>
 
@@ -94,17 +95,17 @@ export const ManageRooms = ({ rooms, onUpdateRoom, onAddPackage, onRemovePackage
           >
             <div className="relative h-48">
               <ImageWithFallback
-                src={room.image}
+                src={room.image_url || ''}
                 alt={room.name}
                 className="w-full h-full object-cover"
               />
               <div className="absolute top-3 right-3 flex gap-2">
-                <span className={`px-3 py-1 rounded-full text-xs font-bold ${
+              <span className={`px-3 py-1 rounded-full text-xs font-bold ${
                   room.status === 'available' 
                     ? 'bg-green-500/90 text-white' 
                     : 'bg-orange-500/90 text-white'
                 }`}>
-                  {room.status === 'available' ? 'Available' : 'Maintenance'}
+                  {room.status === 'available' ? t('manageRooms.available') : room.status === 'maintenance' ? t('manageRooms.maintenance') : t('manageRooms.occupied')}
                 </span>
               </div>
             </div>
@@ -113,33 +114,19 @@ export const ManageRooms = ({ rooms, onUpdateRoom, onAddPackage, onRemovePackage
               <div className="flex items-start justify-between">
                 <div>
                   <h3 className="text-lg font-bold">{room.name}</h3>
-                  <p className="text-sm text-muted-foreground">{room.type}</p>
+                  <p className="text-sm text-muted-foreground">{room.featured ? t('manageRooms.featuredRoom') : t('manageRooms.standardRoom')}</p>
                 </div>
                 <span className="text-2xl font-bold text-primary">${room.price}</span>
               </div>
 
               <p className="text-sm text-muted-foreground line-clamp-2">{room.description}</p>
 
-              {/* Packages */}
-              {room.packages && room.packages.length > 0 && (
-                <div className="space-y-2">
-                  <h4 className="text-xs font-bold uppercase text-muted-foreground">Available Packages</h4>
-                  <div className="flex flex-wrap gap-2">
-                    {room.packages.map((pkg) => (
-                      <div key={pkg.id} className="bg-accent/20 text-accent-foreground px-3 py-1 rounded-full text-xs font-semibold border border-accent/30">
-                        {pkg.name} (+{(pkg.priceMultiplier * 100).toFixed(0)}%)
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
               <button
                 onClick={() => handleEditClick(room)}
-                className="w-full px-4 py-2 bg-primary text-primary-foreground rounded-lg font-bold hover:opacity-90 transition-opacity cursor-pointer flex items-center justify-center gap-2"
+                className="w-full px-4 py-2 bg-primary text-primary-foreground rounded-lg font-bold hover:opacity-80 transition-opacity cursor-pointer flex items-center justify-center gap-2"
               >
                 <Edit2 className="w-4 h-4" />
-                Edit Room Details
+                {t('manageRooms.editRoomDetails')}
               </button>
             </div>
           </motion.div>
@@ -159,8 +146,8 @@ export const ManageRooms = ({ rooms, onUpdateRoom, onAddPackage, onRemovePackage
               {/* Header */}
               <div className="sticky top-0 bg-background border-b border-border p-6 flex items-center justify-between z-10">
                 <div>
-                  <h3 className="text-2xl font-bold">Edit Room: {editingRoom.name}</h3>
-                  <p className="text-sm text-muted-foreground">Update room specifications and packages</p>
+                  <h3 className="text-2xl font-bold">{t('manageRooms.editRoom')}: {editingRoom.name}</h3>
+                  <p className="text-sm text-muted-foreground">{t('manageRooms.updateRoomSpecs')}</p>
                 </div>
                 <button
                   onClick={() => {
@@ -168,7 +155,7 @@ export const ManageRooms = ({ rooms, onUpdateRoom, onAddPackage, onRemovePackage
                     setEditFormData({});
                     setShowPackageForm(false);
                   }}
-                  className="p-2 hover:bg-muted rounded-lg transition-colors cursor-pointer"
+                  className="p-2 hover:bg-muted rounded-lg transition-colors cursor-pointer hover:opacity-80"
                 >
                   <X className="w-5 h-5" />
                 </button>
@@ -179,19 +166,19 @@ export const ManageRooms = ({ rooms, onUpdateRoom, onAddPackage, onRemovePackage
                 {/* Image Section */}
                 <div>
                   <label className="flex items-center gap-2 text-sm font-bold mb-3">
-                    <ImageIcon className="w-4 h-4" /> Room Photo
+                    <ImageIcon className="w-4 h-4" /> {t('manageRooms.roomPhoto')}
                   </label>
                   <div className="relative h-64 rounded-xl overflow-hidden border-2 border-dashed border-border bg-muted/30 group cursor-pointer" onClick={handleImageUpload}>
                     <ImageWithFallback
-                      src={editFormData.image || editingRoom.image}
+                      src={editFormData.image_url || editingRoom.image_url || ''}
                       alt="Room preview"
                       className="w-full h-full object-cover"
                     />
                     <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                       <div className="text-center text-white">
                         <Upload className="w-12 h-12 mx-auto mb-2" />
-                        <p className="font-bold">Click to Upload New Image</p>
-                        <p className="text-xs opacity-80">High-quality images recommended</p>
+                        <p className="font-bold">{t('manageRooms.clickToUpload')}</p>
+                        <p className="text-xs opacity-80">{t('manageRooms.highQualityRecommended')}</p>
                       </div>
                     </div>
                   </div>
@@ -201,7 +188,7 @@ export const ManageRooms = ({ rooms, onUpdateRoom, onAddPackage, onRemovePackage
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <label className="flex items-center gap-2 text-sm font-bold mb-2">
-                      <FileText className="w-4 h-4" /> Room Name
+                      <FileText className="w-4 h-4" /> {t('manageRooms.roomName')}
                     </label>
                     <input
                       type="text"
@@ -213,23 +200,7 @@ export const ManageRooms = ({ rooms, onUpdateRoom, onAddPackage, onRemovePackage
 
                   <div>
                     <label className="flex items-center gap-2 text-sm font-bold mb-2">
-                      <Tag className="w-4 h-4" /> Room Type
-                    </label>
-                    <select
-                      value={editFormData.type || ''}
-                      onChange={(e) => setEditFormData({ ...editFormData, type: e.target.value })}
-                      className="w-full px-4 py-2 bg-input-background border border-border rounded-lg focus:ring-2 focus:ring-primary"
-                    >
-                      <option value="Luxury">Luxury</option>
-                      <option value="Suite">Suite</option>
-                      <option value="Business">Business</option>
-                      <option value="Standard">Standard</option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="flex items-center gap-2 text-sm font-bold mb-2">
-                      <DollarSign className="w-4 h-4" /> Base Price (per night)
+                      <DollarSign className="w-4 h-4" /> {t('manageRooms.basePrice')}
                     </label>
                     <input
                       type="number"
@@ -241,15 +212,29 @@ export const ManageRooms = ({ rooms, onUpdateRoom, onAddPackage, onRemovePackage
 
                   <div>
                     <label className="flex items-center gap-2 text-sm font-bold mb-2">
-                      <SettingsIcon className="w-4 h-4" /> Room Status
+                      <Tag className="w-4 h-4" /> {t('manageRooms.size')}
+                    </label>
+                    <input
+                      type="text"
+                      value={editFormData.size || ''}
+                      onChange={(e) => setEditFormData({ ...editFormData, size: e.target.value })}
+                      className="w-full px-4 py-2 bg-input-background border border-border rounded-lg focus:ring-2 focus:ring-primary"
+                      placeholder={t('manageRooms.sizePlaceholder')}
+                    />
+                  </div>
+
+                  <div>
+                    <label className="flex items-center gap-2 text-sm font-bold mb-2">
+                      <SettingsIcon className="w-4 h-4" /> {t('manageRooms.roomStatus')}
                     </label>
                     <select
                       value={editFormData.status || 'available'}
-                      onChange={(e) => setEditFormData({ ...editFormData, status: e.target.value as 'available' | 'maintenance' })}
+                      onChange={(e) => setEditFormData({ ...editFormData, status: e.target.value as 'available' | 'occupied' | 'maintenance' })}
                       className="w-full px-4 py-2 bg-input-background border border-border rounded-lg focus:ring-2 focus:ring-primary"
                     >
-                      <option value="available">Available</option>
-                      <option value="maintenance">Maintenance</option>
+                      <option value="available">{t('manageRooms.available')}</option>
+                      <option value="occupied">{t('manageRooms.occupied')}</option>
+                      <option value="maintenance">{t('manageRooms.maintenance')}</option>
                     </select>
                   </div>
                 </div>
@@ -257,14 +242,14 @@ export const ManageRooms = ({ rooms, onUpdateRoom, onAddPackage, onRemovePackage
                 {/* Description */}
                 <div>
                   <label className="flex items-center gap-2 text-sm font-bold mb-2">
-                    <FileText className="w-4 h-4" /> Room Description
+                    <FileText className="w-4 h-4" /> {t('manageRooms.roomDescription')}
                   </label>
                   <textarea
                     value={editFormData.description || ''}
                     onChange={(e) => setEditFormData({ ...editFormData, description: e.target.value })}
                     rows={4}
                     className="w-full px-4 py-2 bg-input-background border border-border rounded-lg focus:ring-2 focus:ring-primary resize-none"
-                    placeholder="Highlight specific features and amenities..."
+                    placeholder={t('manageRooms.descriptionPlaceholder')}
                   />
                 </div>
 
@@ -272,47 +257,17 @@ export const ManageRooms = ({ rooms, onUpdateRoom, onAddPackage, onRemovePackage
                 <div className="border-t border-border pt-6">
                   <div className="flex items-center justify-between mb-4">
                     <div>
-                      <h4 className="font-bold text-lg">Room Packages</h4>
-                      <p className="text-xs text-muted-foreground">Add service bundles with automatic pricing</p>
+                      <h4 className="font-bold text-lg">{t('manageRooms.roomPackages')}</h4>
+                      <p className="text-xs text-muted-foreground">{t('manageRooms.addServiceBundles')}</p>
                     </div>
                     <button
                       onClick={() => setShowPackageForm(!showPackageForm)}
-                      className="px-4 py-2 bg-accent text-accent-foreground rounded-lg font-bold hover:opacity-90 transition-opacity cursor-pointer flex items-center gap-2"
+                      className="px-4 py-2 bg-accent text-accent-foreground rounded-lg font-bold hover:opacity-80 transition-opacity cursor-pointer flex items-center gap-2"
                     >
                       <Plus className="w-4 h-4" />
-                      Add Package
+                      {t('manageRooms.addPackage')}
                     </button>
                   </div>
-
-                  {/* Existing Packages */}
-                  {editFormData.packages && editFormData.packages.length > 0 && (
-                    <div className="space-y-3 mb-4">
-                      {editFormData.packages.map((pkg) => (
-                        <div key={pkg.id} className="flex items-center justify-between p-4 bg-muted/30 rounded-lg border border-border">
-                          <div className="flex-1">
-                            <h5 className="font-bold">{pkg.name}</h5>
-                            <p className="text-xs text-muted-foreground">{pkg.description}</p>
-                            <p className="text-sm font-semibold text-primary mt-1">
-                              +{(pkg.priceMultiplier * 100).toFixed(0)}% of base rate (${(editingRoom.price * pkg.priceMultiplier).toFixed(2)})
-                            </p>
-                          </div>
-                          <button
-                            onClick={() => {
-                              onRemovePackage(editingRoom.id, pkg.id);
-                              setEditFormData({
-                                ...editFormData,
-                                packages: editFormData.packages?.filter(p => p.id !== pkg.id)
-                              });
-                              toast.success('Package removed');
-                            }}
-                            className="p-2 text-red-500 hover:bg-red-500/10 rounded-lg transition-colors cursor-pointer"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                  )}
 
                   {/* Add Package Form */}
                   {showPackageForm && (
@@ -320,25 +275,25 @@ export const ManageRooms = ({ rooms, onUpdateRoom, onAddPackage, onRemovePackage
                       initial={{ opacity: 0, height: 0 }}
                       animate={{ opacity: 1, height: 'auto' }}
                       exit={{ opacity: 0, height: 0 }}
-                      className="p-4 bg-accent/10 rounded-lg border border-accent/30 space-y-4"
+                      className="p-4 bg-accent/10 rounded-lg border border-accent/30 space-y-4 mb-4"
                     >
-                      <h5 className="font-bold text-sm">New Package Details</h5>
+                      <h5 className="font-bold text-sm">{t('manageRooms.newPackageDetails')}</h5>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                          <label className="text-xs font-bold mb-1 block">Package Name</label>
+                          <label className="text-xs font-bold mb-1 block">{t('manageRooms.packageName')}</label>
                           <input
                             type="text"
-                            placeholder="e.g., Breakfast Included"
+                            placeholder={t('manageRooms.packageNamePlaceholder')}
                             value={newPackage.name || ''}
                             onChange={(e) => setNewPackage({ ...newPackage, name: e.target.value })}
                             className="w-full px-3 py-2 bg-background border border-border rounded-lg text-sm focus:ring-2 focus:ring-primary"
                           />
                         </div>
                         <div>
-                          <label className="text-xs font-bold mb-1 block">Price Increase (%)</label>
+                          <label className="text-xs font-bold mb-1 block">{t('manageRooms.priceIncrease')}</label>
                           <input
                             type="number"
-                            placeholder="e.g., 15"
+                            placeholder={t('manageRooms.priceIncreasePlaceholder')}
                             value={newPackage.priceMultiplier || ''}
                             onChange={(e) => setNewPackage({ ...newPackage, priceMultiplier: parseFloat(e.target.value) })}
                             className="w-full px-3 py-2 bg-background border border-border rounded-lg text-sm focus:ring-2 focus:ring-primary"
@@ -346,9 +301,9 @@ export const ManageRooms = ({ rooms, onUpdateRoom, onAddPackage, onRemovePackage
                         </div>
                       </div>
                       <div>
-                        <label className="text-xs font-bold mb-1 block">Package Description</label>
+                        <label className="text-xs font-bold mb-1 block">{t('manageRooms.packageDescription')}</label>
                         <textarea
-                          placeholder="Describe what's included in this package..."
+                          placeholder={t('manageRooms.packageDescriptionPlaceholder')}
                           value={newPackage.description || ''}
                           onChange={(e) => setNewPackage({ ...newPackage, description: e.target.value })}
                           rows={2}
@@ -358,17 +313,17 @@ export const ManageRooms = ({ rooms, onUpdateRoom, onAddPackage, onRemovePackage
                       {newPackage.priceMultiplier && (
                         <div className="p-3 bg-primary/10 rounded-lg">
                           <p className="text-xs font-semibold text-primary">
-                            Final Price: ${(editingRoom.price + (editingRoom.price * (newPackage.priceMultiplier / 100))).toFixed(2)} per night
+                            {t('manageRooms.finalPrice')}: ${(editingRoom.price + (editingRoom.price * (newPackage.priceMultiplier / 100))).toFixed(2)} {t('manageRooms.perNight')}
                           </p>
                         </div>
                       )}
                       <div className="flex gap-2">
                         <button
                           onClick={handleAddPackage}
-                          className="flex-1 px-4 py-2 bg-accent text-accent-foreground rounded-lg font-bold hover:opacity-90 transition-opacity cursor-pointer flex items-center justify-center gap-2"
+                          className="flex-1 px-4 py-2 bg-accent text-accent-foreground rounded-lg font-bold hover:opacity-80 transition-opacity cursor-pointer flex items-center justify-center gap-2"
                         >
                           <CheckCircle className="w-4 h-4" />
-                          Add Package
+                          {t('manageRooms.addPackageBtn')}
                         </button>
                         <button
                           onClick={() => {
@@ -377,7 +332,7 @@ export const ManageRooms = ({ rooms, onUpdateRoom, onAddPackage, onRemovePackage
                           }}
                           className="px-4 py-2 bg-muted text-foreground rounded-lg font-bold hover:bg-muted/80 transition-colors cursor-pointer"
                         >
-                          Cancel
+                          {t('common.cancel')}
                         </button>
                       </div>
                     </motion.div>
@@ -389,10 +344,10 @@ export const ManageRooms = ({ rooms, onUpdateRoom, onAddPackage, onRemovePackage
               <div className="sticky bottom-0 bg-background border-t border-border p-6 flex gap-4">
                 <button
                   onClick={handleSaveRoom}
-                  className="flex-1 px-6 py-3 bg-primary text-primary-foreground rounded-lg font-bold hover:opacity-90 transition-opacity cursor-pointer flex items-center justify-center gap-2"
+                  className="flex-1 px-6 py-3 bg-primary text-primary-foreground rounded-lg font-bold hover:opacity-80 transition-opacity cursor-pointer flex items-center justify-center gap-2"
                 >
                   <Save className="w-5 h-5" />
-                  Save Changes
+                  {t('manageRooms.saveChanges')}
                 </button>
                 <button
                   onClick={() => {
@@ -402,7 +357,7 @@ export const ManageRooms = ({ rooms, onUpdateRoom, onAddPackage, onRemovePackage
                   }}
                   className="px-6 py-3 bg-muted text-foreground rounded-lg font-bold hover:bg-muted/80 transition-colors cursor-pointer"
                 >
-                  Cancel
+                  {t('common.cancel')}
                 </button>
               </div>
             </motion.div>

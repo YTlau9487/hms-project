@@ -1,130 +1,87 @@
 import React, { useState } from 'react';
 import { 
-  LayoutDashboard, 
-  CalendarCheck, 
-  Users, 
-  Settings, 
-  Bell, 
   Search, 
   MoreVertical, 
   CheckCircle, 
   XCircle, 
-  Calendar,
   Clock,
   ArrowUpRight,
   TrendingUp,
-  CreditCard,
-  DoorOpen
+  CalendarCheck,
+  Users,
 } from 'lucide-react';
 import { motion } from 'motion/react';
 import { NotificationDropdown, Notification } from './NotificationDropdown';
 import { ConfirmationDialog } from './ConfirmationDialog';
 import { ManageRooms } from './ManageRooms';
 import { Room, RoomPackage } from './RoomCard';
+import { Booking, DashboardStats } from '../services/api';
 import { toast } from 'sonner';
-
-interface Booking {
-  id: string;
-  customerName: string;
-  roomType: string;
-  checkIn: string;
-  checkOut: string;
-  status: 'confirmed' | 'pending' | 'cancelled';
-  total: number;
-}
-
-const MOCK_BOOKINGS: Booking[] = [
-  { id: 'BK-1001', customerName: 'Alice Johnson', roomType: 'Deluxe Suite', checkIn: '2026-02-12', checkOut: '2026-02-15', status: 'confirmed', total: 1200 },
-  { id: 'BK-1002', customerName: 'Bob Smith', roomType: 'Premier King', checkIn: '2026-02-14', checkOut: '2026-02-18', status: 'pending', total: 850 },
-  { id: 'BK-1003', customerName: 'Charlie Brown', roomType: 'Standard Twin', checkIn: '2026-02-11', checkOut: '2026-02-13', status: 'cancelled', total: 400 },
-  { id: 'BK-1004', customerName: 'Diana Ross', roomType: 'Presidential Suite', checkIn: '2026-02-20', checkOut: '2026-02-25', status: 'confirmed', total: 5000 },
-  { id: 'BK-1005', customerName: 'Edward Norton', roomType: 'Deluxe Suite', checkIn: '2026-02-12', checkOut: '2026-02-14', status: 'confirmed', total: 800 },
-];
-
-const MOCK_NOTIFICATIONS: Notification[] = [
-  {
-    id: 'N-001',
-    type: 'check-in',
-    message: 'Alice Johnson has checked in',
-    customerName: 'Alice Johnson',
-    bookingId: 'BK-1001',
-    timestamp: '2 hours ago',
-    read: false,
-  },
-  {
-    id: 'N-002',
-    type: 'cancellation',
-    message: 'Charlie Brown requested to cancel booking',
-    customerName: 'Charlie Brown',
-    bookingId: 'BK-1003',
-    timestamp: '3 hours ago',
-    read: false,
-  },
-  {
-    id: 'N-003',
-    type: 'check-out',
-    message: 'Edward Norton has completed check-out',
-    customerName: 'Edward Norton',
-    bookingId: 'BK-1005',
-    timestamp: '5 hours ago',
-    read: true,
-  },
-  {
-    id: 'N-004',
-    type: 'check-in',
-    message: 'Bob Smith booking date has arrived',
-    customerName: 'Bob Smith',
-    bookingId: 'BK-1002',
-    timestamp: '1 day ago',
-    read: true,
-  },
-];
+import { useTranslation } from 'react-i18next';
 
 interface AdminPanelProps {
   rooms?: Room[];
+  bookings?: Booking[];
+  stats?: DashboardStats | null;
+  isLoading?: boolean;
   onUpdateRoom?: (roomId: string, updates: Partial<Room>) => void;
   onAddPackage?: (roomId: string, packageData: RoomPackage) => void;
   onRemovePackage?: (roomId: string, packageId: string) => void;
+  onStatusChange?: (bookingId: number, status: 'confirmed' | 'cancelled') => void;
 }
 
-export const AdminPanel = ({ rooms = [], onUpdateRoom, onAddPackage, onRemovePackage }: AdminPanelProps) => {
+export const AdminPanel = ({ 
+  rooms = [], 
+  bookings = [], 
+  stats,
+  isLoading = false,
+  onUpdateRoom, 
+  onAddPackage, 
+  onRemovePackage,
+  onStatusChange 
+}: AdminPanelProps) => {
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState('bookings');
-  const [bookings, setBookings] = useState(MOCK_BOOKINGS);
-  const [notifications, setNotifications] = useState(MOCK_NOTIFICATIONS);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [confirmDialog, setConfirmDialog] = useState<{
     isOpen: boolean;
-    bookingId: string;
+    bookingId: number;
     action: 'confirm' | 'cancel';
-  }>({ isOpen: false, bookingId: '', action: 'cancel' });
+  }>({ isOpen: false, bookingId: 0, action: 'cancel' });
 
-  const stats = [
-    { label: 'Total Revenue', value: '$24,500', icon: TrendingUp, color: 'text-green-600' },
-    { label: 'Active Bookings', value: '128', icon: CalendarCheck, color: 'text-blue-600' },
-    { label: 'Pending Requests', value: '12', icon: Clock, color: 'text-orange-600' },
-    { label: 'New Customers', value: '34', icon: Users, color: 'text-purple-600' },
+  const displayStats = stats ? [
+    { label: t('adminPanel.totalRevenue'), value: `$${stats.total_revenue.toLocaleString()}`, icon: TrendingUp, color: 'text-green-600' },
+    { label: t('adminPanel.activeBookings'), value: String(stats.active_bookings), icon: CalendarCheck, color: 'text-blue-600' },
+    { label: t('adminPanel.pendingRequests'), value: String(stats.pending_bookings), icon: Clock, color: 'text-orange-600' },
+    { label: t('adminPanel.totalUsers'), value: String(stats.total_users), icon: Users, color: 'text-purple-600' },
+  ] : [
+    { label: t('adminPanel.totalRevenue'), value: '--', icon: TrendingUp, color: 'text-green-600' },
+    { label: t('adminPanel.activeBookings'), value: '--', icon: CalendarCheck, color: 'text-blue-600' },
+    { label: t('adminPanel.pendingRequests'), value: '--', icon: Clock, color: 'text-orange-600' },
+    { label: t('adminPanel.totalUsers'), value: '--', icon: Users, color: 'text-purple-600' },
   ];
 
-  const handleStatusChange = (id: string, status: 'confirmed' | 'cancelled') => {
-    setBookings(prev => prev.map(b => b.id === id ? { ...b, status } : b));
-    
+  const handleStatusChange = (id: number, status: 'confirmed' | 'cancelled') => {
+    if (onStatusChange) {
+      onStatusChange(id, status);
+    }
+
     const booking = bookings.find(b => b.id === id);
     if (booking) {
       const newNotification: Notification = {
         id: `N-${Date.now()}`,
         type: status === 'cancelled' ? 'cancellation' : 'check-in',
-        message: `${booking.customerName}'s booking has been ${status}`,
-        customerName: booking.customerName,
-        bookingId: id,
+        message: `Booking #${id} has been ${status}`,
+        customerName: `User #${booking.user_id}`,
+        bookingId: `BK-${id}`,
         timestamp: 'Just now',
         read: false,
       };
       setNotifications(prev => [newNotification, ...prev]);
-      
-      toast.success(`Booking ${id} ${status === 'confirmed' ? 'confirmed' : 'cancelled'} successfully`);
     }
-    
-    setConfirmDialog({ isOpen: false, bookingId: '', action: 'cancel' });
+
+    setConfirmDialog({ isOpen: false, bookingId: 0, action: 'cancel' });
   };
 
   const handleMarkNotificationAsRead = (id: string) => {
@@ -140,9 +97,9 @@ export const AdminPanel = ({ rooms = [], onUpdateRoom, onAddPackage, onRemovePac
     if (!searchQuery) return true;
     const query = searchQuery.toLowerCase();
     return (
-      booking.id.toLowerCase().includes(query) ||
-      booking.customerName.toLowerCase().includes(query) ||
-      booking.roomType.toLowerCase().includes(query) ||
+      `bk-${booking.id}`.includes(query) ||
+      `user #${booking.user_id}`.includes(query) ||
+      (booking.room?.name || '').toLowerCase().includes(query) ||
       booking.status.toLowerCase().includes(query)
     );
   });
@@ -153,8 +110,8 @@ export const AdminPanel = ({ rooms = [], onUpdateRoom, onAddPackage, onRemovePac
         <div className="max-w-6xl mx-auto">
           <header className="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
-              <h1 className="text-3xl font-bold tracking-tight">Staff Management Dashboard</h1>
-              <p className="text-muted-foreground">Monitor and control system operations</p>
+              <h1 className="text-3xl font-bold tracking-tight">{t('adminPanel.title')}</h1>
+              <p className="text-muted-foreground">{t('adminPanel.subtitle')}</p>
             </div>
             <div className="flex gap-2">
               <NotificationDropdown 
@@ -166,21 +123,17 @@ export const AdminPanel = ({ rooms = [], onUpdateRoom, onAddPackage, onRemovePac
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <input 
                   type="text" 
-                  placeholder="Search bookings..."
+                  placeholder={t('adminPanel.searchPlaceholder')}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="bg-background border border-border rounded-lg pl-10 pr-4 py-2 text-sm w-full md:w-64 focus:ring-2 focus:ring-primary"
                 />
               </div>
-              <button className="bg-primary text-primary-foreground px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 hidden sm:flex">
-                <Calendar className="w-4 h-4" />
-                Extension Request
-              </button>
             </div>
           </header>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            {stats.map((stat, i) => (
+            {displayStats.map((stat, i) => (
               <motion.div 
                 key={stat.label}
                 initial={{ opacity: 0, y: 20 }}
@@ -192,9 +145,9 @@ export const AdminPanel = ({ rooms = [], onUpdateRoom, onAddPackage, onRemovePac
                   <div className={`p-2 rounded-lg bg-muted ${stat.color}`}>
                     <stat.icon className="w-5 h-5" />
                   </div>
-                  <span className="text-[10px] font-bold text-green-600 bg-green-50 px-1.5 py-0.5 rounded flex items-center gap-1">
-                    <ArrowUpRight className="w-2 h-2" /> +12%
-                  </span>
+                <span className="text-[10px] font-bold text-green-600 bg-green-50 px-1.5 py-0.5 rounded flex items-center gap-1">
+                  <ArrowUpRight className="w-2 h-2" /> {t('adminPanel.live')}
+                </span>
                 </div>
                 <p className="text-sm font-medium text-muted-foreground">{stat.label}</p>
                 <h4 className="text-2xl font-bold mt-1">{stat.value}</h4>
@@ -221,40 +174,45 @@ export const AdminPanel = ({ rooms = [], onUpdateRoom, onAddPackage, onRemovePac
             </div>
           ) : (
             <div className="bg-background rounded-xl border border-border shadow-sm overflow-hidden">
-              <div className="p-6 border-b border-border flex justify-between items-center">
-                <h3 className="font-bold">Recent Bookings</h3>
-                <button className="text-xs font-bold text-primary hover:underline">View All</button>
-              </div>
+            <div className="p-6 border-b border-border flex justify-between items-center">
+              <h3 className="font-bold">{t('adminPanel.recentBookings')}</h3>
+            </div>
               <div className="overflow-x-auto">
                 <table className="w-full text-left">
                   <thead className="bg-muted/50 text-xs font-bold uppercase text-muted-foreground border-b border-border">
                     <tr>
-                      <th className="px-6 py-4">Booking ID</th>
-                      <th className="px-6 py-4">Customer</th>
-                      <th className="px-6 py-4">Room Type</th>
-                      <th className="px-6 py-4">Stay Dates</th>
-                      <th className="px-6 py-4">Status</th>
-                      <th className="px-6 py-4">Amount</th>
-                      <th className="px-6 py-4">Actions</th>
+                      <th className="px-6 py-4">{t('adminPanel.bookingId')}</th>
+                      <th className="px-6 py-4">{t('adminPanel.guest')}</th>
+                      <th className="px-6 py-4">{t('adminPanel.room')}</th>
+                      <th className="px-6 py-4">{t('adminPanel.stayDates')}</th>
+                      <th className="px-6 py-4">{t('adminPanel.status')}</th>
+                      <th className="px-6 py-4">{t('adminPanel.amount')}</th>
+                      <th className="px-6 py-4">{t('adminPanel.actions')}</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-border">
-                    {filteredBookings.length === 0 ? (
+                    {isLoading ? (
                       <tr>
                         <td colSpan={7} className="px-6 py-12 text-center text-muted-foreground">
-                          <p>No bookings found matching your search.</p>
+                          <p>{t('adminPanel.loadingBookings')}</p>
+                        </td>
+                      </tr>
+                    ) : filteredBookings.length === 0 ? (
+                      <tr>
+                        <td colSpan={7} className="px-6 py-12 text-center text-muted-foreground">
+                          <p>{t('adminPanel.noBookingsFound')}</p>
                         </td>
                       </tr>
                     ) : (
                       filteredBookings.map((booking) => (
                         <tr key={booking.id} className="text-sm hover:bg-muted/30 transition-colors">
-                          <td className="px-6 py-4 font-mono text-xs font-bold">{booking.id}</td>
-                          <td className="px-6 py-4 font-medium">{booking.customerName}</td>
-                          <td className="px-6 py-4 text-muted-foreground">{booking.roomType}</td>
+                          <td className="px-6 py-4 font-mono text-xs font-bold">BK-{booking.id}</td>
+                          <td className="px-6 py-4 font-medium">User #{booking.user_id}</td>
+                          <td className="px-6 py-4 text-muted-foreground">{booking.room?.name || 'Unknown'}</td>
                           <td className="px-6 py-4">
                             <div className="flex flex-col">
-                              <span>{booking.checkIn}</span>
-                              <span className="text-[10px] text-muted-foreground font-mono">to {booking.checkOut}</span>
+                              <span>{booking.check_in}</span>
+                              <span className="text-[10px] text-muted-foreground font-mono">to {booking.check_out}</span>
                             </div>
                           </td>
                           <td className="px-6 py-4">
@@ -266,13 +224,13 @@ export const AdminPanel = ({ rooms = [], onUpdateRoom, onAddPackage, onRemovePac
                               {booking.status}
                             </span>
                           </td>
-                          <td className="px-6 py-4 font-bold">${booking.total}</td>
+                          <td className="px-6 py-4 font-bold">${booking.total_price}</td>
                           <td className="px-6 py-4">
                             <div className="flex gap-2">
                               {booking.status === 'pending' && (
                                 <button 
                                   onClick={() => setConfirmDialog({ isOpen: true, bookingId: booking.id, action: 'confirm' })}
-                                  className="p-1.5 rounded-lg bg-green-50 text-green-600 hover:bg-green-100"
+                                  className="p-1.5 rounded-lg bg-green-50 text-green-600 hover:bg-green-100 cursor-pointer hover:opacity-80"
                                   title="Confirm booking"
                                 >
                                   <CheckCircle className="w-4 h-4" />
@@ -281,13 +239,13 @@ export const AdminPanel = ({ rooms = [], onUpdateRoom, onAddPackage, onRemovePac
                               {booking.status !== 'cancelled' && (
                                 <button 
                                   onClick={() => setConfirmDialog({ isOpen: true, bookingId: booking.id, action: 'cancel' })}
-                                  className="p-1.5 rounded-lg bg-red-50 text-red-600 hover:bg-red-100"
+                                  className="p-1.5 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 cursor-pointer hover:opacity-80"
                                   title="Cancel booking"
                                 >
                                   <XCircle className="w-4 h-4" />
                                 </button>
                               )}
-                              <button className="p-1.5 rounded-lg bg-muted text-muted-foreground hover:bg-border">
+                              <button className="p-1.5 rounded-lg bg-muted text-muted-foreground hover:bg-border cursor-pointer hover:opacity-80">
                                 <MoreVertical className="w-4 h-4" />
                               </button>
                             </div>
@@ -303,21 +261,21 @@ export const AdminPanel = ({ rooms = [], onUpdateRoom, onAddPackage, onRemovePac
         </div>
       </div>
 
-      <ConfirmationDialog
+        <ConfirmationDialog
         isOpen={confirmDialog.isOpen}
-        onClose={() => setConfirmDialog({ isOpen: false, bookingId: '', action: 'cancel' })}
+        onClose={() => setConfirmDialog({ isOpen: false, bookingId: 0, action: 'cancel' })}
         onConfirm={() => {
           const status = confirmDialog.action === 'confirm' ? 'confirmed' : 'cancelled';
           handleStatusChange(confirmDialog.bookingId, status);
         }}
-        title={confirmDialog.action === 'confirm' ? 'Confirm Booking' : 'Cancel Booking'}
+        title={confirmDialog.action === 'confirm' ? t('adminPanel.confirmBooking') : t('adminPanel.cancelBooking')}
         description={
           confirmDialog.action === 'confirm'
-            ? `Are you sure you want to confirm booking ${confirmDialog.bookingId}? This will notify the customer via email.`
-            : `Are you sure you want to cancel booking ${confirmDialog.bookingId}? This action cannot be undone and the customer will be notified.`
+            ? t('adminPanel.confirmBookingDesc', { id: confirmDialog.bookingId })
+            : t('adminPanel.cancelBookingDesc', { id: confirmDialog.bookingId })
         }
-        confirmText={confirmDialog.action === 'confirm' ? 'Confirm Booking' : 'Cancel Booking'}
-        cancelText="Go Back"
+        confirmText={confirmDialog.action === 'confirm' ? t('adminPanel.confirmBookingBtn') : t('adminPanel.cancelBookingBtn')}
+        cancelText={t('adminPanel.goBack')}
         variant={confirmDialog.action === 'cancel' ? 'destructive' : 'default'}
       />
     </div>

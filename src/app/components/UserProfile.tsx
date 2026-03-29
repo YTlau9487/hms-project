@@ -1,49 +1,46 @@
 import React, { useState } from 'react';
-import { User, Mail, Phone, Calendar, ArrowLeft, Save } from 'lucide-react';
+import { User, Mail, Phone, ArrowLeft, Save } from 'lucide-react';
 import { motion } from 'motion/react';
-import { toast } from 'sonner';
+import { User as UserType } from '../services/api';
+import { useTranslation } from 'react-i18next';
 
 interface UserProfileProps {
-  user: any;
+  user: UserType | null;
   onBack: () => void;
-  onUpdate: (userData: any) => void;
+  onUpdate: (userData: { name: string; phone: string }) => void;
 }
 
 export const UserProfile = ({ user, onBack, onUpdate }: UserProfileProps) => {
+  const { t } = useTranslation();
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({
     name: user?.name || '',
     email: user?.email || '',
     phone: user?.phone || '',
-    age: user?.age || '',
   });
 
-  const [errors, setErrors] = useState<any>({});
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
+  React.useEffect(() => {
+    if (user) {
+      setFormData({
+        name: user.name || '',
+        email: user.email || '',
+        phone: user.phone || '',
+      });
+    }
+  }, [user]);
 
   const validateForm = () => {
-    const newErrors: any = {};
+    const newErrors: Record<string, string> = {};
 
-    // Email validation
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(formData.email)) {
-      newErrors.email = 'Please enter a valid email address';
-    }
-
-    // Phone validation (must contain only digits and be between 8-15 characters)
-    const phoneRegex = /^\d{8,15}$/;
-    if (!phoneRegex.test(formData.phone.replace(/[\s-]/g, ''))) {
-      newErrors.phone = 'Phone number must contain 8-15 digits';
-    }
-
-    // Age validation
-    const ageNum = parseInt(formData.age);
-    if (isNaN(ageNum) || ageNum < 18 || ageNum > 120) {
-      newErrors.age = 'Age must be between 18 and 120';
-    }
-
-    // Name validation
     if (formData.name.trim().length < 2) {
       newErrors.name = 'Name must be at least 2 characters';
+    }
+
+    const phoneRegex = /^\d{8,15}$/;
+    if (formData.phone && !phoneRegex.test(formData.phone.replace(/[\s-]/g, ''))) {
+      newErrors.phone = 'Phone number must contain 8-15 digits';
     }
 
     setErrors(newErrors);
@@ -54,9 +51,6 @@ export const UserProfile = ({ user, onBack, onUpdate }: UserProfileProps) => {
     if (validateForm()) {
       onUpdate(formData);
       setIsEditing(false);
-      toast.success('Profile updated successfully!');
-    } else {
-      toast.error('Please fix the errors in the form');
     }
   };
 
@@ -65,7 +59,6 @@ export const UserProfile = ({ user, onBack, onUpdate }: UserProfileProps) => {
       name: user?.name || '',
       email: user?.email || '',
       phone: user?.phone || '',
-      age: user?.age || '',
     });
     setErrors({});
     setIsEditing(false);
@@ -81,10 +74,10 @@ export const UserProfile = ({ user, onBack, onUpdate }: UserProfileProps) => {
         >
           <button
             onClick={onBack}
-            className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
+            className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors cursor-pointer hover:opacity-80"
           >
             <ArrowLeft className="w-4 h-4" />
-            <span className="text-sm font-medium">Back</span>
+            <span className="text-sm font-medium">{t('userProfile.back')}</span>
           </button>
         </motion.div>
 
@@ -103,7 +96,7 @@ export const UserProfile = ({ user, onBack, onUpdate }: UserProfileProps) => {
               <div>
                 <h1 className="text-3xl font-bold">{user?.name}</h1>
                 <p className="text-primary-foreground/80 mt-1">
-                  {user?.role === 'staff' ? 'Staff Member' : 'Guest'}
+                  {user?.role === 'staff' ? t('userProfile.staffMember') : t('userProfile.guest')}
                 </p>
               </div>
             </div>
@@ -112,28 +105,28 @@ export const UserProfile = ({ user, onBack, onUpdate }: UserProfileProps) => {
           {/* Profile Information */}
           <div className="p-8">
             <div className="flex justify-between items-center mb-6">
-              <h2 className="text-xl font-bold">Personal Information</h2>
+              <h2 className="text-xl font-bold">{t('userProfile.personalInformation')}</h2>
               {!isEditing ? (
                 <button
                   onClick={() => setIsEditing(true)}
-                  className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:opacity-90 transition-opacity font-medium"
+                  className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:opacity-80 transition-opacity font-medium cursor-pointer"
                 >
-                  Edit Profile
+                  {t('userProfile.editProfile')}
                 </button>
               ) : (
                 <div className="flex gap-2">
                   <button
                     onClick={handleCancel}
-                    className="px-4 py-2 bg-muted text-foreground rounded-lg hover:bg-muted/80 transition-colors font-medium"
+                    className="px-4 py-2 bg-muted text-foreground rounded-lg hover:opacity-80 transition-opacity font-medium cursor-pointer"
                   >
-                    Cancel
+                    {t('userProfile.cancel')}
                   </button>
                   <button
                     onClick={handleSave}
-                    className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:opacity-90 transition-opacity font-medium flex items-center gap-2"
+                    className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:opacity-80 transition-opacity font-medium flex items-center gap-2 cursor-pointer"
                   >
                     <Save className="w-4 h-4" />
-                    Save Changes
+                    {t('userProfile.saveChanges')}
                   </button>
                 </div>
               )}
@@ -144,7 +137,7 @@ export const UserProfile = ({ user, onBack, onUpdate }: UserProfileProps) => {
               <div>
                 <label className="flex items-center gap-2 text-sm font-medium text-muted-foreground mb-2">
                   <User className="w-4 h-4" />
-                  Full Name
+                  {t('userProfile.fullName')}
                 </label>
                 {isEditing ? (
                   <div>
@@ -155,7 +148,7 @@ export const UserProfile = ({ user, onBack, onUpdate }: UserProfileProps) => {
                       className={`w-full px-4 py-3 rounded-lg border ${
                         errors.name ? 'border-red-500' : 'border-border'
                       } bg-background focus:ring-2 focus:ring-primary focus:border-transparent`}
-                      placeholder="Enter your full name"
+                      placeholder={t('userProfile.fullNamePlaceholder')}
                     />
                     {errors.name && (
                       <p className="text-red-500 text-xs mt-1">{errors.name}</p>
@@ -172,7 +165,7 @@ export const UserProfile = ({ user, onBack, onUpdate }: UserProfileProps) => {
               <div>
                 <label className="flex items-center gap-2 text-sm font-medium text-muted-foreground mb-2">
                   <Mail className="w-4 h-4" />
-                  Email Address (Login ID)
+                  {t('userProfile.emailAddress')}
                 </label>
                 <div>
                   <input
@@ -180,10 +173,10 @@ export const UserProfile = ({ user, onBack, onUpdate }: UserProfileProps) => {
                     value={formData.email}
                     disabled={true}
                     className="w-full px-4 py-3 rounded-lg border border-border bg-muted/50 cursor-not-allowed opacity-60"
-                    title="Email cannot be changed as it is your login ID"
+                    title={t('userProfile.emailNote')}
                   />
                   <p className="text-xs text-muted-foreground mt-1">
-                    Email cannot be changed as it is used for login
+                    {t('userProfile.emailNote')}
                   </p>
                 </div>
               </div>
@@ -192,7 +185,7 @@ export const UserProfile = ({ user, onBack, onUpdate }: UserProfileProps) => {
               <div>
                 <label className="flex items-center gap-2 text-sm font-medium text-muted-foreground mb-2">
                   <Phone className="w-4 h-4" />
-                  Phone Number
+                  {t('userProfile.phoneNumber')}
                 </label>
                 {isEditing ? (
                   <div>
@@ -203,7 +196,7 @@ export const UserProfile = ({ user, onBack, onUpdate }: UserProfileProps) => {
                       className={`w-full px-4 py-3 rounded-lg border ${
                         errors.phone ? 'border-red-500' : 'border-border'
                       } bg-background focus:ring-2 focus:ring-primary focus:border-transparent`}
-                      placeholder="Enter your phone number"
+                      placeholder={t('userProfile.phonePlaceholder')}
                     />
                     {errors.phone && (
                       <p className="text-red-500 text-xs mt-1">{errors.phone}</p>
@@ -211,40 +204,7 @@ export const UserProfile = ({ user, onBack, onUpdate }: UserProfileProps) => {
                   </div>
                 ) : (
                   <p className="text-base font-medium px-4 py-3 bg-muted rounded-lg">
-                    {formData.phone}
-                  </p>
-                )}
-              </div>
-
-              {/* Age */}
-              <div>
-                <label className="flex items-center gap-2 text-sm font-medium text-muted-foreground mb-2">
-                  <Calendar className="w-4 h-4" />
-                  Age
-                </label>
-                {isEditing ? (
-                  <div>
-                    <input
-                      type="number"
-                      value={formData.age}
-                      onChange={(e) => setFormData({ ...formData, age: e.target.value })}
-                      className={`w-full px-4 py-3 rounded-lg border ${
-                        errors.age ? 'border-red-500' : 'border-border'
-                      } bg-background focus:ring-2 focus:ring-primary focus:border-transparent`}
-                      placeholder="Enter your age"
-                      min="18"
-                      max="120"
-                    />
-                    {errors.age && (
-                      <p className="text-red-500 text-xs mt-1">{errors.age}</p>
-                    )}
-                    <p className="text-xs text-muted-foreground mt-1">
-                      You must be at least 18 years old to book a room
-                    </p>
-                  </div>
-                ) : (
-                  <p className="text-base font-medium px-4 py-3 bg-muted rounded-lg">
-                    {formData.age} years old
+                    {formData.phone || t('userProfile.notSet')}
                   </p>
                 )}
               </div>
@@ -253,7 +213,7 @@ export const UserProfile = ({ user, onBack, onUpdate }: UserProfileProps) => {
             {/* Info Box */}
             <div className="mt-8 p-4 bg-blue-50 border border-blue-200 rounded-lg">
               <p className="text-sm text-blue-800">
-                <strong>Note:</strong> Your personal information is securely stored and used only for booking confirmations and communication regarding your stay. We take your privacy seriously.
+                <strong>Note:</strong> {t('userProfile.infoBox')}
               </p>
             </div>
           </div>

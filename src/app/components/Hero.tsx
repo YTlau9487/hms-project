@@ -2,6 +2,7 @@ import React from 'react';
 import { Search, Calendar, Users, MapPin } from 'lucide-react';
 import { motion } from 'motion/react';
 import { ImageWithFallback } from './ImageWithFallback';
+import { useTranslation } from 'react-i18next';
 
 interface HeroProps {
   onBookNow: () => void;
@@ -9,10 +10,11 @@ interface HeroProps {
 }
 
 export const Hero = ({ onBookNow, onSearch }: HeroProps) => {
+  const { t } = useTranslation();
   const [searchParams, setSearchParams] = React.useState({
     checkIn: '2026-02-12',
     checkOut: '2026-02-14',
-    guests: '2 Adults, 0 Children'
+    guests: t('hero.guestOption1')
   });
 
   const handleSearch = () => {
@@ -39,19 +41,19 @@ export const Hero = ({ onBookNow, onSearch }: HeroProps) => {
           className="max-w-2xl text-white pb-12"
         >
           <h1 className="text-5xl md:text-7xl font-bold mb-6 tracking-tight leading-tight">
-            Elevate Your <br />
+            {t('hero.titleFallback1')} <br />
             <span className="text-accent-foreground bg-accent px-4 py-1 inline-block -rotate-1 mt-2">
-              Urban Escape
+              {t('hero.titleFallback2')}
             </span>
           </h1>
           <p className="text-lg md:text-xl mb-8 text-gray-200 font-light max-w-lg">
-            Experience unparalleled luxury in the heart of Hong Kong. Discover a world of comfort, elegance, and personalized service.
+            {t('hero.subtitleFallback')}
           </p>
           <button 
             onClick={onBookNow}
             className="px-8 py-4 bg-primary text-primary-foreground text-lg font-semibold rounded-lg hover:scale-105 transition-transform shadow-xl cursor-pointer"
           >
-            Book Your Stay
+            {t('hero.bookYourStay')}
           </button>
         </motion.div>
 
@@ -65,7 +67,7 @@ export const Hero = ({ onBookNow, onSearch }: HeroProps) => {
           <div className="flex-1 grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="space-y-1">
               <label className="text-xs uppercase font-bold text-muted-foreground flex items-center gap-1">
-                <Calendar className="w-3 h-3" /> Check In
+                <Calendar className="w-3 h-3" /> {t('hero.checkIn')}
               </label>
               <input 
                 type="date" 
@@ -76,7 +78,7 @@ export const Hero = ({ onBookNow, onSearch }: HeroProps) => {
             </div>
             <div className="space-y-1">
               <label className="text-xs uppercase font-bold text-muted-foreground flex items-center gap-1">
-                <Calendar className="w-3 h-3" /> Check Out
+                <Calendar className="w-3 h-3" /> {t('hero.checkOut')}
               </label>
               <input 
                 type="date" 
@@ -87,17 +89,17 @@ export const Hero = ({ onBookNow, onSearch }: HeroProps) => {
             </div>
             <div className="space-y-1">
               <label className="text-xs uppercase font-bold text-muted-foreground flex items-center gap-1">
-                <Users className="w-3 h-3" /> Guests
+                <Users className="w-3 h-3" /> {t('hero.guests')}
               </label>
               <select 
                 className="w-full bg-input-background border-none rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-primary"
                 value={searchParams.guests}
                 onChange={(e) => setSearchParams({ ...searchParams, guests: e.target.value })}
               >
-                <option>2 Adults, 0 Children</option>
-                <option>1 Adult</option>
-                <option>2 Adults, 1 Child</option>
-                <option>2 Adults, 2 Children</option>
+                <option>{t('hero.guestOption1')}</option>
+                <option>{t('hero.guestOption2')}</option>
+                <option>{t('hero.guestOption3')}</option>
+                <option>{t('hero.guestOption4')}</option>
               </select>
             </div>
           </div>
@@ -106,7 +108,7 @@ export const Hero = ({ onBookNow, onSearch }: HeroProps) => {
             className="md:w-48 bg-primary text-primary-foreground rounded-lg font-bold flex items-center justify-center gap-2 hover:opacity-90 transition-opacity cursor-pointer"
           >
             <Search className="w-5 h-5" />
-            Check Availability
+            {t('hero.checkAvailability')}
           </button>
         </motion.div>
       </div>

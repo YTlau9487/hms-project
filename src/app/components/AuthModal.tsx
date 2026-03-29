@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { X, Mail, Lock, User, Phone, CheckCircle, Calendar } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
+import { useTranslation } from 'react-i18next';
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -9,6 +10,7 @@ interface AuthModalProps {
 }
 
 export const AuthModal = ({ isOpen, onClose, onSuccess }: AuthModalProps) => {
+  const { t } = useTranslation();
   const [mode, setMode] = useState<'login' | 'register'>('login');
   const [formData, setFormData] = useState({
     name: '',
@@ -47,30 +49,30 @@ export const AuthModal = ({ isOpen, onClose, onSuccess }: AuthModalProps) => {
         <div className="relative p-8">
           <button 
             onClick={onClose}
-            className="absolute top-4 right-4 p-2 text-muted-foreground hover:text-foreground transition-colors"
+            className="absolute top-4 right-4 p-2 text-muted-foreground hover:text-foreground transition-colors cursor-pointer hover:opacity-80"
           >
             <X className="w-5 h-5" />
           </button>
 
           <div className="mb-8">
             <h2 className="text-2xl font-bold mb-2">
-              {mode === 'login' ? 'Welcome Back' : 'Create Account'}
+              {mode === 'login' ? t('authModal.welcomeBack') : t('authModal.createAccount')}
             </h2>
             <p className="text-muted-foreground">
-              {mode === 'login' ? 'Enter your credentials to access your account' : 'Join our membership for exclusive benefits'}
+              {mode === 'login' ? t('authModal.loginSubtitle') : t('authModal.registerSubtitle')}
             </p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             {mode === 'register' && (
               <div className="space-y-1">
-                <label className="text-sm font-medium">Full Name</label>
+                <label className="text-sm font-medium">{t('authModal.fullName')}</label>
                 <div className="relative">
                   <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                   <input 
                     type="text" 
                     required
-                    placeholder="John Doe"
+                    placeholder={t('authModal.fullNamePlaceholder')}
                     className="w-full bg-input-background border-none rounded-lg pl-10 pr-4 py-2.5 text-sm focus:ring-2 focus:ring-primary transition-all"
                     value={formData.name}
                     onChange={(e) => setFormData({...formData, name: e.target.value})}
@@ -80,13 +82,13 @@ export const AuthModal = ({ isOpen, onClose, onSuccess }: AuthModalProps) => {
             )}
 
             <div className="space-y-1">
-              <label className="text-sm font-medium">Email Address</label>
+              <label className="text-sm font-medium">{t('authModal.emailAddress')}</label>
               <div className="relative">
                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <input 
                   type="email" 
                   required
-                  placeholder="name@example.com"
+                  placeholder={t('authModal.emailPlaceholder')}
                   className="w-full bg-input-background border-none rounded-lg pl-10 pr-4 py-2.5 text-sm focus:ring-2 focus:ring-primary transition-all"
                   value={formData.email}
                   onChange={(e) => setFormData({...formData, email: e.target.value})}
@@ -97,13 +99,13 @@ export const AuthModal = ({ isOpen, onClose, onSuccess }: AuthModalProps) => {
             {mode === 'register' && (
               <>
                 <div className="space-y-1">
-                  <label className="text-sm font-medium">Phone Number</label>
+                  <label className="text-sm font-medium">{t('authModal.phoneNumber')}</label>
                   <div className="relative">
                     <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                     <input 
                       type="tel" 
                       required
-                      placeholder="+852 1234 5678"
+                      placeholder={t('authModal.phonePlaceholder')}
                       className="w-full bg-input-background border-none rounded-lg pl-10 pr-4 py-2.5 text-sm focus:ring-2 focus:ring-primary transition-all"
                       value={formData.phone}
                       onChange={(e) => setFormData({...formData, phone: e.target.value})}
@@ -111,7 +113,7 @@ export const AuthModal = ({ isOpen, onClose, onSuccess }: AuthModalProps) => {
                   </div>
                 </div>
                 <div className="space-y-1">
-                  <label className="text-sm font-medium">Age</label>
+                  <label className="text-sm font-medium">{t('authModal.age')}</label>
                   <div className="relative">
                     <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                     <input 
@@ -119,22 +121,22 @@ export const AuthModal = ({ isOpen, onClose, onSuccess }: AuthModalProps) => {
                       required
                       min="18"
                       max="120"
-                      placeholder="18"
+                      placeholder={t('authModal.agePlaceholder')}
                       className="w-full bg-input-background border-none rounded-lg pl-10 pr-4 py-2.5 text-sm focus:ring-2 focus:ring-primary transition-all"
                       value={formData.age}
                       onChange={(e) => setFormData({...formData, age: e.target.value})}
                     />
                   </div>
-                  <p className="text-xs text-muted-foreground mt-1">Must be 18 or older to book</p>
+                  <p className="text-xs text-muted-foreground mt-1">{t('authModal.ageNote')}</p>
                 </div>
               </>
             )}
 
             <div className="space-y-1">
               <div className="flex justify-between items-center">
-                <label className="text-sm font-medium">Password</label>
+                <label className="text-sm font-medium">{t('authModal.password')}</label>
                 {mode === 'login' && (
-                  <button type="button" className="text-xs text-primary font-medium hover:underline">Forgot password?</button>
+                  <button type="button" className="text-xs text-primary font-medium hover:underline cursor-pointer hover:opacity-80">{t('authModal.forgotPassword')}</button>
                 )}
               </div>
               <div className="relative">
@@ -152,26 +154,26 @@ export const AuthModal = ({ isOpen, onClose, onSuccess }: AuthModalProps) => {
 
             <button 
               type="submit"
-              className="w-full bg-primary text-primary-foreground py-3 rounded-lg font-bold hover:opacity-90 transition-opacity mt-2"
+              className="w-full bg-primary text-primary-foreground py-3 rounded-lg font-bold hover:opacity-80 transition-opacity mt-2 cursor-pointer"
             >
-              {mode === 'login' ? 'Sign In' : 'Create Account'}
+              {mode === 'login' ? t('authModal.signIn') : t('authModal.createAccountBtn')}
             </button>
           </form>
 
           <div className="mt-6 pt-6 border-t border-border text-center">
             <p className="text-sm text-muted-foreground">
-              {mode === 'login' ? "Don't have an account?" : "Already have an account?"}
+              {mode === 'login' ? t('authModal.noAccount') : t('authModal.alreadyAccount')}
               <button 
                 onClick={() => setMode(mode === 'login' ? 'register' : 'login')}
                 className="ml-1 text-primary font-bold hover:underline"
               >
-                {mode === 'login' ? 'Register' : 'Login'}
+                {mode === 'login' ? t('authModal.register') : t('authModal.login')}
               </button>
             </p>
           </div>
           
           <div className="mt-4 p-3 bg-accent rounded-lg text-[10px] text-accent-foreground/70 leading-relaxed text-center">
-            Tip: Use <span className="font-bold">admin@hotel.com</span> to log in as Staff
+            {t('authModal.staffTip')} <span className="font-bold">admin@hotel.com</span> {t('authModal.staffTipEnd')}
           </div>
         </div>
       </motion.div>

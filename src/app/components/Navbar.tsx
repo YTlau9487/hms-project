@@ -20,8 +20,10 @@ export const Navbar = () => {
   };
 
   const toggleLanguage = () => {
-    const newLang = i18n.language === 'en' ? 'zh-TW' : 'en';
-    i18n.changeLanguage(newLang);
+    const langs = ['en', 'zh-TW', 'zh-CN'];
+    const currentIndex = langs.indexOf(i18n.language);
+    const nextIndex = (currentIndex + 1) % langs.length;
+    i18n.changeLanguage(langs[nextIndex]);
   };
 
   return (
@@ -76,10 +78,10 @@ export const Navbar = () => {
             <button
               onClick={toggleLanguage}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-colors cursor-pointer"
-              title={i18n.language === 'en' ? 'Switch to Chinese' : '切換至英文'}
+              title={i18n.language === 'en' ? '切換至繁體中文' : i18n.language === 'zh-TW' ? '切換至简体中文' : 'Switch to English'}
             >
               <Languages className="w-4 h-4" />
-              <span className="hidden sm:inline">{i18n.language === 'en' ? 'EN' : '繁'}</span>
+              <span className="hidden sm:inline">{i18n.language === 'en' ? 'EN' : i18n.language === 'zh-TW' ? '繁' : '简'}</span>
             </button>
 
             {user?.role === 'staff' && (
@@ -101,7 +103,7 @@ export const Navbar = () => {
 
             {user ? (
               <div className="flex items-center gap-4">
-                <button className="relative p-2 text-muted-foreground hover:text-foreground transition-colors">
+                <button className="relative p-2 text-muted-foreground hover:text-foreground transition-colors cursor-pointer hover:opacity-80">
                   <Bell className="w-5 h-5" />
                   <span className="absolute top-2 right-2 w-2 h-2 bg-destructive rounded-full" />
                 </button>
@@ -112,7 +114,7 @@ export const Navbar = () => {
                   </div>
                   <button 
                     onClick={handleLogout}
-                    className="p-2 rounded-full hover:bg-muted transition-colors cursor-pointer"
+                    className="p-2 rounded-full hover:bg-muted transition-colors cursor-pointer hover:opacity-80"
                   >
                     <LogOut className="w-5 h-5" />
                   </button>
@@ -152,7 +154,7 @@ export const Navbar = () => {
                   navigate('/');
                   setIsMobileMenuOpen(false);
                 }}
-                className={`block w-full text-left px-3 py-2 rounded-lg text-base font-bold ${isActive('/') ? 'bg-primary/10 text-primary' : 'text-muted-foreground'}`}
+                className={`block w-full text-left px-3 py-2 rounded-lg text-base font-bold cursor-pointer hover:opacity-80 ${isActive('/') ? 'bg-primary/10 text-primary' : 'text-muted-foreground'}`}
               >
                 {t('navbar.rooms')}
               </button>
@@ -163,7 +165,7 @@ export const Navbar = () => {
                       navigate('/account/bookings');
                       setIsMobileMenuOpen(false);
                     }}
-                    className={`block w-full text-left px-3 py-2 rounded-lg text-base font-bold ${isActive('/account/bookings') ? 'bg-primary/10 text-primary' : 'text-muted-foreground'}`}
+                    className={`block w-full text-left px-3 py-2 rounded-lg text-base font-bold cursor-pointer hover:opacity-80 ${isActive('/account/bookings') ? 'bg-primary/10 text-primary' : 'text-muted-foreground'}`}
                   >
                     {t('navbar.myBookings')}
                   </button>
@@ -172,13 +174,13 @@ export const Navbar = () => {
                       navigate('/account/profile');
                       setIsMobileMenuOpen(false);
                     }}
-                    className={`block w-full text-left px-3 py-2 rounded-lg text-base font-bold ${isActive('/account/profile') ? 'bg-primary/10 text-primary' : 'text-muted-foreground'}`}
+                    className={`block w-full text-left px-3 py-2 rounded-lg text-base font-bold cursor-pointer hover:opacity-80 ${isActive('/account/profile') ? 'bg-primary/10 text-primary' : 'text-muted-foreground'}`}
                   >
                     {t('navbar.myProfile')}
                   </button>
                 </>
               )}
-              <button className="block w-full text-left px-3 py-2 rounded-lg text-base font-bold text-muted-foreground">
+              <button className="block w-full text-left px-3 py-2 rounded-lg text-base font-bold text-muted-foreground cursor-pointer hover:opacity-80">
                 {t('navbar.amenities')}
               </button>
               {!user && (
@@ -187,7 +189,7 @@ export const Navbar = () => {
                     navigate('/login');
                     setIsMobileMenuOpen(false);
                   }}
-                  className="w-full bg-primary text-primary-foreground py-3 rounded-lg font-bold"
+                  className="w-full bg-primary text-primary-foreground py-3 rounded-lg font-bold cursor-pointer hover:opacity-80"
                 >
                   {t('navbar.loginRegister')}
                 </button>
