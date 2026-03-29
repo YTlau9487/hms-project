@@ -14,7 +14,7 @@ echo "Docker is running. Building and starting development environment..."
 echo ""
 
 # Build and start the development environment
-if ! docker-compose up --build dev; then
+if ! docker-compose up --build; then
     echo ""
     echo "Error occurred while starting the development environment."
     echo "Please check the error messages above."

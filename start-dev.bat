@@ -15,7 +15,7 @@ echo Docker is running. Building and starting development environment...
 echo.
 
 REM Build and start the development environment
-docker-compose up --build dev
+docker-compose up --build
 
 if %errorlevel% neq 0 (
     echo.
