@@ -121,6 +121,27 @@ pnpm build
 pnpm preview
 ```
 
+### Internationalization (i18n)
+The frontend supports multiple languages:
+- **English (EN)** - Default language
+- **Traditional Chinese (繁/zh-TW)** - 繁體中文
+- **Simplified Chinese (简/zh-CN)** - 简体中文
+
+#### Language Switching
+- Use the language switcher in the Navbar to cycle through languages
+- Language preference persists across sessions
+- All 20+ frontend components are fully translated
+
+#### Translation Files
+- `src/locales/en/translation.json` - English translations
+- `src/locales/zh-TW/translation.json` - Traditional Chinese translations
+- `src/locales/zh-CN/translation.json` - Simplified Chinese translations
+
+#### Adding New Languages
+1. Create a new translation file in `src/locales/{language-code}/translation.json`
+2. Add the language to `src/i18n.ts` resources
+3. Update the language switcher in `Navbar.tsx`
+
 ### Backend Development
 ```bash
 cd backend
