@@ -12,11 +12,14 @@ COPY . .
 # Create directory for SQLite database
 RUN mkdir -p /app/data
 
-# Make startup script executable
-RUN chmod +x start.sh
+# Install dos2unix and fix Windows line endings in start.sh
+RUN apt-get update && apt-get install -y dos2unix && \
+    dos2unix start.sh && \
+    chmod +x start.sh && \
+    apt-get remove -y dos2unix && apt-get autoremove -y
 
 # Expose port
 EXPOSE 8000
 
 # Run the application with seed
-CMD ["./start.sh"]
+CMD ["sh", "start.sh"]
