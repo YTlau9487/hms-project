@@ -1,13 +1,14 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { authAPI, setAuthToken, User } from '../services/api';
+import { authAPI, setAuthToken, User, UserUpdate } from '../services/api';
 
 interface AuthContextType {
   user: User | null;
   loading: boolean;
-  login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
-  register: (data: { email: string; password: string; name: string; phone?: string }) => Promise<{ success: boolean; error?: string }>;
+  login: (email: string, password: string) => Promise<{ success: boolean; error?: string; user?: User }>;
+  register: (data: { email: string; password: string; name: string; phone?: string }) => Promise<{ success: boolean; error?: string; user?: User }>;
   logout: () => void;
   refreshUser: () => Promise<void>;
+  updateProfile: (data: UserUpdate) => Promise<{ success: boolean; error?: string }>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -36,7 +37,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     initAuth();
   }, []);
 
-  const login = async (email: string, password: string): Promise<{ success: boolean; error?: string }> => {
+  const login = async (email: string, password: string): Promise<{ success: boolean; error?: string; user?: User }> => {
     try {
       const tokenData = await authAPI.login({ email, password });
       localStorage.setItem('hms_token', tokenData.access_token);
@@ -45,14 +46,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       const userData = await authAPI.me();
       setUser(userData);
       
-      return { success: true };
+      return { success: true, user: userData };
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Login failed';
       return { success: false, error: errorMessage };
     }
   };
 
-  const register = async (data: { email: string; password: string; name: string; phone?: string }): Promise<{ success: boolean; error?: string }> => {
+  const register = async (data: { email: string; password: string; name: string; phone?: string }): Promise<{ success: boolean; error?: string; user?: User }> => {
     try {
       await authAPI.register(data);
       // Auto-login after registration
@@ -78,8 +79,19 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  const updateProfile = async (data: UserUpdate): Promise<{ success: boolean; error?: string }> => {
+    try {
+      const updatedUser = await authAPI.updateProfile(data);
+      setUser(updatedUser);
+      return { success: true };
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Profile update failed';
+      return { success: false, error: errorMessage };
+    }
+  };
+
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, logout, refreshUser }}>
+    <AuthContext.Provider value={{ user, loading, login, register, logout, refreshUser, updateProfile }}>
       {children}
     </AuthContext.Provider>
   );

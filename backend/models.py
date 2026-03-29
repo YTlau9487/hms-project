@@ -38,8 +38,8 @@ class Room(SQLModel, table=True):
     description: str
     price: float
     image_url: Optional[str] = None
-    size: Optional[str] = None
-    occupancy: Optional[str] = None
+    size_value: Optional[int] = None
+    occupancy_count: Optional[int] = None
     amenities: Optional[str] = None  # JSON string of amenities list
     status: RoomStatus = Field(default=RoomStatus.AVAILABLE)
     featured: bool = Field(default=False)

@@ -91,8 +91,8 @@ export interface Room {
   description: string;
   price: number;
   image_url: string | null;
-  size: string | null;
-  occupancy: string | null;
+  size_value: number | null;
+  occupancy_count: number | null;
   amenities: string | null;
   status: 'available' | 'occupied' | 'maintenance';
   featured: boolean;
@@ -120,6 +120,11 @@ export interface DashboardStats {
   total_revenue: number;
 }
 
+export interface UserUpdate {
+  name?: string;
+  phone?: string;
+}
+
 // Auth API
 export const authAPI = {
   register: (data: { email: string; password: string; name: string; phone?: string }) =>
@@ -135,6 +140,12 @@ export const authAPI = {
     }),
 
   me: () => fetchAPI<User>('/auth/me'),
+
+  updateProfile: (data: UserUpdate) =>
+    fetchAPI<User>('/auth/profile', {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    }),
 };
 
 // Rooms API

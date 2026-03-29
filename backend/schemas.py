@@ -41,8 +41,8 @@ class RoomResponse(BaseModel):
     description: str
     price: float
     image_url: Optional[str]
-    size: Optional[str]
-    occupancy: Optional[str]
+    size_value: Optional[int]
+    occupancy_count: Optional[int]
     amenities: Optional[str]
     status: RoomStatus
     featured: bool
@@ -56,8 +56,8 @@ class RoomCreate(BaseModel):
     description: str
     price: float
     image_url: Optional[str] = None
-    size: Optional[str] = None
-    occupancy: Optional[str] = None
+    size_value: Optional[int] = None
+    occupancy_count: Optional[int] = None
     amenities: Optional[str] = None
     status: RoomStatus = RoomStatus.AVAILABLE
     featured: bool = False
@@ -68,8 +68,8 @@ class RoomUpdate(BaseModel):
     description: Optional[str] = None
     price: Optional[float] = None
     image_url: Optional[str] = None
-    size: Optional[str] = None
-    occupancy: Optional[str] = None
+    size_value: Optional[int] = None
+    occupancy_count: Optional[int] = None
     amenities: Optional[str] = None
     status: Optional[RoomStatus] = None
     featured: Optional[bool] = None
@@ -101,3 +101,8 @@ class BookingResponse(BaseModel):
 
 class BookingUpdate(BaseModel):
     status: Optional[BookingStatus] = None
+
+
+class UserUpdate(BaseModel):
+    name: Optional[str] = None
+    phone: Optional[str] = None

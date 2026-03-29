@@ -12,11 +12,8 @@ COPY . .
 # Create directory for SQLite database
 RUN mkdir -p /app/data
 
-# Make startup script executable
-RUN chmod +x start.sh
-
 # Expose port
 EXPOSE 8000
 
 # Run the application with seed
-CMD ["./start.sh"]
+CMD ["sh", "-c", "python seed.py && uvicorn main:app --host 0.0.0.0 --port 8000 --reload"]

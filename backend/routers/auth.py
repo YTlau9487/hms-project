@@ -8,7 +8,7 @@ from typing import Optional
 
 from database import get_session
 from models import User, UserRole
-from schemas import UserRegister, UserLogin, Token, UserResponse
+from schemas import UserRegister, UserLogin, Token, UserResponse, UserUpdate
 
 router = APIRouter(prefix="/api/auth", tags=["auth"])
 
@@ -135,4 +135,22 @@ def login(user_data: UserLogin, session: Session = Depends(get_session)):
 @router.get("/me", response_model=UserResponse)
 def get_current_user_info(current_user: User = Depends(get_current_user)):
     """Get current user information"""
+    return current_user
+
+
+@router.put("/profile", response_model=UserResponse)
+def update_profile(
+    user_data: UserUpdate,
+    current_user: User = Depends(get_current_user),
+    session: Session = Depends(get_session)
+):
+    """Update current user profile"""
+    if user_data.name is not None:
+        current_user.name = user_data.name
+    if user_data.phone is not None:
+        current_user.phone = user_data.phone
+
+    session.add(current_user)
+    session.commit()
+    session.refresh(current_user)
     return current_user

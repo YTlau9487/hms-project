@@ -65,8 +65,8 @@ def seed_database():
                 "description": "Luxurious king-sized room with stunning city views, featuring modern amenities and elegant design.",
                 "price": 280.0,
                 "image_url": "https://images.unsplash.com/photo-1590490359854-dfba19688d70?w=800",
-                "size": "38 sq.m",
-                "occupancy": "2 Adults",
+                "size_value": 38,
+                "occupancy_count": 2,
                 "amenities": "King Bed,City View,Free WiFi,Smart TV,Minibar",
                 "status": RoomStatus.AVAILABLE,
                 "featured": False
@@ -76,8 +76,8 @@ def seed_database():
                 "description": "Comfortable twin room perfect for friends or colleagues traveling together.",
                 "price": 240.0,
                 "image_url": "https://images.unsplash.com/photo-1566665797739-1674de7a421a?w=800",
-                "size": "35 sq.m",
-                "occupancy": "2 Adults",
+                "size_value": 35,
+                "occupancy_count": 2,
                 "amenities": "Twin Beds,Garden View,Free WiFi,Rain Shower,Work Desk",
                 "status": RoomStatus.AVAILABLE,
                 "featured": False
@@ -87,8 +87,8 @@ def seed_database():
                 "description": "The ultimate luxury experience with panoramic harbor views and exclusive butler service.",
                 "price": 850.0,
                 "image_url": "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=800",
-                "size": "120 sq.m",
-                "occupancy": "4 Adults",
+                "size_value": 120,
+                "occupancy_count": 4,
                 "amenities": "Master Suite,Living Area,Personal Butler,Kitchenette,Panoramic View",
                 "status": RoomStatus.AVAILABLE,
                 "featured": True
@@ -98,8 +98,8 @@ def seed_database():
                 "description": "Executive room with the best harbor views, perfect for business travelers.",
                 "price": 420.0,
                 "image_url": "https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=800",
-                "size": "45 sq.m",
-                "occupancy": "2 Adults",
+                "size_value": 45,
+                "occupancy_count": 2,
                 "amenities": "Lounge Access,Harbor View,Nespresso,Work Desk,High-Speed WiFi",
                 "status": RoomStatus.AVAILABLE,
                 "featured": False
