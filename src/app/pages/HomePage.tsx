@@ -6,15 +6,17 @@ import { toast } from 'sonner';
 import { roomsAPI, getErrorMessage } from '../services/api';
 import { LoadingSpinner } from '../components/LoadingSpinner';
 import { ErrorMessage } from '../components/ErrorMessage';
+import { useTranslation } from 'react-i18next';
 
 interface HomePageProps {
   onBookNow: (room: Room) => void;
 }
 
 export const HomePage = ({ onBookNow }: HomePageProps) => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [rooms, setRooms] = useState<Room[]>([]);
-  const [activeFilter, setActiveFilter] = useState('All Rooms');
+  const [activeFilter, setActiveFilter] = useState(t('homePage.allRooms'));
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -29,7 +31,7 @@ export const HomePage = ({ onBookNow }: HomePageProps) => {
       const data = await roomsAPI.list({ status: 'available' });
       setRooms(data);
     } catch (err) {
-      const errorMessage = err instanceof Error ? getErrorMessage(err) : '無法取得房型資料';
+      const errorMessage = err instanceof Error ? getErrorMessage(err) : t('homePage.loadingRooms');
       setError(errorMessage);
     } finally {
       setIsLoading(false);
@@ -68,7 +70,7 @@ export const HomePage = ({ onBookNow }: HomePageProps) => {
   };
 
   if (isLoading) {
-    return <LoadingSpinner message="載入房型資料中..." />;
+    return <LoadingSpinner message={t('homePage.loadingRooms')} />;
   }
 
   if (error) {
@@ -90,13 +92,13 @@ export const HomePage = ({ onBookNow }: HomePageProps) => {
       <section id="rooms-section" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-4">
           <div>
-            <h2 className="text-4xl font-bold mb-4">Our Curated Rooms</h2>
+            <h2 className="text-4xl font-bold mb-4">{t('homePage.ourCuratedRooms')}</h2>
             <p className="text-muted-foreground max-w-xl">
-              Each room is meticulously designed to provide a haven of tranquility amidst the vibrant pulse of Hong Kong.
+              {t('homePage.roomsSubtitle')}
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
-            {['All Rooms', 'Luxury', 'Suite', 'Business'].map((filter) => (
+            {[t('homePage.allRooms'), t('homePage.luxury'), t('homePage.suite'), t('homePage.business')].map((filter) => (
               <button 
                 key={filter} 
                 onClick={() => setActiveFilter(filter)}
@@ -124,7 +126,7 @@ export const HomePage = ({ onBookNow }: HomePageProps) => {
             ))
           ) : (
             <div className="col-span-full py-12 text-center text-muted-foreground">
-              No rooms found matching this category.
+              {t('homePage.noRoomsFound')}
             </div>
           )}
         </div>
@@ -134,31 +136,31 @@ export const HomePage = ({ onBookNow }: HomePageProps) => {
       <section className="bg-muted/30 py-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold mb-4">World-Class Facilities</h2>
+            <h2 className="text-4xl font-bold mb-4">{t('homePage.worldClassFacilities')}</h2>
             <p className="text-muted-foreground max-w-2xl mx-auto">
-              Beyond your room, explore a world of dining, relaxation, and wellness.
+              {t('homePage.facilitiesSubtitle')}
             </p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="group relative h-80 rounded-2xl overflow-hidden shadow-lg cursor-pointer">
               <img src="https://images.unsplash.com/photo-1769638913569-40fc740b44f5?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxob3RlbCUyMGJyZWFrZmFzdCUyMGJ1ZmZldCUyMHNlbGVjdGlvbiUyMGZyZXNoJTIwZm9vZHxlbnwxfHx8fDE3NzA4NTMyOTh8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" alt="Dining" />
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent flex flex-col justify-end p-8 text-white">
-                <h3 className="text-xl font-bold mb-2">Exquisite Dining</h3>
-                <p className="text-sm opacity-80">Award-winning Cantonese and international cuisine.</p>
+                <h3 className="text-xl font-bold mb-2">{t('homePage.exquisiteDining')}</h3>
+                <p className="text-sm opacity-80">{t('homePage.exquisiteDiningDesc')}</p>
               </div>
             </div>
             <div className="group relative h-80 rounded-2xl overflow-hidden shadow-lg cursor-pointer">
               <img src="https://images.unsplash.com/photo-1761049862641-16616dea7b32?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxsdXh1cnklMjBob3RlbCUyMHNwYSUyMHdlbGxuZXNzJTIwY2VudGVyJTIwcG9vbHxlbnwxfHx8fDE3NzA4NTMyOTh8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" alt="Spa" />
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent flex flex-col justify-end p-8 text-white">
-                <h3 className="text-xl font-bold mb-2">Wellness & Spa</h3>
-                <p className="text-sm opacity-80">Rejuvenate your senses with our holistic treatments.</p>
+                <h3 className="text-xl font-bold mb-2">{t('homePage.wellnessAndSpa')}</h3>
+                <p className="text-sm opacity-80">{t('homePage.wellnessAndSpaDesc')}</p>
               </div>
             </div>
             <div className="group relative h-80 rounded-2xl overflow-hidden shadow-lg cursor-pointer">
               <img src="https://images.unsplash.com/photo-1742844552193-2fd3425cd26d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxsdXh1cnklMjBob3RlbCUyMGxvYmJ5JTIwaW50ZXJpb3IlMjBoaWdoJTIwcmVzb2x1dGlvbnxlbnwxfHx8fDE3NzA4NTMyOTh8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" alt="Lobby" />
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent flex flex-col justify-end p-8 text-white">
-                <h3 className="text-xl font-bold mb-2">Luxury Lounge</h3>
-                <p className="text-sm opacity-80">Relax in our elegantly designed guest spaces.</p>
+                <h3 className="text-xl font-bold mb-2">{t('homePage.luxuryLounge')}</h3>
+                <p className="text-sm opacity-80">{t('homePage.luxuryLoungeDesc')}</p>
               </div>
             </div>
           </div>

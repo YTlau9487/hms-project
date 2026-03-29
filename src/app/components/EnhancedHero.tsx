@@ -17,7 +17,7 @@ export const EnhancedHero = ({ onBookNow, onSearch, featuredRoom, onViewFeatured
   const [searchParams, setSearchParams] = React.useState({
     checkIn: '2026-02-12',
     checkOut: '2026-02-14',
-    guests: '2 Adults, 0 Children'
+    guests: t('hero.guestOption1')
   });
 
   const handleSearch = () => {
@@ -25,7 +25,7 @@ export const EnhancedHero = ({ onBookNow, onSearch, featuredRoom, onViewFeatured
   };
 
   // Use featured room or default image
-  const heroImage = featuredRoom?.image || 'https://images.unsplash.com/photo-1742844552193-2fd3425cd26d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxsdXh1cnklMjBob3RlbCUyMGxvYmJ5JTIwaW50ZXJpb3IlMjBoaWdoJTIwcmVzb2x1dGlvbnxlbnwxfHx8fDE3NzA4NTMyOTh8MA&ixlib=rb-4.1.0&q=80&w=1080';
+  const heroImage = featuredRoom?.image_url || 'https://images.unsplash.com/photo-1742844552193-2fd3425cd26d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxsdXh1cnklMjBob3RlbCUyMGxvYmJ5JTIwaW50ZXJpb3IlMjBoaWdoJTIwcmVzb2x1dGlvbnxlbnwxfHx8fDE3NzA4NTMyOTh8MA&ixlib=rb-4.1.0&q=80&w=1080';
 
   return (
     <div className="relative w-full min-h-[60vh] md:min-h-[65vh] mb-6 md:mb-8">
@@ -72,14 +72,18 @@ export const EnhancedHero = ({ onBookNow, onSearch, featuredRoom, onViewFeatured
 
             {/* Featured Room Highlights */}
             <div className="flex flex-wrap gap-3 mb-6">
+              {featuredRoom.size_value && (
+                <div className="bg-white/10 backdrop-blur-sm px-3 py-1.5 rounded-lg border border-white/20">
+                  <span className="text-xs font-semibold">{t('roomCard.sizeLabel', { value: featuredRoom.size_value })}</span>
+                </div>
+              )}
+              {featuredRoom.occupancy_count && (
+                <div className="bg-white/10 backdrop-blur-sm px-3 py-1.5 rounded-lg border border-white/20">
+                  <span className="text-xs font-semibold">{t('roomCard.occupancyLabel', { count: featuredRoom.occupancy_count })}</span>
+                </div>
+              )}
               <div className="bg-white/10 backdrop-blur-sm px-3 py-1.5 rounded-lg border border-white/20">
-                <span className="text-xs font-semibold">{featuredRoom.size}</span>
-              </div>
-              <div className="bg-white/10 backdrop-blur-sm px-3 py-1.5 rounded-lg border border-white/20">
-                <span className="text-xs font-semibold">{featuredRoom.occupancy}</span>
-              </div>
-              <div className="bg-white/10 backdrop-blur-sm px-3 py-1.5 rounded-lg border border-white/20">
-                <span className="text-xs font-semibold">Starting from ${featuredRoom.price}/night</span>
+                <span className="text-xs font-semibold">{t('hero.startingFrom', { price: featuredRoom.price })}</span>
               </div>
             </div>
 
@@ -162,10 +166,10 @@ export const EnhancedHero = ({ onBookNow, onSearch, featuredRoom, onViewFeatured
                 value={searchParams.guests}
                 onChange={(e) => setSearchParams({ ...searchParams, guests: e.target.value })}
               >
-                <option>2 Adults, 0 Children</option>
-                <option>1 Adult</option>
-                <option>2 Adults, 1 Child</option>
-                <option>2 Adults, 2 Children</option>
+                <option>{t('hero.guestOption1')}</option>
+                <option>{t('hero.guestOption2')}</option>
+                <option>{t('hero.guestOption3')}</option>
+                <option>{t('hero.guestOption4')}</option>
               </select>
             </div>
           </div>

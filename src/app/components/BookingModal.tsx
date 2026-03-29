@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X, ChevronRight, Check, Coffee, Wifi, Car, Waves, Tv, Shield, ArrowLeft, CheckCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { ImageWithFallback } from './ImageWithFallback';
 import { Room } from './RoomCard';
+import { useTranslation } from 'react-i18next';
 
 interface BookingModalProps {
   room: Room | null;
@@ -13,8 +14,11 @@ interface BookingModalProps {
 }
 
 export const BookingModal = ({ room, isOpen, onClose, onConfirm, user }: BookingModalProps) => {
+  const { t } = useTranslation();
   const [step, setStep] = useState(1);
   const [selectedPackageId, setSelectedPackageId] = useState<string>('');
+  const [checkIn, setCheckIn] = useState('');
+  const [checkOut, setCheckOut] = useState('');
   const [formData, setFormData] = useState({
     firstName: user?.name?.split(' ')[0] || '',
     lastName: user?.name?.split(' ')[1] || '',
@@ -23,17 +27,39 @@ export const BookingModal = ({ room, isOpen, onClose, onConfirm, user }: Booking
     specialRequests: ''
   });
 
+  // Reset state when modal opens
+  useEffect(() => {
+    if (isOpen) {
+      setStep(1);
+      setSelectedPackageId('');
+      setCheckIn('');
+      setCheckOut('');
+      setFormData({
+        firstName: user?.name?.split(' ')[0] || '',
+        lastName: user?.name?.split(' ')[1] || '',
+        email: user?.email || '',
+        phone: '',
+        specialRequests: ''
+      });
+    }
+  }, [isOpen, user]);
+
+  // Calculate number of nights
+  const calculateNights = () => {
+    if (!checkIn || !checkOut) return 1;
+    const start = new Date(checkIn);
+    const end = new Date(checkOut);
+    const diffTime = Math.abs(end.getTime() - start.getTime());
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return diffDays || 1;
+  };
+
+  const nights = calculateNights();
+
   if (!isOpen || !room) return null;
 
   // Use room-specific packages or fallback to default
-  const packages = room.packages && room.packages.length > 0 
-    ? room.packages.map(pkg => ({
-        id: pkg.id,
-        name: pkg.name,
-        price: Math.round(room.price * pkg.priceMultiplier),
-        desc: pkg.description
-      }))
-    : [
+  const packages = [
         { id: 'default-1', name: 'Standard Stay', price: 0, desc: 'Includes complimentary WiFi and pool access.' },
         { id: 'default-2', name: 'Breakfast Delight', price: 45, desc: 'Daily gourmet breakfast buffet for all guests.' },
         { id: 'default-3', name: 'VIP Experience', price: 120, desc: 'Breakfast, airport transfer, and late check-out.' },
@@ -47,12 +73,28 @@ export const BookingModal = ({ room, isOpen, onClose, onConfirm, user }: Booking
   const selectedPackage = packages.find(p => p.id === selectedPackageId) || packages[0];
 
   const handleConfirm = () => {
+    if (!checkIn || !checkOut) {
+      return;
+    }
+    const totalPrice = (room.price * nights) + (selectedPackage?.price || 0);
     onConfirm({
       room,
+      room_id: room.id,
+      checkIn,
+      checkOut,
       package: selectedPackage,
+      package_name: selectedPackage?.name,
       customer: formData,
-      total: room.price + (selectedPackage?.price || 0)
+      total: totalPrice,
+      nights: nights
     });
+  };
+
+  const canProceedToNextStep = () => {
+    if (step === 2) {
+      return checkIn && checkOut && formData.firstName && formData.lastName && formData.email;
+    }
+    return true;
   };
 
   return (
@@ -64,12 +106,12 @@ export const BookingModal = ({ room, isOpen, onClose, onConfirm, user }: Booking
       >
         {/* Left Side: Room Info */}
         <div className="w-full md:w-1/3 bg-muted/30 border-r border-border overflow-y-auto">
-          <div className="h-48 md:h-64 relative">
-            <ImageWithFallback src={room.image} alt={room.name} className="w-full h-full object-cover" />
+            <div className="h-48 md:h-64 relative">
+            <ImageWithFallback src={room.image_url || ''} alt={room.name} className="w-full h-full object-cover" />
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
             <div className="absolute bottom-4 left-4 text-white">
               <h2 className="text-xl font-bold">{room.name}</h2>
-              <p className="text-sm opacity-80">{room.type}</p>
+              <p className="text-sm opacity-80">{room.featured ? t('roomDetails.featured') : t('roomDetails.standard')}</p>
             </div>
           </div>
           <div className="p-6 space-y-6">
@@ -77,16 +119,16 @@ export const BookingModal = ({ room, isOpen, onClose, onConfirm, user }: Booking
               <h3 className="text-xs font-bold uppercase text-muted-foreground tracking-widest mb-3">Room Features</h3>
               <div className="grid grid-cols-2 gap-3">
                 <div className="flex items-center gap-2 text-xs">
-                  <Wifi className="w-3.5 h-3.5 text-primary" /> Free WiFi
+                  <Wifi className="w-3.5 h-3.5 text-primary" /> {t('roomCard.freeWifi')}
                 </div>
                 <div className="flex items-center gap-2 text-xs">
-                  <Waves className="w-3.5 h-3.5 text-primary" /> Pool Access
+                  <Waves className="w-3.5 h-3.5 text-primary" /> {t('roomDetails.poolAccess')}
                 </div>
                 <div className="flex items-center gap-2 text-xs">
-                  <Tv className="w-3.5 h-3.5 text-primary" /> Smart TV
+                  <Tv className="w-3.5 h-3.5 text-primary" /> {t('roomDetails.smartTv')}
                 </div>
                 <div className="flex items-center gap-2 text-xs">
-                  <Shield className="w-3.5 h-3.5 text-primary" /> Safe Box
+                  <Shield className="w-3.5 h-3.5 text-primary" /> {t('roomDetails.digitalSafe')}
                 </div>
               </div>
             </div>
@@ -98,7 +140,7 @@ export const BookingModal = ({ room, isOpen, onClose, onConfirm, user }: Booking
             </div>
             <div className="pt-4 border-t border-border">
               <div className="flex justify-between items-end">
-                <span className="text-xs text-muted-foreground">Base Price</span>
+                <span className="text-xs text-muted-foreground">{t('bookingModal.step3.roomBasePrice')}</span>
                 <span className="text-2xl font-bold">${room.price}</span>
               </div>
             </div>
@@ -116,7 +158,7 @@ export const BookingModal = ({ room, isOpen, onClose, onConfirm, user }: Booking
                 />
               ))}
             </div>
-            <button onClick={onClose} className="p-2 hover:bg-muted rounded-full">
+            <button onClick={onClose} className="p-2 hover:bg-muted rounded-full cursor-pointer hover:opacity-80">
               <X className="w-5 h-5" />
             </button>
           </div>
@@ -132,8 +174,8 @@ export const BookingModal = ({ room, isOpen, onClose, onConfirm, user }: Booking
                   className="space-y-6"
                 >
                   <div>
-                    <h2 className="text-2xl font-bold mb-2">Enhance Your Stay</h2>
-                    <p className="text-muted-foreground">Choose a package to make your visit even more memorable.</p>
+                    <h2 className="text-2xl font-bold mb-2">{t('bookingModal.step1.title')}</h2>
+                    <p className="text-muted-foreground">{t('bookingModal.step1.subtitle')}</p>
                   </div>
                   <div className="space-y-3">
                     {packages.map((pkg) => (
@@ -155,7 +197,7 @@ export const BookingModal = ({ room, isOpen, onClose, onConfirm, user }: Booking
                         </div>
                         <div className="text-right">
                           <span className="font-bold">
-                            {pkg.price === 0 ? 'FREE' : `+$${pkg.price}`}
+                            {pkg.price === 0 ? t('bookingModal.free') : `+$${pkg.price}`}
                           </span>
                         </div>
                       </button>
@@ -173,12 +215,32 @@ export const BookingModal = ({ room, isOpen, onClose, onConfirm, user }: Booking
                   className="space-y-6"
                 >
                   <div>
-                    <h2 className="text-2xl font-bold mb-2">Guest Details</h2>
-                    <p className="text-muted-foreground">Please provide your contact information to finalize the booking.</p>
+                    <h2 className="text-2xl font-bold mb-2">{t('bookingModal.step2.title')}</h2>
+                    <p className="text-muted-foreground">{t('bookingModal.step2.subtitle')}</p>
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-1">
-                      <label className="text-xs font-bold uppercase text-muted-foreground">First Name</label>
+                      <label className="text-xs font-bold uppercase text-muted-foreground">{t('hero.checkIn')}</label>
+                      <input 
+                        type="date" 
+                        className="w-full bg-input-background border-none rounded-lg px-4 py-2.5 text-sm focus:ring-2 focus:ring-primary"
+                        value={checkIn}
+                        onChange={(e) => setCheckIn(e.target.value)}
+                        min={new Date().toISOString().split('T')[0]}
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-xs font-bold uppercase text-muted-foreground">{t('hero.checkOut')}</label>
+                      <input 
+                        type="date" 
+                        className="w-full bg-input-background border-none rounded-lg px-4 py-2.5 text-sm focus:ring-2 focus:ring-primary"
+                        value={checkOut}
+                        onChange={(e) => setCheckOut(e.target.value)}
+                        min={checkIn || new Date().toISOString().split('T')[0]}
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-xs font-bold uppercase text-muted-foreground">{t('bookingModal.firstName')}</label>
                       <input 
                         type="text" 
                         className="w-full bg-input-background border-none rounded-lg px-4 py-2.5 text-sm focus:ring-2 focus:ring-primary"
@@ -187,7 +249,7 @@ export const BookingModal = ({ room, isOpen, onClose, onConfirm, user }: Booking
                       />
                     </div>
                     <div className="space-y-1">
-                      <label className="text-xs font-bold uppercase text-muted-foreground">Last Name</label>
+                      <label className="text-xs font-bold uppercase text-muted-foreground">{t('bookingModal.lastName')}</label>
                       <input 
                         type="text" 
                         className="w-full bg-input-background border-none rounded-lg px-4 py-2.5 text-sm focus:ring-2 focus:ring-primary"
@@ -196,7 +258,7 @@ export const BookingModal = ({ room, isOpen, onClose, onConfirm, user }: Booking
                       />
                     </div>
                     <div className="col-span-2 space-y-1">
-                      <label className="text-xs font-bold uppercase text-muted-foreground">Email Address</label>
+                      <label className="text-xs font-bold uppercase text-muted-foreground">{t('bookingModal.emailAddress')}</label>
                       <input 
                         type="email" 
                         className="w-full bg-input-background border-none rounded-lg px-4 py-2.5 text-sm focus:ring-2 focus:ring-primary"
@@ -205,7 +267,7 @@ export const BookingModal = ({ room, isOpen, onClose, onConfirm, user }: Booking
                       />
                     </div>
                     <div className="col-span-2 space-y-1">
-                      <label className="text-xs font-bold uppercase text-muted-foreground">Phone Number</label>
+                      <label className="text-xs font-bold uppercase text-muted-foreground">{t('bookingModal.phoneNumber')}</label>
                       <input 
                         type="tel" 
                         className="w-full bg-input-background border-none rounded-lg px-4 py-2.5 text-sm focus:ring-2 focus:ring-primary"
@@ -214,10 +276,10 @@ export const BookingModal = ({ room, isOpen, onClose, onConfirm, user }: Booking
                       />
                     </div>
                     <div className="col-span-2 space-y-1">
-                      <label className="text-xs font-bold uppercase text-muted-foreground">Special Requests</label>
+                      <label className="text-xs font-bold uppercase text-muted-foreground">{t('bookingModal.specialRequests')}</label>
                       <textarea 
                         className="w-full bg-input-background border-none rounded-lg px-4 py-2.5 text-sm focus:ring-2 focus:ring-primary min-h-[80px]"
-                        placeholder="e.g. Early check-in, high floor..."
+                        placeholder={t('bookingModal.specialRequestsPlaceholder')}
                         value={formData.specialRequests}
                         onChange={(e) => setFormData({...formData, specialRequests: e.target.value})}
                       />
@@ -238,25 +300,33 @@ export const BookingModal = ({ room, isOpen, onClose, onConfirm, user }: Booking
                     <CheckCircle className="w-12 h-12" />
                   </div>
                   <div>
-                    <h2 className="text-2xl font-bold mb-2">Ready to Confirm?</h2>
-                    <p className="text-muted-foreground">You are booking the <span className="font-bold text-foreground">{room.name}</span> with the <span className="font-bold text-foreground">{selectedPackage?.name}</span>.</p>
+                    <h2 className="text-2xl font-bold mb-2">{t('bookingModal.step3.title')}</h2>
+                    <p className="text-muted-foreground">{t('bookingModal.step3.subtitle')} <span className="font-bold text-foreground">{room.name}</span> {t('bookingModal.step3.withPackage')} <span className="font-bold text-foreground">{selectedPackage?.name}</span>.</p>
                   </div>
                   <div className="bg-muted/50 rounded-xl p-6 text-left space-y-3">
                     <div className="flex justify-between text-sm">
-                      <span>Room Base Price</span>
-                      <span className="font-bold">${room.price}</span>
+                      <span>{t('hero.checkIn')}</span>
+                      <span className="font-bold">{checkIn}</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span>{t('hero.checkOut')}</span>
+                      <span className="font-bold">{checkOut}</span>
+                    </div>
+                    <div className="flex justify-between text-sm border-t border-border pt-3">
+                      <span>{t('bookingModal.step3.roomBasePrice')}</span>
+                      <span className="font-bold">${room.price} × {nights} {nights === 1 ? 'night' : 'nights'}</span>
                     </div>
                     <div className="flex justify-between text-sm border-b border-border pb-3">
-                      <span>Package Upgrade</span>
+                      <span>{t('bookingModal.step3.packageUpgrade')}</span>
                       <span className="font-bold">+${selectedPackage?.price || 0}</span>
                     </div>
                     <div className="flex justify-between text-lg font-bold">
-                      <span>Total Amount</span>
-                      <span className="text-primary">${room.price + (selectedPackage?.price || 0)}</span>
+                      <span>{t('bookingModal.step3.totalAmount')}</span>
+                      <span className="text-primary">${(room.price * nights) + (selectedPackage?.price || 0)}</span>
                     </div>
                   </div>
                   <p className="text-xs text-muted-foreground italic">
-                    By confirming, you agree to our terms of service and cancellation policy.
+                    {t('bookingModal.step3.termsNotice')}
                   </p>
                 </motion.div>
               )}
@@ -267,9 +337,9 @@ export const BookingModal = ({ room, isOpen, onClose, onConfirm, user }: Booking
             {step > 1 ? (
               <button 
                 onClick={() => setStep(step - 1)}
-                className="flex items-center gap-2 px-6 py-2.5 rounded-lg border border-border font-bold hover:bg-muted"
+                className="flex items-center gap-2 px-6 py-2.5 rounded-lg border border-border font-bold hover:bg-muted cursor-pointer hover:opacity-80"
               >
-                <ArrowLeft className="w-4 h-4" /> Back
+                <ArrowLeft className="w-4 h-4" /> {t('bookingModal.back')}
               </button>
             ) : (
               <div />
@@ -277,9 +347,10 @@ export const BookingModal = ({ room, isOpen, onClose, onConfirm, user }: Booking
             
             <button 
               onClick={() => step < 3 ? setStep(step + 1) : handleConfirm()}
-              className="flex items-center gap-2 px-8 py-2.5 rounded-lg bg-primary text-primary-foreground font-bold hover:opacity-90"
+              disabled={!canProceedToNextStep()}
+              className="flex items-center gap-2 px-8 py-2.5 rounded-lg bg-primary text-primary-foreground font-bold hover:opacity-80 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {step === 3 ? 'Confirm Booking' : 'Next Step'} <ChevronRight className="w-4 h-4" />
+              {step === 3 ? t('bookingModal.confirmBooking') : t('bookingModal.nextStep')} <ChevronRight className="w-4 h-4" />
             </button>
           </div>
         </div>

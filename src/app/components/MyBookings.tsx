@@ -5,6 +5,7 @@ import { ImageWithFallback } from './ImageWithFallback';
 import { ConfirmationDialog } from './ConfirmationDialog';
 import { toast } from 'sonner';
 import { Booking as APIBooking } from '../services/api';
+import { useTranslation } from 'react-i18next';
 
 interface Booking {
   id: string;
@@ -24,6 +25,7 @@ interface MyBookingsProps {
 }
 
 export const MyBookings = ({ bookings, onBack, onCancelBooking }: MyBookingsProps) => {
+  const { t } = useTranslation();
   // Map API bookings to component format
   const mappedBookings: Booking[] = bookings.map(b => ({
     id: b.id.toString(),
@@ -60,29 +62,29 @@ export const MyBookings = ({ bookings, onBack, onCancelBooking }: MyBookingsProp
     >
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-10">
         <div>
-          <h1 className="text-4xl font-bold tracking-tight">My Reservations</h1>
-          <p className="text-muted-foreground mt-2">Manage your upcoming and past stays at Golden Mile.</p>
+          <h1 className="text-4xl font-bold tracking-tight">{t('myBookings.title')}</h1>
+          <p className="text-muted-foreground mt-2">{t('myBookings.subtitle')}</p>
         </div>
         <button 
           onClick={onBack}
           className="text-sm font-bold text-primary hover:underline cursor-pointer"
         >
-          Return to Exploring
+          {t('myBookings.returnToExploring')}
         </button>
       </div>
 
       {mappedBookings.length === 0 ? (
         <div className="bg-muted/30 border-2 border-dashed border-border rounded-2xl p-16 text-center">
           <Calendar className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-          <h3 className="text-xl font-bold">No Bookings Found</h3>
+          <h3 className="text-xl font-bold">{t('myBookings.noBookingsTitle')}</h3>
           <p className="text-muted-foreground max-w-xs mx-auto mt-2">
-            You haven't made any reservations yet. Start planning your urban escape today!
+            {t('myBookings.noBookingsSubtitle')}
           </p>
           <button 
             onClick={onBack}
             className="mt-6 bg-primary text-primary-foreground px-6 py-2 rounded-lg font-bold hover:opacity-90 transition-opacity cursor-pointer"
           >
-            Explore Rooms
+            {t('myBookings.exploreRooms')}
           </button>
         </div>
       ) : (
@@ -107,7 +109,7 @@ export const MyBookings = ({ bookings, onBack, onCancelBooking }: MyBookingsProp
                     <div>
                       <h3 className="text-xl font-bold">{booking.roomName}</h3>
                       <p className="text-sm text-muted-foreground flex items-center gap-1">
-                        <MapPin className="w-3 h-3" /> Tsim Sha Tsui, Hong Kong
+                        <MapPin className="w-3 h-3" /> {t('myBookings.location')}
                       </p>
                     </div>
                     <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${
@@ -124,14 +126,14 @@ export const MyBookings = ({ bookings, onBack, onCancelBooking }: MyBookingsProp
 
                   <div className="grid grid-cols-2 gap-4 mt-6">
                     <div className="space-y-1">
-                      <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Stay Dates</p>
+                      <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">{t('myBookings.stayDates')}</p>
                       <p className="text-sm font-medium flex items-center gap-2">
                         <Calendar className="w-4 h-4 text-primary" />
                         {booking.checkIn} – {booking.checkOut}
                       </p>
                     </div>
                     <div className="space-y-1">
-                      <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Total Amount</p>
+                      <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">{t('myBookings.totalAmount')}</p>
                       <p className="text-sm font-medium flex items-center gap-2">
                         <CreditCard className="w-4 h-4 text-primary" />
                         ${booking.total}
@@ -140,24 +142,24 @@ export const MyBookings = ({ bookings, onBack, onCancelBooking }: MyBookingsProp
                   </div>
                 </div>
 
-                <div className="flex items-center justify-between mt-8 pt-4 border-t border-border">
-                  <div className="text-xs text-muted-foreground">
-                    Package: <span className="font-bold text-foreground">{booking.package}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    {booking.status !== 'cancelled' && (
-                      <button 
-                        onClick={() => handleCancelClick(booking.id, booking.roomName)}
-                        className="px-3 py-1.5 text-sm font-bold text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                      >
-                        Cancel Booking
+                  <div className="flex items-center justify-between mt-8 pt-4 border-t border-border">
+                    <div className="text-xs text-muted-foreground">
+                      {t('myBookings.package')}: <span className="font-bold text-foreground">{booking.package}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      {booking.status !== 'cancelled' && (
+                        <button 
+                          onClick={() => handleCancelClick(booking.id, booking.roomName)}
+                          className="px-3 py-1.5 text-sm font-bold text-red-600 hover:bg-red-50 rounded-lg transition-colors cursor-pointer hover:opacity-80"
+                        >
+                          {t('myBookings.cancelBooking')}
+                        </button>
+                      )}
+                      <button className="flex items-center gap-1 text-sm font-bold text-primary hover:gap-2 transition-all cursor-pointer hover:opacity-80">
+                        {t('myBookings.viewReceipt')} <ChevronRight className="w-4 h-4" />
                       </button>
-                    )}
-                    <button className="flex items-center gap-1 text-sm font-bold text-primary hover:gap-2 transition-all">
-                      View Receipt <ChevronRight className="w-4 h-4" />
-                    </button>
+                    </div>
                   </div>
-                </div>
               </div>
             </motion.div>
           ))}

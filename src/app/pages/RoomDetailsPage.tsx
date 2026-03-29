@@ -5,12 +5,14 @@ import { Room } from '../components/RoomCard';
 import { roomsAPI, getErrorMessage } from '../services/api';
 import { LoadingSpinner } from '../components/LoadingSpinner';
 import { ErrorMessage } from '../components/ErrorMessage';
+import { useTranslation } from 'react-i18next';
 
 interface RoomDetailsPageProps {
   onBookNow: (room: Room) => void;
 }
 
 export const RoomDetailsPage = ({ onBookNow }: RoomDetailsPageProps) => {
+  const { t } = useTranslation();
   const { roomId } = useParams<{ roomId: string }>();
   const navigate = useNavigate();
   const [room, setRoom] = useState<Room | null>(null);
@@ -30,7 +32,7 @@ export const RoomDetailsPage = ({ onBookNow }: RoomDetailsPageProps) => {
       const data = await roomsAPI.getById(id);
       setRoom(data);
     } catch (err) {
-      const errorMessage = err instanceof Error ? getErrorMessage(err) : '無法取得房型資料';
+      const errorMessage = err instanceof Error ? getErrorMessage(err) : t('homePage.loadingRooms');
       setError(errorMessage);
     } finally {
       setIsLoading(false);
@@ -38,7 +40,7 @@ export const RoomDetailsPage = ({ onBookNow }: RoomDetailsPageProps) => {
   };
 
   if (isLoading) {
-    return <LoadingSpinner message="載入房型資料中..." />;
+    return <LoadingSpinner message={t('homePage.loadingRooms')} />;
   }
 
   if (error) {
@@ -52,13 +54,13 @@ export const RoomDetailsPage = ({ onBookNow }: RoomDetailsPageProps) => {
   if (!room) {
     return (
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 text-center">
-        <h2 className="text-2xl font-bold mb-4">Room Not Found</h2>
-        <p className="text-muted-foreground mb-8">The room you're looking for doesn't exist.</p>
+        <h2 className="text-2xl font-bold mb-4">{t('roomDetails.backToRooms')}</h2>
+        <p className="text-muted-foreground mb-8">{t('roomDetails.backToRooms')}</p>
         <button 
           onClick={() => navigate('/')}
           className="px-6 py-2 bg-primary text-primary-foreground rounded-lg font-bold hover:opacity-90 transition-opacity"
         >
-          Back to Rooms
+          {t('roomDetails.backToRooms')}
         </button>
       </div>
     );

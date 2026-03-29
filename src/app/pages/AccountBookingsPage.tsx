@@ -5,8 +5,10 @@ import { bookingsAPI, getErrorMessage, Booking } from '../services/api';
 import { LoadingSpinner } from '../components/LoadingSpinner';
 import { ErrorMessage } from '../components/ErrorMessage';
 import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
 
 export const AccountBookingsPage = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -23,7 +25,7 @@ export const AccountBookingsPage = () => {
       const data = await bookingsAPI.my();
       setBookings(data);
     } catch (err) {
-      const errorMessage = err instanceof Error ? getErrorMessage(err) : '無法取得訂單資料';
+      const errorMessage = err instanceof Error ? getErrorMessage(err) : t('adminBookings.loadingError');
       setError(errorMessage);
     } finally {
       setIsLoading(false);
@@ -43,7 +45,7 @@ export const AccountBookingsPage = () => {
   };
 
   if (isLoading) {
-    return <LoadingSpinner message="載入訂單資料中..." />;
+    return <LoadingSpinner message={t('adminBookings.loadingBookings')} />;
   }
 
   if (error) {

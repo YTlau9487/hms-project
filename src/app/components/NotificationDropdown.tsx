@@ -9,6 +9,7 @@ import {
   DropdownMenuTrigger,
 } from './ui/dropdown-menu';
 import { motion } from 'motion/react';
+import { useTranslation } from 'react-i18next';
 
 export interface Notification {
   id: string;
@@ -31,6 +32,7 @@ export const NotificationDropdown = ({
   onMarkAsRead, 
   onClearAll 
 }: NotificationDropdownProps) => {
+  const { t } = useTranslation();
   const unreadCount = notifications.filter(n => !n.read).length;
 
   const getIcon = (type: Notification['type']) => {
@@ -77,13 +79,13 @@ export const NotificationDropdown = ({
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-80 max-h-[500px] overflow-y-auto">
         <DropdownMenuLabel className="flex items-center justify-between">
-          <span>Notifications</span>
+          <span>{t('notifications.title')}</span>
           {notifications.length > 0 && (
             <button
               onClick={onClearAll}
               className="text-xs text-primary hover:underline font-normal"
             >
-              Clear all
+              {t('notifications.clearAll')}
             </button>
           )}
         </DropdownMenuLabel>
@@ -92,7 +94,7 @@ export const NotificationDropdown = ({
         {notifications.length === 0 ? (
           <div className="py-8 text-center text-muted-foreground">
             <Bell className="w-8 h-8 mx-auto mb-2 opacity-50" />
-            <p className="text-sm">No new notifications</p>
+            <p className="text-sm">{t('notifications.noNotifications')}</p>
           </div>
         ) : (
           <div className="space-y-1 py-1">
