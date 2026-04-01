@@ -20,6 +20,13 @@ class RoomStatus(str, Enum):
     UNAVAILABLE = "unavailable"
 
 
+class RoomType(str, Enum):
+    STANDARD = "standard"
+    LUXURY = "luxury"
+    SUITE = "suite"
+    BUSINESS = "business"
+
+
 class User(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
     email: str = Field(unique=True, index=True)
@@ -45,6 +52,7 @@ class Room(SQLModel, table=True):
     occupancy: Optional[str] = None
     status: RoomStatus = Field(default=RoomStatus.AVAILABLE)
     featured: bool = Field(default=False)
+    room_type: RoomType = Field(default=RoomType.STANDARD)
 
     bookings: List["Booking"] = Relationship(back_populates="room", cascade_delete=True)
     translations: List["RoomTranslation"] = Relationship(back_populates="room", cascade_delete=True)

@@ -87,6 +87,7 @@ def build_localized_room(room: Room, lang: str, session: Session) -> dict:
         "amenities": amenity_names,
         "status": room.status,
         "featured": room.featured,
+        "room_type": room.room_type,
     }
 
 
@@ -192,6 +193,7 @@ def get_room_admin(
         occupancy=room.occupancy,
         status=room.status,
         featured=room.featured,
+        room_type=room.room_type,
         translations=translations,
         amenities=amenity_admins,
     )
@@ -212,6 +214,7 @@ def create_room(
         occupancy=room_data.occupancy,
         status=room_data.status,
         featured=room_data.featured,
+        room_type=room_data.room_type,
     )
     session.add(room)
     session.commit()

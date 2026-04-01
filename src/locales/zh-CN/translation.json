@@ -8,7 +8,9 @@
     "myProfile": "我的资料",
     "customerView": "客户视图",
     "staffDashboard": "员工仪表板",
-    "loginRegister": "登录 / 注册"
+    "loginRegister": "登录 / 注册",
+    "customer": "客户",
+    "staff": "员工"
   },
   "hero": {
     "badge": "精选奢华体验",
@@ -46,6 +48,8 @@
     "standard": "标准",
     "stars": "5星",
     "whatThisRoomOffers": "此客房提供",
+    "roomFeatures": "客房特色",
+    "description": "描述",
     "highSpeedWifi": "高速WiFi",
     "complimentaryBreakfast": "免费早餐",
     "smartTv": "4K智能电视",
@@ -85,7 +89,23 @@
     "back": "返回",
     "nextStep": "下一步",
     "confirmBooking": "确认预订",
-    "free": "免费"
+    "free": "免费",
+    "night": "晚",
+    "nights": "晚",
+    "packages": {
+      "standardStay": {
+        "name": "标准住宿",
+        "desc": "包含免费WiFi和泳池使用权。"
+      },
+      "breakfastDelight": {
+        "name": "早餐套餐",
+        "desc": "每日为所有宾客提供精致早餐自助餐。"
+      },
+      "vipExperience": {
+        "name": "VIP体验",
+        "desc": "早餐、机场接送和延迟退房。"
+      }
+    }
   },
   "authModal": {
     "welcomeBack": "欢迎回来",
@@ -97,7 +117,7 @@
     "emailAddress": "电子邮件地址",
     "emailPlaceholder": "name@example.com",
     "phoneNumber": "电话号码",
-    "phonePlaceholder": "+852 1234 5678",
+    "phonePlaceholder": "电话号码",
     "age": "年龄",
     "agePlaceholder": "18",
     "ageNote": "必须年满18岁才能预订",
@@ -146,7 +166,9 @@
     "notSet": "未设置",
     "infoBox": "您的个人信息安全存储，仅用于预订确认和住宿相关沟通。我们非常重视您的隐私。",
     "nameMinLength": "姓名至少需要2个字符",
-    "phoneInvalid": "电话号码必须包含8-15位数字"
+    "phoneInvalid": "请输入有效的电话号码",
+    "profileUpdated": "个人资料更新成功！",
+    "updateFailed": "更新个人资料失败"
   },
   "manageRooms": {
     "title": "管理客房",
@@ -213,6 +235,8 @@
     "cancelBookingDesc": "您确定要取消预订 #{{id}} 吗？此操作无法撤消。",
     "confirmBookingBtn": "确认预订",
     "cancelBookingBtn": "取消预订",
+    "confirm": "确认",
+    "cancel": "取消",
     "goBack": "返回",
     "dashboardView": "仪表板视图",
     "dashboardViewDesc": "收入分析和预订统计数据将在此显示。",
@@ -281,6 +305,7 @@
     "signingIn": "登录中...",
     "loginSuccess": "登录成功！",
     "loginFailed": "登录失败",
+    "incorrectCredentials": "电子邮件或密码不正确，请重新输入。",
     "noAccount": "还没有账户？",
     "register": "注册"
   },
@@ -292,7 +317,7 @@
     "emailAddress": "电子邮件地址",
     "emailPlaceholder": "name@example.com",
     "phoneNumber": "电话号码",
-    "phonePlaceholder": "+852 1234 5678",
+    "phonePlaceholder": "电话号码",
     "password": "密码",
     "createAccountBtn": "创建账户",
     "creating": "创建中...",
@@ -334,6 +359,9 @@
     "noRoomsFound": "未找到客房。点击\"添加客房\"创建。",
     "featured": "精选",
     "standard": "标准",
+    "luxury": "豪华",
+    "suite": "套房",
+    "business": "商务",
     "perNight": "/晚",
     "available": "可用",
     "occupied": "已占用",
@@ -397,5 +425,281 @@
     "bookingConfirmed": "预订确认成功",
     "bookingCancelled": "预订取消成功",
     "updateFailed": "更新预订失败"
+  },
+  "staticPages": {
+    "back": "返回",
+    "lastUpdated": "最后更新"
+  },
+  "privacyPage": {
+    "title": "隐私政策",
+    "informationWeCollect": {
+      "heading": "我们收集的信息",
+      "item1": "个人识别信息（姓名、电子邮件、电话号码）",
+      "item2": "预订和订房详情",
+      "item3": "付款信息（安全处理）",
+      "item4": "通信偏好和反馈"
+    },
+    "howWeUseYourInformation": {
+      "heading": "我们如何使用您的信息",
+      "item1": "处理和管理您的预订",
+      "item2": "就您的住宿和服务进行沟通",
+      "item3": "改善我们的服务和宾客体验",
+      "item4": "遵守法律义务"
+    },
+    "informationSharing": {
+      "heading": "信息分享",
+      "content": "我们不会出售、交易或出租您的个人信息给第三方。我们可能会与协助我们运营网站和开展业务的可信合作伙伴分享信息，前提是他们同意对这些信息保密。"
+    },
+    "dataSecurity": {
+      "heading": "数据安全",
+      "content": "我们实施适当的安全措施来保护您的个人信息。您的数据存储在安全的服务器上，只有授权人员才能访问。"
+    },
+    "yourRights": {
+      "heading": "您的权利",
+      "item1": "访问您的个人数据",
+      "item2": "要求更正不准确的数据",
+      "item3": "要求删除您的数据",
+      "item4": "选择退出营销通信"
+    },
+    "contactUs": {
+      "heading": "联系我们",
+      "content": "如果您对本隐私政策有任何疑问，请联系我们：privacy@goldenmile.com 或致电 +852 2369 3111。"
+    }
+  },
+  "termsPage": {
+    "title": "服务条款",
+    "acceptanceOfTerms": {
+      "heading": "条款接受",
+      "content": "通过访问和使用黄金英里酒店网站和服务，您接受并同意受本服务条款约束。如果您不同意这些条款，请不要使用我们的服务。"
+    },
+    "descriptionOfService": {
+      "heading": "服务描述",
+      "content": "黄金英里酒店通过我们的网站和附属平台提供在线预订服务、住宿、餐饮和相关服务。"
+    },
+    "userResponsibilities": {
+      "heading": "用户责任",
+      "item1": "提供准确和完整的信息",
+      "item2": "维护账户的机密性",
+      "item3": "遵守所有适用的法律法规",
+      "item4": "尊重其他宾客和员工的权利"
+    },
+    "bookingAndCancellation": {
+      "heading": "预订和取消",
+      "item1": "所有预订均视供应情况而定",
+      "item2": "取消政策因房价和季节而异",
+      "item3": "未入住可能会产生费用"
+    },
+    "limitationOfLiability": {
+      "heading": "责任限制",
+      "content": "黄金英里酒店对因使用我们的服务而产生的任何间接、附带或后果性损害不承担责任。"
+    },
+    "modifications": {
+      "heading": "修改",
+      "content": "我们保留随时修改这些条款的权利。更改将在网站上发布后生效。"
+    },
+    "governingLaw": {
+      "heading": "管辖法律",
+      "content": "这些条款受香港特别行政区法律管辖。"
+    }
+  },
+  "cookiesPage": {
+    "title": "Cookie政策",
+    "whatAreCookies": {
+      "heading": "什么是Cookie",
+      "content": "Cookie是当您访问我们网站时存储在您设备上的小型文本文件。它们帮助我们为您提供更好的浏览体验。"
+    },
+    "typesOfCookies": {
+      "heading": "我们使用的Cookie类型",
+      "item1": "必要Cookie - 网站功能所需",
+      "item2": "分析Cookie - 帮助我们了解网站使用情况",
+      "item3": "偏好Cookie - 记住您的设置",
+      "item4": "营销Cookie - 用于定向广告"
+    },
+    "howWeUseCookies": {
+      "heading": "我们如何使用Cookie",
+      "item1": "记住您的登录状态",
+      "item2": "分析网站流量和使用情况",
+      "item3": "个性化您的体验",
+      "item4": "改善我们的服务"
+    },
+    "managingCookies": {
+      "heading": "管理Cookie",
+      "content": "您可以通过浏览器设置控制Cookie。请注意，禁用某些Cookie可能会影响网站功能。"
+    },
+    "thirdPartyCookies": {
+      "heading": "第三方Cookie",
+      "content": "我们可能会使用在您设备上放置Cookie的第三方服务。这些服务有自己的隐私政策。"
+    },
+    "updates": {
+      "heading": "政策更新",
+      "content": "我们可能会不时更新此Cookie政策。请定期检查此页面以获取更改。"
+    }
+  },
+  "accessibilityPage": {
+    "title": "无障碍",
+    "ourCommitment": {
+      "heading": "我们的承诺",
+      "content": "黄金英里酒店致力于确保残障人士的数字无障碍。我们持续改善所有用户的体验。"
+    },
+    "accessibilityFeatures": {
+      "heading": "无障碍功能",
+      "item1": "键盘导航支持",
+      "item2": "屏幕阅读器兼容性",
+      "item3": "高对比度模式",
+      "item4": "可调整文字大小",
+      "item5": "图片替代文字"
+    },
+    "assistiveTechnologies": {
+      "heading": "辅助技术",
+      "content": "我们的网站设计为与辅助技术兼容，包括屏幕阅读器、放大软件和语音识别软件。"
+    },
+    "feedback": {
+      "heading": "反馈",
+      "content": "我们欢迎您对我们网站无障碍性的反馈。如果您遇到任何无障碍障碍，请联系我们：accessibility@goldenmile.com。"
+    },
+    "continuousImprovement": {
+      "heading": "持续改进",
+      "content": "我们致力于持续改进，确保我们的网站对所有用户保持无障碍。"
+    }
+  },
+  "aboutPage": {
+    "title": "关于我们",
+    "ourStory": {
+      "heading": "我们的故事",
+      "content": "自1975年以来，黄金英里酒店一直是香港奢华酒店业的地标。位于尖沙咀中心地带，我们以传统优雅与现代舒适的独特融合欢迎来自世界各地的宾客。"
+    },
+    "ourMission": {
+      "heading": "我们的使命",
+      "content": "提供超越期望的卓越酒店体验，通过个性化服务和对细节的关注为每位宾客创造持久回忆。"
+    },
+    "ourValues": {
+      "heading": "我们的价值观",
+      "item1": "卓越的服务交付",
+      "item2": "尊重文化多样性",
+      "item3": "环境责任",
+      "item4": "社区参与"
+    },
+    "whyChooseUs": {
+      "heading": "为什么选择我们",
+      "item1": "尖沙咀黄金地段",
+      "item2": "屡获殊荣的餐饮体验",
+      "item3": "世界级设施和设备",
+      "item4": "专业礼宾服务"
+    },
+    "contact": {
+      "heading": "联系我们",
+      "content": "我们期待您的来信。请联系我们：info@goldenmile.com 或致电 +852 2369 3111。"
+    }
+  },
+  "roomsAndSuitesPage": {
+    "title": "客房与套房",
+    "luxuryAccommodations": {
+      "heading": "奢华住宿",
+      "content": "我们的每间客房和套房都旨在提供终极的舒适和风格，配备优质设施和香港的壮丽景色。"
+    },
+    "standardRooms": {
+      "heading": "标准客房",
+      "item1": "舒适的双人床或双床",
+      "item2": "现代浴室配备雨淋花洒",
+      "item3": "工作桌和高速WiFi"
+    },
+    "luxuryRooms": {
+      "heading": "豪华客房",
+      "item1": "宽敞布局配备特大床",
+      "item2": "豪华浴室配备浸泡浴缸",
+      "item3": "城市或海港景观"
+    },
+    "suites": {
+      "heading": "套房",
+      "item1": "独立的起居和睡眠区域",
+      "item2": "豪华浴室配备双洗手台",
+      "item3": "全景景观和私人阳台"
+    },
+    "businessRooms": {
+      "heading": "商务客房",
+      "item1": "行政工作区",
+      "item2": "会议室使用权",
+      "item3": "免费商务服务"
+    },
+    "amenities": {
+      "heading": "客房设施",
+      "item1": "高速WiFi",
+      "item2": "24小时客房服务",
+      "item3": "优质床上用品和床单",
+      "item4": "客房保险箱",
+      "item5": "迷你吧和咖啡机"
+    }
+  },
+  "diningPage": {
+    "title": "餐饮体验",
+    "culinaryExcellence": {
+      "heading": "卓越美食",
+      "content": "在我们的餐厅体验屡获殊荣的美食，我们的厨师将传统技术与创新方法相结合，创造难忘的用餐体验。"
+    },
+    "fineDining": {
+      "heading": "精致餐饮",
+      "item1": "金龙 - 粤菜",
+      "item2": "La Maison - 法国美食",
+      "item3": "樱花 - 日本料理"
+    },
+    "casualDining": {
+      "heading": "休闲餐饮",
+      "item1": "露台餐厅 - 国际自助餐",
+      "item2": "东方咖啡厅 - 轻食和糕点",
+      "item3": "池畔酒吧 - 饮品和小食"
+    },
+    "barsAndLounges": {
+      "heading": "酒吧和休息室",
+      "item1": "天空酒廊 - 屋顶鸡尾酒",
+      "item2": "图书馆 - 下午茶",
+      "item3": "钢琴酒吧 - 现场音乐晚会"
+    },
+    "privateDining": {
+      "heading": "私人餐饮",
+      "content": "我们的私人餐厅为特殊场合、商务晚宴和庆祝活动提供私密环境。可应要求提供定制菜单。"
+    },
+    "dietaryRequirements": {
+      "heading": "饮食要求",
+      "item1": "提供素食和纯素选择",
+      "item2": "可应要求提供清真和犹太餐",
+      "item3": "提供过敏原信息"
+    }
+  },
+  "meetingsEventsPage": {
+    "title": "会议与活动",
+    "versatileSpaces": {
+      "heading": "多功能活动空间",
+      "content": "从私密的董事会会议到盛大的庆祝活动，我们灵活的活动空间可以容纳各种规模的聚会，配备先进的技术和无可挑剔的服务。"
+    },
+    "meetingRooms": {
+      "heading": "会议室",
+      "item1": "董事会议室可容纳10-20位宾客",
+      "item2": "会议室可容纳30-50位宾客",
+      "item3": "视频会议设施"
+    },
+    "conferenceFacilities": {
+      "heading": "会议设施",
+      "item1": "大宴会厅可容纳200+位宾客",
+      "item2": "分组讨论室",
+      "item3": "展览空间"
+    },
+    "specialEvents": {
+      "heading": "特殊活动",
+      "item1": "婚宴和婚礼",
+      "item2": "晚宴和宴会",
+      "item3": "产品发布和展览"
+    },
+    "cateringServices": {
+      "heading": "餐饮服务",
+      "item1": "可定制菜单选项",
+      "item2": "茶歇和茶点",
+      "item3": "全方位宴会餐饮服务"
+    },
+    "technologySupport": {
+      "heading": "技术支持",
+      "item1": "全场高速WiFi",
+      "item2": "视听设备",
+      "item3": "专业活动协调员"
+    }
   }
 }

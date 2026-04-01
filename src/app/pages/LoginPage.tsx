@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router';
 import { Mail, Lock } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuth } from '../context/AuthContext';
-import { getErrorMessage } from '../services/api';
 import { useTranslation } from 'react-i18next';
 
 export const LoginPage = () => {
@@ -23,12 +22,12 @@ export const LoginPage = () => {
   }, [user, navigate]);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+  const [hasError, setHasError] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
+    setHasError(false);
     setIsLoading(true);
     
     try {
@@ -42,13 +41,10 @@ export const LoginPage = () => {
           navigate('/');
         }
       } else {
-        setError(result.error || t('loginPage.loginFailed'));
-        toast.error(result.error || t('loginPage.loginFailed'));
+        setHasError(true);
       }
     } catch (err) {
-      const errorMessage = err instanceof Error ? getErrorMessage(err) : t('loginPage.loginFailed');
-      setError(errorMessage);
-      toast.error(errorMessage);
+      setHasError(true);
     } finally {
       setIsLoading(false);
     }
@@ -96,9 +92,9 @@ export const LoginPage = () => {
             </div>
           </div>
 
-          {error && (
+          {hasError && (
             <div className="p-3 bg-destructive/10 border border-destructive/20 rounded-lg text-destructive text-sm">
-              {error}
+              {t('loginPage.incorrectCredentials')}
             </div>
           )}
 
@@ -116,7 +112,7 @@ export const LoginPage = () => {
             {t('loginPage.noAccount')}
             <button 
               onClick={() => navigate('/register')}
-              className="ml-1 text-primary font-bold hover:underline"
+              className="ml-1 text-primary font-bold hover:underline cursor-pointer hover:opacity-80"
             >
               {t('loginPage.register')}
             </button>

@@ -69,9 +69,9 @@ export const BookingModal = ({ room, isOpen, onClose, onConfirm, user }: Booking
 
   // Use room-specific packages or fallback to default
   const packages = [
-        { id: 'default-1', name: 'Standard Stay', price: 0, desc: 'Includes complimentary WiFi and pool access.' },
-        { id: 'default-2', name: 'Breakfast Delight', price: 45, desc: 'Daily gourmet breakfast buffet for all guests.' },
-        { id: 'default-3', name: 'VIP Experience', price: 120, desc: 'Breakfast, airport transfer, and late check-out.' },
+        { id: 'default-1', name: t('bookingModal.packages.standardStay.name'), price: 0, desc: t('bookingModal.packages.standardStay.desc') },
+        { id: 'default-2', name: t('bookingModal.packages.breakfastDelight.name'), price: 45, desc: t('bookingModal.packages.breakfastDelight.desc') },
+        { id: 'default-3', name: t('bookingModal.packages.vipExperience.name'), price: 120, desc: t('bookingModal.packages.vipExperience.desc') },
       ];
 
   // Set default package if not selected
@@ -125,7 +125,7 @@ export const BookingModal = ({ room, isOpen, onClose, onConfirm, user }: Booking
           </div>
           <div className="p-6 space-y-6">
             <div>
-              <h3 className="text-xs font-bold uppercase text-muted-foreground tracking-widest mb-3">Room Features</h3>
+              <h3 className="text-xs font-bold uppercase text-muted-foreground tracking-widest mb-3">{t('roomDetails.roomFeatures')}</h3>
               <div className="grid grid-cols-2 gap-3">
                 {(room.amenities || []).slice(0, 4).map((amenity, i) => {
                   const IconComponent = amenityIcons[amenity] || Check;
@@ -138,7 +138,7 @@ export const BookingModal = ({ room, isOpen, onClose, onConfirm, user }: Booking
               </div>
             </div>
             <div>
-              <h3 className="text-xs font-bold uppercase text-muted-foreground tracking-widest mb-2">Description</h3>
+              <h3 className="text-xs font-bold uppercase text-muted-foreground tracking-widest mb-2">{t('roomDetails.description')}</h3>
               <p className="text-xs leading-relaxed text-muted-foreground">
                 {room.description}
               </p>
@@ -319,7 +319,7 @@ export const BookingModal = ({ room, isOpen, onClose, onConfirm, user }: Booking
                     </div>
                     <div className="flex justify-between text-sm border-t border-border pt-3">
                       <span>{t('bookingModal.step3.roomBasePrice')}</span>
-                      <span className="font-bold">${room.price} × {nights} {nights === 1 ? 'night' : 'nights'}</span>
+                      <span className="font-bold">${room.price} × {nights} {nights === 1 ? t('bookingModal.night') : t('bookingModal.nights')}</span>
                     </div>
                     <div className="flex justify-between text-sm border-b border-border pb-3">
                       <span>{t('bookingModal.step3.packageUpgrade')}</span>

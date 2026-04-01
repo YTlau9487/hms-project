@@ -7,7 +7,7 @@ This script is idempotent - it only creates data if it doesn't already exist.
 from sqlmodel import Session, select
 from database import engine, init_db
 from models import (
-    User, Room, Booking, UserRole, RoomStatus, BookingStatus,
+    User, Room, Booking, UserRole, RoomStatus, BookingStatus, RoomType,
     RoomTranslation, Amenity, AmenityTranslation, RoomAmenity
 )
 from argon2 import PasswordHasher
@@ -91,7 +91,7 @@ def seed_database():
             email="customer@test.com",
             hashed_password=ph.hash("password123"),
             name="Test Customer",
-            phone="+852 1234 5678",
+            phone="+85298765432",
             role=UserRole.CUSTOMER
         )
         session.add(customer)
@@ -101,7 +101,7 @@ def seed_database():
             email="staff@test.com",
             hashed_password=ph.hash("password123"),
             name="Test Staff",
-            phone="+852 8765 4321",
+            phone="+85223456789",
             role=UserRole.STAFF
         )
         session.add(staff)
@@ -146,7 +146,8 @@ def seed_database():
                 "size": "38 sq.m",
                 "occupancy": "2 Adults",
                 "status": RoomStatus.AVAILABLE,
-                "featured": False
+                "featured": False,
+                "room_type": RoomType.LUXURY
             },
             {
                 "price": 240.0,
@@ -154,7 +155,8 @@ def seed_database():
                 "size": "35 sq.m",
                 "occupancy": "2 Adults",
                 "status": RoomStatus.AVAILABLE,
-                "featured": False
+                "featured": False,
+                "room_type": RoomType.STANDARD
             },
             {
                 "price": 850.0,
@@ -162,7 +164,8 @@ def seed_database():
                 "size": "120 sq.m",
                 "occupancy": "4 Adults",
                 "status": RoomStatus.AVAILABLE,
-                "featured": True
+                "featured": True,
+                "room_type": RoomType.SUITE
             },
             {
                 "price": 420.0,
@@ -170,7 +173,8 @@ def seed_database():
                 "size": "45 sq.m",
                 "occupancy": "2 Adults",
                 "status": RoomStatus.AVAILABLE,
-                "featured": False
+                "featured": False,
+                "room_type": RoomType.BUSINESS
             }
         ]
 

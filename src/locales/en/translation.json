@@ -8,7 +8,9 @@
     "myProfile": "My Profile",
     "customerView": "Customer View",
     "staffDashboard": "Staff Dashboard",
-    "loginRegister": "Login / Register"
+    "loginRegister": "Login / Register",
+    "customer": "Customer",
+    "staff": "Staff"
   },
   "hero": {
     "badge": "FEATURED LUXURY EXPERIENCE",
@@ -46,6 +48,8 @@
     "standard": "Standard",
     "stars": "5 Stars",
     "whatThisRoomOffers": "What this room offers",
+    "roomFeatures": "Room Features",
+    "description": "Description",
     "highSpeedWifi": "High-speed WiFi",
     "complimentaryBreakfast": "Complimentary Breakfast",
     "smartTv": "4K Smart TV",
@@ -85,7 +89,23 @@
     "back": "Back",
     "nextStep": "Next Step",
     "confirmBooking": "Confirm Booking",
-    "free": "FREE"
+    "free": "FREE",
+    "night": "night",
+    "nights": "nights",
+    "packages": {
+      "standardStay": {
+        "name": "Standard Stay",
+        "desc": "Includes complimentary WiFi and pool access."
+      },
+      "breakfastDelight": {
+        "name": "Breakfast Delight",
+        "desc": "Daily gourmet breakfast buffet for all guests."
+      },
+      "vipExperience": {
+        "name": "VIP Experience",
+        "desc": "Breakfast, airport transfer, and late check-out."
+      }
+    }
   },
   "authModal": {
     "welcomeBack": "Welcome Back",
@@ -97,7 +117,7 @@
     "emailAddress": "Email Address",
     "emailPlaceholder": "name@example.com",
     "phoneNumber": "Phone Number",
-    "phonePlaceholder": "+852 1234 5678",
+    "phonePlaceholder": "Phone number",
     "age": "Age",
     "agePlaceholder": "18",
     "ageNote": "Must be 18 or older to book",
@@ -146,7 +166,9 @@
     "notSet": "Not set",
     "infoBox": "Your personal information is securely stored and used only for booking confirmations and communication regarding your stay. We take your privacy seriously.",
     "nameMinLength": "Name must be at least 2 characters",
-    "phoneInvalid": "Phone number must contain 8-15 digits"
+    "phoneInvalid": "Please enter a valid phone number",
+    "profileUpdated": "Profile updated successfully!",
+    "updateFailed": "Failed to update profile"
   },
   "manageRooms": {
     "title": "Manage Rooms",
@@ -213,6 +235,8 @@
     "cancelBookingDesc": "Are you sure you want to cancel booking #{{id}}? This action cannot be undone.",
     "confirmBookingBtn": "Confirm Booking",
     "cancelBookingBtn": "Cancel Booking",
+    "confirm": "Confirm",
+    "cancel": "Cancel",
     "goBack": "Go Back",
     "dashboardView": "Dashboard View",
     "dashboardViewDesc": "Revenue analytics and booking statistics will be displayed here.",
@@ -281,6 +305,7 @@
     "signingIn": "Signing in...",
     "loginSuccess": "Login successful!",
     "loginFailed": "Login failed",
+    "incorrectCredentials": "Incorrect email or password. Please try again.",
     "noAccount": "Don't have an account?",
     "register": "Register"
   },
@@ -292,7 +317,7 @@
     "emailAddress": "Email Address",
     "emailPlaceholder": "name@example.com",
     "phoneNumber": "Phone Number",
-    "phonePlaceholder": "+852 1234 5678",
+    "phonePlaceholder": "Phone number",
     "password": "Password",
     "createAccountBtn": "Create Account",
     "creating": "Creating...",
@@ -334,6 +359,9 @@
     "noRoomsFound": "No rooms found. Click \"Add Room\" to create one.",
     "featured": "Featured",
     "standard": "Standard",
+    "luxury": "Luxury",
+    "suite": "Suite",
+    "business": "Business",
     "perNight": "/night",
     "available": "Available",
     "occupied": "Occupied",
@@ -397,5 +425,281 @@
     "bookingConfirmed": "Booking confirmed successfully",
     "bookingCancelled": "Booking cancelled successfully",
     "updateFailed": "Failed to update booking"
+  },
+  "staticPages": {
+    "back": "Back",
+    "lastUpdated": "Last updated"
+  },
+  "privacyPage": {
+    "title": "Privacy Policy",
+    "informationWeCollect": {
+      "heading": "Information We Collect",
+      "item1": "Personal identification information (name, email, phone number)",
+      "item2": "Booking and reservation details",
+      "item3": "Payment information (processed securely)",
+      "item4": "Communication preferences and feedback"
+    },
+    "howWeUseYourInformation": {
+      "heading": "How We Use Your Information",
+      "item1": "Process and manage your reservations",
+      "item2": "Communicate about your stay and services",
+      "item3": "Improve our services and guest experience",
+      "item4": "Comply with legal obligations"
+    },
+    "informationSharing": {
+      "heading": "Information Sharing",
+      "content": "We do not sell, trade, or rent your personal information to third parties. We may share information with trusted partners who assist us in operating our website and conducting our business, provided they agree to keep this information confidential."
+    },
+    "dataSecurity": {
+      "heading": "Data Security",
+      "content": "We implement appropriate security measures to protect your personal information. Your data is stored on secure servers and is only accessible by authorized personnel."
+    },
+    "yourRights": {
+      "heading": "Your Rights",
+      "item1": "Access your personal data",
+      "item2": "Request correction of inaccurate data",
+      "item3": "Request deletion of your data",
+      "item4": "Opt-out of marketing communications"
+    },
+    "contactUs": {
+      "heading": "Contact Us",
+      "content": "If you have any questions about this Privacy Policy, please contact us at privacy@goldenmile.com or call +852 2369 3111."
+    }
+  },
+  "termsPage": {
+    "title": "Terms of Service",
+    "acceptanceOfTerms": {
+      "heading": "Acceptance of Terms",
+      "content": "By accessing and using the Golden Mile Hotel website and services, you accept and agree to be bound by these Terms of Service. If you do not agree to these terms, please do not use our services."
+    },
+    "descriptionOfService": {
+      "heading": "Description of Service",
+      "content": "Golden Mile Hotel provides online booking services, accommodation, dining, and related hospitality services through our website and affiliated platforms."
+    },
+    "userResponsibilities": {
+      "heading": "User Responsibilities",
+      "item1": "Provide accurate and complete information",
+      "item2": "Maintain the confidentiality of your account",
+      "item3": "Comply with all applicable laws and regulations",
+      "item4": "Respect the rights of other guests and staff"
+    },
+    "bookingAndCancellation": {
+      "heading": "Booking and Cancellation",
+      "item1": "All bookings are subject to availability",
+      "item2": "Cancellation policies vary by rate and season",
+      "item3": "No-shows may result in charges"
+    },
+    "limitationOfLiability": {
+      "heading": "Limitation of Liability",
+      "content": "Golden Mile Hotel shall not be liable for any indirect, incidental, or consequential damages arising from the use of our services."
+    },
+    "modifications": {
+      "heading": "Modifications",
+      "content": "We reserve the right to modify these terms at any time. Changes will be effective upon posting to the website."
+    },
+    "governingLaw": {
+      "heading": "Governing Law",
+      "content": "These terms are governed by the laws of Hong Kong Special Administrative Region."
+    }
+  },
+  "cookiesPage": {
+    "title": "Cookie Policy",
+    "whatAreCookies": {
+      "heading": "What Are Cookies",
+      "content": "Cookies are small text files stored on your device when you visit our website. They help us provide you with a better browsing experience."
+    },
+    "typesOfCookies": {
+      "heading": "Types of Cookies We Use",
+      "item1": "Essential cookies - Required for website functionality",
+      "item2": "Analytics cookies - Help us understand website usage",
+      "item3": "Preference cookies - Remember your settings",
+      "item4": "Marketing cookies - Used for targeted advertising"
+    },
+    "howWeUseCookies": {
+      "heading": "How We Use Cookies",
+      "item1": "Remember your login status",
+      "item2": "Analyze website traffic and usage",
+      "item3": "Personalize your experience",
+      "item4": "Improve our services"
+    },
+    "managingCookies": {
+      "heading": "Managing Cookies",
+      "content": "You can control cookies through your browser settings. Note that disabling certain cookies may affect website functionality."
+    },
+    "thirdPartyCookies": {
+      "heading": "Third-Party Cookies",
+      "content": "We may use third-party services that place cookies on your device. These services have their own privacy policies."
+    },
+    "updates": {
+      "heading": "Updates to This Policy",
+      "content": "We may update this Cookie Policy from time to time. Please check this page periodically for changes."
+    }
+  },
+  "accessibilityPage": {
+    "title": "Accessibility",
+    "ourCommitment": {
+      "heading": "Our Commitment",
+      "content": "Golden Mile Hotel is committed to ensuring digital accessibility for people with disabilities. We continually improve the user experience for everyone."
+    },
+    "accessibilityFeatures": {
+      "heading": "Accessibility Features",
+      "item1": "Keyboard navigation support",
+      "item2": "Screen reader compatibility",
+      "item3": "High contrast mode",
+      "item4": "Resizable text",
+      "item5": "Alternative text for images"
+    },
+    "assistiveTechnologies": {
+      "heading": "Assistive Technologies",
+      "content": "Our website is designed to be compatible with assistive technologies including screen readers, magnification software, and voice recognition software."
+    },
+    "feedback": {
+      "heading": "Feedback",
+      "content": "We welcome your feedback on the accessibility of our website. Please contact us at accessibility@goldenmile.com if you encounter any accessibility barriers."
+    },
+    "continuousImprovement": {
+      "heading": "Continuous Improvement",
+      "content": "We are committed to ongoing improvements to ensure our website remains accessible to all users."
+    }
+  },
+  "aboutPage": {
+    "title": "About Us",
+    "ourStory": {
+      "heading": "Our Story",
+      "content": "Since 1975, Golden Mile Hotel has been a landmark of luxury hospitality in Hong Kong. Located in the heart of Tsim Sha Tsui, we have welcomed guests from around the world with our signature blend of traditional elegance and modern comfort."
+    },
+    "ourMission": {
+      "heading": "Our Mission",
+      "content": "To provide exceptional hospitality experiences that exceed expectations, creating lasting memories for every guest through personalized service and attention to detail."
+    },
+    "ourValues": {
+      "heading": "Our Values",
+      "item1": "Excellence in service delivery",
+      "item2": "Respect for cultural diversity",
+      "item3": "Environmental responsibility",
+      "item4": "Community engagement"
+    },
+    "whyChooseUs": {
+      "heading": "Why Choose Us",
+      "item1": "Prime location in Tsim Sha Tsui",
+      "item2": "Award-winning dining experiences",
+      "item3": "World-class amenities and facilities",
+      "item4": "Dedicated concierge services"
+    },
+    "contact": {
+      "heading": "Contact Us",
+      "content": "We would love to hear from you. Reach us at info@goldenmile.com or call +852 2369 3111."
+    }
+  },
+  "roomsAndSuitesPage": {
+    "title": "Rooms & Suites",
+    "luxuryAccommodations": {
+      "heading": "Luxury Accommodations",
+      "content": "Each of our rooms and suites is designed to provide the ultimate in comfort and style, featuring premium amenities and stunning views of Hong Kong."
+    },
+    "standardRooms": {
+      "heading": "Standard Rooms",
+      "item1": "Comfortable queen or twin beds",
+      "item2": "Modern bathroom with rain shower",
+      "item3": "Work desk and high-speed WiFi"
+    },
+    "luxuryRooms": {
+      "heading": "Luxury Rooms",
+      "item1": "Spacious layout with king bed",
+      "item2": "Premium bathroom with soaking tub",
+      "item3": "City or harbor views"
+    },
+    "suites": {
+      "heading": "Suites",
+      "item1": "Separate living and sleeping areas",
+      "item2": "Luxury bathroom with dual vanities",
+      "item3": "Panoramic views and private balcony"
+    },
+    "businessRooms": {
+      "heading": "Business Rooms",
+      "item1": "Executive work area",
+      "item2": "Meeting room access",
+      "item3": "Complimentary business services"
+    },
+    "amenities": {
+      "heading": "Room Amenities",
+      "item1": "High-speed WiFi",
+      "item2": "24-hour room service",
+      "item3": "Premium bedding and linens",
+      "item4": "In-room safe",
+      "item5": "Mini bar and coffee maker"
+    }
+  },
+  "diningPage": {
+    "title": "Dining Experience",
+    "culinaryExcellence": {
+      "heading": "Culinary Excellence",
+      "content": "Experience award-winning cuisine at our restaurants, where our chefs blend traditional techniques with innovative approaches to create unforgettable dining experiences."
+    },
+    "fineDining": {
+      "heading": "Fine Dining",
+      "item1": "Golden Dragon - Cantonese cuisine",
+      "item2": "La Maison - French gastronomy",
+      "item3": "Sakura - Japanese omakase"
+    },
+    "casualDining": {
+      "heading": "Casual Dining",
+      "item1": "The Terrace - International buffet",
+      "item2": "Café Oriental - Light meals and pastries",
+      "item3": "Pool Bar - Refreshments and snacks"
+    },
+    "barsAndLounges": {
+      "heading": "Bars & Lounges",
+      "item1": "Sky Lounge - Rooftop cocktails",
+      "item2": "The Library - Afternoon tea",
+      "item3": "Piano Bar - Live music evenings"
+    },
+    "privateDining": {
+      "heading": "Private Dining",
+      "content": "Our private dining rooms offer intimate settings for special occasions, business dinners, and celebrations. Custom menus available upon request."
+    },
+    "dietaryRequirements": {
+      "heading": "Dietary Requirements",
+      "item1": "Vegetarian and vegan options available",
+      "item2": "Halal and kosher meals upon request",
+      "item3": "Allergen information provided"
+    }
+  },
+  "meetingsEventsPage": {
+    "title": "Meetings & Events",
+    "versatileSpaces": {
+      "heading": "Versatile Event Spaces",
+      "content": "From intimate board meetings to grand celebrations, our flexible event spaces can accommodate gatherings of all sizes with state-of-the-art technology and impeccable service."
+    },
+    "meetingRooms": {
+      "heading": "Meeting Rooms",
+      "item1": "Boardroom for 10-20 guests",
+      "item2": "Conference room for 30-50 guests",
+      "item3": "Video conferencing facilities"
+    },
+    "conferenceFacilities": {
+      "heading": "Conference Facilities",
+      "item1": "Grand Ballroom for 200+ guests",
+      "item2": "Breakout rooms for workshops",
+      "item3": "Exhibition space available"
+    },
+    "specialEvents": {
+      "heading": "Special Events",
+      "item1": "Wedding receptions and ceremonies",
+      "item2": "Gala dinners and banquets",
+      "item3": "Product launches and exhibitions"
+    },
+    "cateringServices": {
+      "heading": "Catering Services",
+      "item1": "Customizable menu options",
+      "item2": "Coffee breaks and refreshments",
+      "item3": "Full-service banquet catering"
+    },
+    "technologySupport": {
+      "heading": "Technology Support",
+      "item1": "High-speed WiFi throughout",
+      "item2": "Audio-visual equipment",
+      "item3": "Dedicated event coordinator"
+    }
   }
 }

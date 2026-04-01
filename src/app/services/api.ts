@@ -96,6 +96,7 @@ export interface Room {
   amenities: string[];
   status: 'available' | 'unavailable';
   featured: boolean;
+  room_type: 'luxury' | 'suite' | 'business' | 'standard';
 }
 
 export interface Booking {
@@ -145,6 +146,7 @@ export interface RoomAdminData {
   occupancy: string | null;
   status: 'available' | 'unavailable';
   featured: boolean;
+  room_type: 'luxury' | 'suite' | 'business' | 'standard';
   translations: RoomTranslationData[];
   amenities: AmenityAdminData[];
 }
@@ -156,6 +158,7 @@ export interface RoomCreatePayload {
   occupancy?: string;
   status: 'available' | 'unavailable';
   featured: boolean;
+  room_type: 'luxury' | 'suite' | 'business' | 'standard';
   translations: RoomTranslationData[];
   amenities: { translations: AmenityTranslationData[] }[];
 }
@@ -167,9 +170,19 @@ export interface RoomUpdatePayload {
   occupancy?: string;
   status?: 'available' | 'unavailable';
   featured?: boolean;
+  room_type?: 'luxury' | 'suite' | 'business' | 'standard';
   translations?: RoomTranslationData[];
   amenities?: { translations: AmenityTranslationData[] }[];
 }
+
+// Users API
+export const usersAPI = {
+  updateProfile: (data: { name: string; phone: string }) =>
+    fetchAPI<User>('/auth/me', {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    }),
+};
 
 // Auth API
 export const authAPI = {

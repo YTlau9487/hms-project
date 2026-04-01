@@ -1,7 +1,7 @@
 from pydantic import BaseModel, EmailStr
 from typing import Optional, List
 from datetime import date, datetime
-from models import UserRole, BookingStatus, RoomStatus
+from models import UserRole, BookingStatus, RoomStatus, RoomType
 
 
 # Auth schemas
@@ -34,6 +34,11 @@ class UserResponse(BaseModel):
         from_attributes = True
 
 
+class UserUpdate(BaseModel):
+    name: Optional[str] = None
+    phone: Optional[str] = None
+
+
 # Room schemas - Public (localized)
 class RoomLocalizedResponse(BaseModel):
     id: int
@@ -46,6 +51,7 @@ class RoomLocalizedResponse(BaseModel):
     amenities: List[str]
     status: RoomStatus
     featured: bool
+    room_type: RoomType
 
     class Config:
         from_attributes = True
@@ -91,6 +97,7 @@ class RoomCreate(BaseModel):
     occupancy: Optional[str] = None
     status: RoomStatus = RoomStatus.AVAILABLE
     featured: bool = False
+    room_type: RoomType = RoomType.STANDARD
     translations: List[TranslationInput]
     amenities: List[AmenityInput] = []
 
@@ -102,6 +109,7 @@ class RoomUpdate(BaseModel):
     occupancy: Optional[str] = None
     status: Optional[RoomStatus] = None
     featured: Optional[bool] = None
+    room_type: Optional[RoomType] = None
     translations: Optional[List[TranslationInput]] = None
     amenities: Optional[List[AmenityInput]] = None
 
@@ -140,6 +148,7 @@ class RoomAdminResponse(BaseModel):
     occupancy: Optional[str]
     status: RoomStatus
     featured: bool
+    room_type: RoomType
     translations: List[RoomTranslationAdmin]
     amenities: List[AmenityAdmin]
 
