@@ -1,0 +1,29 @@
+# Development Dockerfile for Backend
+FROM python:3.11-slim
+
+WORKDIR /app
+
+# Install dependencies
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Install sqlite3 for development debugging
+RUN apt-get update && apt-get install -y sqlite3 && rm -rf /var/lib/apt/lists/*
+
+# Copy application code
+COPY . .
+
+# Create directory for SQLite database
+RUN mkdir -p /app/data
+
+# Install dos2unix and fix Windows line endings in start.sh
+RUN apt-get update && apt-get install -y dos2unix && \
+    dos2unix start.sh && \
+    chmod +x start.sh && \
+    apt-get remove -y dos2unix && apt-get autoremove -y
+
+# Expose port
+EXPOSE 8000
+
+# Run the application with seed
+CMD ["sh", "start.sh"]
