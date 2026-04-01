@@ -22,6 +22,7 @@ interface RoomFormState {
   occupancy: string;
   status: 'available' | 'unavailable';
   featured: boolean;
+  room_type: 'luxury' | 'suite' | 'business' | 'standard';
   translations: RoomTranslationData[];
   amenities: { translations: AmenityTranslationData[] }[];
 }
@@ -39,6 +40,7 @@ const emptyForm: RoomFormState = {
   occupancy: '',
   status: 'available',
   featured: false,
+  room_type: 'standard',
   translations: emptyTranslations,
   amenities: [],
 };
@@ -96,6 +98,7 @@ export const AdminRoomsPage = () => {
         occupancy: adminData.occupancy || '',
         status: adminData.status,
         featured: adminData.featured,
+        room_type: adminData.room_type,
         translations: adminData.translations.length > 0
           ? adminData.translations
           : emptyTranslations.map(t => ({ ...t })),
@@ -115,6 +118,7 @@ export const AdminRoomsPage = () => {
         occupancy: room.occupancy || '',
         status: room.status,
         featured: room.featured,
+        room_type: room.room_type,
         translations: emptyTranslations.map(t => ({ ...t })),
         amenities: [],
       });
@@ -138,6 +142,7 @@ export const AdminRoomsPage = () => {
         occupancy: formData.occupancy || undefined,
         status: formData.status,
         featured: formData.featured,
+        room_type: formData.room_type,
         translations: formData.translations,
         amenities: formData.amenities,
       };
@@ -244,15 +249,16 @@ export const AdminRoomsPage = () => {
         </button>
       </div>
 
-      <div className="bg-background rounded-xl border border-border overflow-hidden">
+      {/* Desktop Table View */}
+      <div className="hidden md:block bg-background rounded-xl border border-border shadow-sm overflow-hidden">
         <table className="w-full">
-          <thead className="bg-muted/50">
+          <thead className="bg-muted/50 border-b border-border">
             <tr>
-              <th className="text-left px-6 py-4 text-sm font-medium text-muted-foreground">{t('adminRooms.room')}</th>
-              <th className="text-left px-6 py-4 text-sm font-medium text-muted-foreground">{t('adminRooms.type')}</th>
-              <th className="text-left px-6 py-4 text-sm font-medium text-muted-foreground">{t('adminRooms.price')}</th>
-              <th className="text-left px-6 py-4 text-sm font-medium text-muted-foreground">{t('adminRooms.status')}</th>
-              <th className="text-left px-6 py-4 text-sm font-medium text-muted-foreground">{t('adminRooms.actions')}</th>
+              <th className="text-left px-6 py-3.5 text-xs font-bold uppercase tracking-wider text-muted-foreground">{t('adminRooms.room')}</th>
+              <th className="text-left px-6 py-3.5 text-xs font-bold uppercase tracking-wider text-muted-foreground">{t('adminRooms.type')}</th>
+              <th className="text-left px-6 py-3.5 text-xs font-bold uppercase tracking-wider text-muted-foreground">{t('adminRooms.price')}</th>
+              <th className="text-left px-6 py-3.5 text-xs font-bold uppercase tracking-wider text-muted-foreground">{t('adminRooms.status')}</th>
+              <th className="text-left px-6 py-3.5 text-xs font-bold uppercase tracking-wider text-muted-foreground">{t('adminRooms.actions')}</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-border">
@@ -264,7 +270,7 @@ export const AdminRoomsPage = () => {
               </tr>
             ) : (
               rooms.map((room) => (
-                <tr key={room.id} className="hover:bg-muted/30 transition-colors">
+                <tr key={room.id} className="text-sm hover:bg-muted/30 transition-colors">
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
                       <div className="w-12 h-12 rounded-lg bg-muted flex items-center justify-center overflow-hidden">
@@ -281,13 +287,13 @@ export const AdminRoomsPage = () => {
                     </div>
                   </td>
                   <td className="px-6 py-4">
-                    <span className="px-2 py-1 bg-primary/10 text-primary rounded-full text-xs font-medium">
-                      {room.featured ? t('adminRooms.featured') : t('adminRooms.standard')}
+                    <span className="inline-flex items-center px-2.5 py-0.5 bg-primary/10 text-primary rounded-full text-xs font-medium capitalize">
+                      {t(`adminRooms.${room.room_type}`)}
                     </span>
                   </td>
-                  <td className="px-6 py-4 font-medium">${room.price}{t('adminRooms.perNight')}</td>
+                  <td className="px-6 py-4 font-semibold">${room.price}{t('adminRooms.perNight')}</td>
                   <td className="px-6 py-4">
-                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
                       room.status === 'available' 
                         ? 'bg-green-100 text-green-700' 
                         : 'bg-orange-100 text-orange-700'
@@ -299,14 +305,14 @@ export const AdminRoomsPage = () => {
                     <div className="flex items-center gap-2">
                       <button 
                         onClick={() => openEditModal(room)}
-                        className="p-2 hover:bg-muted rounded-lg transition-colors cursor-pointer hover:opacity-80"
+                        className="p-2 rounded-lg hover:bg-muted transition-colors cursor-pointer"
                         title={t('adminRooms.editRoom')}
                       >
                         <Edit className="w-4 h-4 text-muted-foreground" />
                       </button>
                       <button 
                         onClick={() => handleDeleteClick(room)}
-                        className="p-2 hover:bg-destructive/10 rounded-lg transition-colors cursor-pointer hover:opacity-80"
+                        className="p-2 rounded-lg hover:bg-destructive/10 transition-colors cursor-pointer"
                         title={t('adminRooms.deleteRoom')}
                       >
                         <Trash2 className="w-4 h-4 text-destructive" />
@@ -318,6 +324,72 @@ export const AdminRoomsPage = () => {
             )}
           </tbody>
         </table>
+      </div>
+
+      {/* Mobile/Tablet Card View */}
+      <div className="md:hidden space-y-4">
+        {rooms.length === 0 ? (
+          <div className="bg-background rounded-xl border border-border p-8 text-center text-muted-foreground">
+            {t('adminRooms.noRoomsFound')}
+          </div>
+        ) : (
+          rooms.map((room) => (
+            <div key={room.id} className="bg-background rounded-xl border border-border p-4 hover:bg-muted/30 transition-colors">
+              <div className="flex gap-4">
+                {/* Room Image */}
+                <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-lg bg-muted flex items-center justify-center overflow-hidden flex-shrink-0">
+                  {room.image_url ? (
+                    <img src={room.image_url} alt={room.name} className="w-full h-full object-cover" />
+                  ) : (
+                    <span className="text-xs text-muted-foreground">No img</span>
+                  )}
+                </div>
+                
+                {/* Room Info */}
+                <div className="flex-grow min-w-0">
+                  <div className="flex items-start justify-between gap-2 mb-2">
+                    <h3 className="font-medium text-base truncate">{room.name}</h3>
+                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium flex-shrink-0 ${
+                      room.status === 'available' 
+                        ? 'bg-green-100 text-green-700' 
+                        : 'bg-orange-100 text-orange-700'
+                    }`}>
+                      {room.status === 'available' ? t('adminRooms.available') : t('adminRooms.maintenance')}
+                    </span>
+                  </div>
+                  
+                  <div className="space-y-1.5 text-sm text-muted-foreground">
+                    <p>{room.size || 'N/A'} • {room.occupancy || 'N/A'}</p>
+                    <div className="flex items-center gap-2">
+                      <span className="font-medium text-foreground">${room.price}{t('adminRooms.perNight')}</span>
+                      <span className="inline-flex items-center px-2.5 py-0.5 bg-primary/10 text-primary rounded-full text-xs font-medium capitalize">
+                        {t(`adminRooms.${room.room_type}`)}
+                      </span>
+                    </div>
+                  </div>
+                  
+                  {/* Actions */}
+                  <div className="flex items-center gap-2 pt-3 border-t border-border">
+                    <button 
+                      onClick={() => openEditModal(room)}
+                      className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-muted hover:bg-muted/80 rounded-lg transition-colors cursor-pointer text-sm font-medium"
+                    >
+                      <Edit className="w-4 h-4" />
+                      {t('adminRooms.editRoom')}
+                    </button>
+                    <button 
+                      onClick={() => handleDeleteClick(room)}
+                      className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-destructive/10 hover:bg-destructive/20 text-destructive rounded-lg transition-colors cursor-pointer text-sm font-medium"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                      {t('adminRooms.deleteRoom')}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))
+        )}
       </div>
 
       {/* Create/Edit Modal */}
@@ -418,6 +490,20 @@ export const AdminRoomsPage = () => {
                     >
                       <option value="available">{t('adminRooms.available')}</option>
                       <option value="unavailable">{t('adminRooms.maintenance')}</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="text-sm font-bold mb-2 block">{t('adminRooms.roomType')}</label>
+                    <select
+                      value={formData.room_type}
+                      onChange={(e) => setFormData({ ...formData, room_type: e.target.value as 'luxury' | 'suite' | 'business' | 'standard' })}
+                      className="w-full px-4 py-2 bg-input-background border border-border rounded-lg focus:ring-2 focus:ring-primary"
+                    >
+                      <option value="standard">{t('adminRooms.standard')}</option>
+                      <option value="business">{t('adminRooms.business')}</option>
+                      <option value="luxury">{t('adminRooms.luxury')}</option>
+                      <option value="suite">{t('adminRooms.suite')}</option>
                     </select>
                   </div>
 

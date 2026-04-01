@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import { User, Mail, Phone, ArrowLeft, Save } from 'lucide-react';
 import { motion } from 'motion/react';
+import { isValidPhoneNumber } from 'libphonenumber-js';
 import { User as UserType } from '../services/api';
 import { useTranslation } from 'react-i18next';
+import PhoneInput, { formatPhoneDisplay } from './PhoneInput';
 
 interface UserProfileProps {
   user: UserType | null;
@@ -38,9 +40,8 @@ export const UserProfile = ({ user, onBack, onUpdate }: UserProfileProps) => {
       newErrors.name = 'Name must be at least 2 characters';
     }
 
-    const phoneRegex = /^\d{8,15}$/;
-    if (formData.phone && !phoneRegex.test(formData.phone.replace(/[\s-]/g, ''))) {
-      newErrors.phone = 'Phone number must contain 8-15 digits';
+    if (formData.phone && !isValidPhoneNumber(formData.phone)) {
+      newErrors.phone = 'Please enter a valid phone number';
     }
 
     setErrors(newErrors);
@@ -189,13 +190,10 @@ export const UserProfile = ({ user, onBack, onUpdate }: UserProfileProps) => {
                 </label>
                 {isEditing ? (
                   <div>
-                    <input
-                      type="tel"
+                    <PhoneInput
                       value={formData.phone}
-                      onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                      className={`w-full px-4 py-3 rounded-lg border ${
-                        errors.phone ? 'border-red-500' : 'border-border'
-                      } bg-background focus:ring-2 focus:ring-primary focus:border-transparent`}
+                      onChange={(value) => setFormData({ ...formData, phone: value || '' })}
+                      error={!!errors.phone}
                       placeholder={t('userProfile.phonePlaceholder')}
                     />
                     {errors.phone && (
@@ -204,7 +202,7 @@ export const UserProfile = ({ user, onBack, onUpdate }: UserProfileProps) => {
                   </div>
                 ) : (
                   <p className="text-base font-medium px-4 py-3 bg-muted rounded-lg">
-                    {formData.phone || t('userProfile.notSet')}
+                    {formatPhoneDisplay(formData.phone) || t('userProfile.notSet')}
                   </p>
                 )}
               </div>

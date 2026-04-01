@@ -22,6 +22,14 @@ import { AccountBookingsPage } from './pages/AccountBookingsPage';
 import { AdminDashboardPage } from './pages/AdminDashboardPage';
 import { AdminRoomsPage } from './pages/AdminRoomsPage';
 import { AdminBookingsPage } from './pages/AdminBookingsPage';
+import { PrivacyPage } from './pages/PrivacyPage';
+import { TermsPage } from './pages/TermsPage';
+import { CookiesPage } from './pages/CookiesPage';
+import { AccessibilityPage } from './pages/AccessibilityPage';
+import { AboutPage } from './pages/AboutPage';
+import { RoomsAndSuitesPage } from './pages/RoomsAndSuitesPage';
+import { DiningPage } from './pages/DiningPage';
+import { MeetingsEventsPage } from './pages/MeetingsEventsPage';
 
 function AppContent() {
   const [selectedRoomForBooking, setSelectedRoomForBooking] = useState<Room | null>(null);
@@ -84,6 +92,38 @@ function AppContent() {
             <Route 
               path="/register" 
               element={<RegisterPage />} 
+            />
+            <Route 
+              path="/privacy" 
+              element={<PrivacyPage />} 
+            />
+            <Route 
+              path="/terms" 
+              element={<TermsPage />} 
+            />
+            <Route 
+              path="/cookies" 
+              element={<CookiesPage />} 
+            />
+            <Route 
+              path="/accessibility" 
+              element={<AccessibilityPage />} 
+            />
+            <Route 
+              path="/about" 
+              element={<AboutPage />} 
+            />
+            <Route 
+              path="/rooms-and-suites" 
+              element={<RoomsAndSuitesPage />} 
+            />
+            <Route 
+              path="/dining" 
+              element={<DiningPage />} 
+            />
+            <Route 
+              path="/meetings-events" 
+              element={<MeetingsEventsPage />} 
             />
           </Route>
 

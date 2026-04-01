@@ -79,7 +79,21 @@ export const Navbar = () => {
                       </button>
                     </>
                   )}
-                  <button className="px-3 py-2 text-sm font-bold text-muted-foreground hover:text-foreground transition-colors cursor-pointer">
+                  <button 
+                    onClick={() => {
+                      if (location.pathname !== '/') {
+                        navigate('/');
+                        setTimeout(() => {
+                          const element = document.getElementById('amenities-section');
+                          element?.scrollIntoView({ behavior: 'smooth' });
+                        }, 100);
+                      } else {
+                        const element = document.getElementById('amenities-section');
+                        element?.scrollIntoView({ behavior: 'smooth' });
+                      }
+                    }}
+                    className="px-3 py-2 text-sm font-bold text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
+                  >
                     {t('navbar.amenities')}
                   </button>
                 </>
@@ -87,15 +101,15 @@ export const Navbar = () => {
             </div>
           </div>
 
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2 sm:gap-4">
             {/* Language Switcher */}
             <button
               onClick={toggleLanguage}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-colors cursor-pointer"
+              className="flex items-center gap-1.5 px-2 sm:px-3 py-1.5 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-colors cursor-pointer"
               title={i18n.language === 'en' ? '切換至繁體中文' : i18n.language === 'zh-TW' ? '切換至简体中文' : 'Switch to English'}
             >
               <Languages className="w-4 h-4" />
-              <span className="hidden sm:inline">{i18n.language === 'en' ? 'EN' : i18n.language === 'zh-TW' ? '繁' : '简'}</span>
+              <span className="hidden md:inline">{i18n.language === 'en' ? 'EN' : i18n.language === 'zh-TW' ? '繁' : '简'}</span>
             </button>
 
             {user?.role === 'staff' && (
@@ -136,7 +150,7 @@ export const Navbar = () => {
                 <div className="flex items-center gap-2 pl-4 border-l border-border">
                   <div className="hidden sm:block text-right">
                     <p className="text-sm font-medium leading-none">{user.name}</p>
-                    <p className="text-xs text-muted-foreground">{user.role}</p>
+                    <p className="text-xs text-muted-foreground">{user.role === 'customer' ? t('navbar.customer') : t('navbar.staff')}</p>
                   </div>
                   <button 
                     onClick={handleLogout}
@@ -212,7 +226,22 @@ export const Navbar = () => {
                       </button>
                     </>
                   )}
-                  <button className="block w-full text-left px-3 py-2 rounded-lg text-base font-bold text-muted-foreground cursor-pointer hover:opacity-80">
+                  <button 
+                    onClick={() => {
+                      if (location.pathname !== '/') {
+                        navigate('/');
+                        setTimeout(() => {
+                          const element = document.getElementById('amenities-section');
+                          element?.scrollIntoView({ behavior: 'smooth' });
+                        }, 100);
+                      } else {
+                        const element = document.getElementById('amenities-section');
+                        element?.scrollIntoView({ behavior: 'smooth' });
+                      }
+                      setIsMobileMenuOpen(false);
+                    }}
+                    className="block w-full text-left px-3 py-2 rounded-lg text-base font-bold text-muted-foreground cursor-pointer hover:opacity-80"
+                  >
                     {t('navbar.amenities')}
                   </button>
                 </>

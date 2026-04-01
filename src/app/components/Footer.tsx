@@ -1,6 +1,7 @@
 import React from 'react';
 import { Mail, Phone, MapPin, Instagram, Facebook, Twitter } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { Link } from 'react-router';
 
 export const Footer = () => {
   const { t } = useTranslation();
@@ -34,10 +35,10 @@ export const Footer = () => {
           <div>
             <h4 className="text-sm font-bold uppercase tracking-widest mb-6">{t('footer.quickLinks')}</h4>
             <ul className="space-y-4 text-sm text-primary-foreground/70">
-              <li><a href="#" className="hover:text-primary-foreground transition-colors">{t('footer.aboutUs')}</a></li>
-              <li><a href="#" className="hover:text-primary-foreground transition-colors">{t('footer.roomsAndSuites')}</a></li>
-              <li><a href="#" className="hover:text-primary-foreground transition-colors">{t('footer.diningExperience')}</a></li>
-              <li><a href="#" className="hover:text-primary-foreground transition-colors">{t('footer.meetingsAndEvents')}</a></li>
+              <li><Link to="/about" className="hover:text-primary-foreground transition-colors">{t('footer.aboutUs')}</Link></li>
+              <li><Link to="/rooms-and-suites" className="hover:text-primary-foreground transition-colors">{t('footer.roomsAndSuites')}</Link></li>
+              <li><Link to="/dining" className="hover:text-primary-foreground transition-colors">{t('footer.diningExperience')}</Link></li>
+              <li><Link to="/meetings-events" className="hover:text-primary-foreground transition-colors">{t('footer.meetingsAndEvents')}</Link></li>
             </ul>
           </div>
 
@@ -78,10 +79,10 @@ export const Footer = () => {
         <div className="pt-8 border-t border-primary-foreground/10 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-primary-foreground/50">
           <p>{t('footer.copyright')}</p>
           <div className="flex gap-6">
-            <a href="#" className="hover:text-primary-foreground">{t('footer.privacyPolicy')}</a>
-            <a href="#" className="hover:text-primary-foreground">{t('footer.termsOfService')}</a>
-            <a href="#" className="hover:text-primary-foreground">{t('footer.cookiePolicy')}</a>
-            <a href="#" className="hover:text-primary-foreground">{t('footer.accessibility')}</a>
+            <Link to="/privacy" className="hover:text-primary-foreground">{t('footer.privacyPolicy')}</Link>
+            <Link to="/terms" className="hover:text-primary-foreground">{t('footer.termsOfService')}</Link>
+            <Link to="/cookies" className="hover:text-primary-foreground">{t('footer.cookiePolicy')}</Link>
+            <Link to="/accessibility" className="hover:text-primary-foreground">{t('footer.accessibility')}</Link>
           </div>
         </div>
       </div>

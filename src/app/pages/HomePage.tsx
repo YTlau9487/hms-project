@@ -52,12 +52,23 @@ export const HomePage = ({ onBookNow }: HomePageProps) => {
   const featuredRoom = rooms.find(room => room.featured && room.status === 'available') || null;
 
   const filteredRooms = rooms.filter(room => {
-    if (activeFilter === t('homePage.allRooms')) {
-      return room.status === 'available';
+    if (room.status !== 'available') {
+      return false;
     }
-    // For other filters, we would need to filter by room type
-    // Since the current API doesn't support room types, we'll show all available rooms
-    return room.status === 'available';
+    
+    if (activeFilter === t('homePage.allRooms')) {
+      return true;
+    }
+    
+    // Map filter labels to room types
+    const filterToRoomType: Record<string, string> = {
+      [t('homePage.luxury')]: 'luxury',
+      [t('homePage.suite')]: 'suite',
+      [t('homePage.business')]: 'business',
+    };
+    
+    const roomType = filterToRoomType[activeFilter];
+    return roomType ? room.room_type === roomType : true;
   });
 
   const handleViewDetails = (room: Room) => {
@@ -155,7 +166,7 @@ export const HomePage = ({ onBookNow }: HomePageProps) => {
       </section>
 
       {/* Amenities Section */}
-      <section className="bg-muted/30 py-24">
+      <section id="amenities-section" className="bg-muted/30 py-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold mb-4">{t('homePage.worldClassFacilities')}</h2>

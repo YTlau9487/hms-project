@@ -207,17 +207,18 @@ export const AdminPanel = ({
             <div className="p-6 border-b border-border flex justify-between items-center">
               <h3 className="font-bold">{t('adminPanel.recentBookings')}</h3>
             </div>
-              <div className="overflow-x-auto">
+              {/* Desktop Table View */}
+              <div className="hidden md:block overflow-x-auto">
                 <table className="w-full text-left">
-                  <thead className="bg-muted/50 text-xs font-bold uppercase text-muted-foreground border-b border-border">
+                  <thead className="bg-muted/50 border-b border-border">
                     <tr>
-                      <th className="px-6 py-4">{t('adminPanel.bookingId')}</th>
-                      <th className="px-6 py-4">{t('adminPanel.guest')}</th>
-                      <th className="px-6 py-4">{t('adminPanel.room')}</th>
-                      <th className="px-6 py-4">{t('adminPanel.stayDates')}</th>
-                      <th className="px-6 py-4">{t('adminPanel.status')}</th>
-                      <th className="px-6 py-4">{t('adminPanel.amount')}</th>
-                      <th className="px-6 py-4">{t('adminPanel.actions')}</th>
+                      <th className="px-6 py-3.5 text-xs font-bold uppercase tracking-wider text-muted-foreground">{t('adminPanel.bookingId')}</th>
+                      <th className="px-6 py-3.5 text-xs font-bold uppercase tracking-wider text-muted-foreground">{t('adminPanel.guest')}</th>
+                      <th className="px-6 py-3.5 text-xs font-bold uppercase tracking-wider text-muted-foreground">{t('adminPanel.room')}</th>
+                      <th className="px-6 py-3.5 text-xs font-bold uppercase tracking-wider text-muted-foreground">{t('adminPanel.stayDates')}</th>
+                      <th className="px-6 py-3.5 text-xs font-bold uppercase tracking-wider text-muted-foreground">{t('adminPanel.status')}</th>
+                      <th className="px-6 py-3.5 text-xs font-bold uppercase tracking-wider text-muted-foreground">{t('adminPanel.amount')}</th>
+                      <th className="px-6 py-3.5 text-xs font-bold uppercase tracking-wider text-muted-foreground">{t('adminPanel.actions')}</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-border">
@@ -246,37 +247,37 @@ export const AdminPanel = ({
                             </div>
                           </td>
                           <td className="px-6 py-4">
-                            <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
                               booking.status === 'confirmed' ? 'bg-green-100 text-green-700' :
                               booking.status === 'pending' ? 'bg-orange-100 text-orange-700' :
                               'bg-red-100 text-red-700'
                             }`}>
-                              {booking.status}
+                              {booking.status === 'confirmed' ? t('adminBookings.confirmed') : booking.status === 'pending' ? t('adminBookings.pending') : t('adminBookings.cancelled')}
                             </span>
                           </td>
-                          <td className="px-6 py-4 font-bold">${booking.total_price}</td>
+                          <td className="px-6 py-4 font-semibold">${booking.total_price}</td>
                           <td className="px-6 py-4">
                             <div className="flex gap-2">
                               {booking.status === 'pending' && (
                                 <button 
                                   onClick={() => setConfirmDialog({ isOpen: true, bookingId: booking.id, action: 'confirm' })}
-                                  className="p-1.5 rounded-lg bg-green-50 text-green-600 hover:bg-green-100 cursor-pointer hover:opacity-80"
-                                  title="Confirm booking"
+                                  className="p-2 rounded-lg hover:bg-green-50 transition-colors cursor-pointer"
+                                  title={t('adminPanel.confirmBooking')}
                                 >
-                                  <CheckCircle className="w-4 h-4" />
+                                  <CheckCircle className="w-4 h-4 text-green-600" />
                                 </button>
                               )}
                               {booking.status !== 'cancelled' && (
                                 <button 
                                   onClick={() => setConfirmDialog({ isOpen: true, bookingId: booking.id, action: 'cancel' })}
-                                  className="p-1.5 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 cursor-pointer hover:opacity-80"
-                                  title="Cancel booking"
+                                  className="p-2 rounded-lg hover:bg-destructive/10 transition-colors cursor-pointer"
+                                  title={t('adminPanel.cancelBooking')}
                                 >
-                                  <XCircle className="w-4 h-4" />
+                                  <XCircle className="w-4 h-4 text-destructive" />
                                 </button>
                               )}
-                              <button className="p-1.5 rounded-lg bg-muted text-muted-foreground hover:bg-border cursor-pointer hover:opacity-80">
-                                <MoreVertical className="w-4 h-4" />
+                              <button className="p-2 rounded-lg hover:bg-muted transition-colors cursor-pointer" title={t('adminPanel.actions')}>
+                                <MoreVertical className="w-4 h-4 text-muted-foreground" />
                               </button>
                             </div>
                           </td>
@@ -285,6 +286,61 @@ export const AdminPanel = ({
                     )}
                   </tbody>
                 </table>
+              </div>
+              {/* Mobile Card View */}
+              <div className="md:hidden divide-y divide-border">
+                {isLoading ? (
+                  <div className="p-6 text-center text-muted-foreground">
+                    <p>{t('adminPanel.loadingBookings')}</p>
+                  </div>
+                ) : filteredBookings.length === 0 ? (
+                  <div className="p-6 text-center text-muted-foreground">
+                    <p>{t('adminPanel.noBookingsFound')}</p>
+                  </div>
+                ) : (
+                  filteredBookings.map((booking) => (
+                    <div key={booking.id} className="p-4 space-y-3">
+                      <div className="flex items-center justify-between">
+                        <span className="font-mono text-xs font-bold">BK-{booking.id}</span>
+                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                          booking.status === 'confirmed' ? 'bg-green-100 text-green-700' :
+                          booking.status === 'pending' ? 'bg-orange-100 text-orange-700' :
+                          'bg-red-100 text-red-700'
+                        }`}>
+                          {booking.status === 'confirmed' ? t('adminBookings.confirmed') : booking.status === 'pending' ? t('adminBookings.pending') : t('adminBookings.cancelled')}
+                        </span>
+                      </div>
+                      <div className="text-sm font-medium">User #{booking.user_id}</div>
+                      <div className="text-sm text-muted-foreground">{booking.room?.name || 'Unknown'}</div>
+                      <div className="flex justify-between items-center text-sm">
+                        <div className="text-muted-foreground">
+                          {booking.check_in} – {booking.check_out}
+                        </div>
+                        <div className="font-semibold">${booking.total_price}</div>
+                      </div>
+                      <div className="flex items-center gap-2 pt-3 border-t border-border">
+                        {booking.status === 'pending' && (
+                          <button 
+                            onClick={() => setConfirmDialog({ isOpen: true, bookingId: booking.id, action: 'confirm' })}
+                            className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-green-50 hover:bg-green-100 text-green-700 rounded-lg transition-colors cursor-pointer text-sm font-medium"
+                          >
+                            <CheckCircle className="w-4 h-4" />
+                            {t('adminPanel.confirm')}
+                          </button>
+                        )}
+                        {booking.status !== 'cancelled' && (
+                          <button 
+                            onClick={() => setConfirmDialog({ isOpen: true, bookingId: booking.id, action: 'cancel' })}
+                            className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-destructive/10 hover:bg-destructive/20 text-destructive rounded-lg transition-colors cursor-pointer text-sm font-medium"
+                          >
+                            <XCircle className="w-4 h-4" />
+                            {t('adminPanel.cancel')}
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  ))
+                )}
               </div>
               </motion.div>
             )}

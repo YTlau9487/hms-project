@@ -88,13 +88,13 @@ export const RoomDetails = ({ room, onBack, onBookNow }: RoomDetailsProps) => {
                 {room.size && (
                   <div className="flex items-center gap-2">
                     <Maximize2 className="w-5 h-5" />
-                    <span>{room.size}</span>
+                    <span>{t('roomCard.sizeLabel', { value: room.size.replace(/(\d+)\s*sq\.m/i, '$1') })}</span>
                   </div>
                 )}
                 {room.occupancy && (
                   <div className="flex items-center gap-2">
                     <Users className="w-5 h-5" />
-                    <span>{room.occupancy}</span>
+                    <span>{t('roomCard.occupancyLabel', { count: parseInt(room.occupancy.replace(/(\d+)\s*Adult/i, '$1')) })}</span>
                   </div>
                 )}
               </div>
@@ -116,6 +116,13 @@ export const RoomDetails = ({ room, onBack, onBookNow }: RoomDetailsProps) => {
                   );
                 })}
               </div>
+            </div>
+
+            <div>
+              <h3 className="text-xs font-bold uppercase text-muted-foreground tracking-widest mb-2">{t('roomDetails.description')}</h3>
+              <p className="text-xs leading-relaxed text-muted-foreground">
+                {room.description}
+              </p>
             </div>
 
             <div className="p-8 bg-muted/50 rounded-2xl border border-border flex flex-col md:flex-row items-center justify-between gap-6">

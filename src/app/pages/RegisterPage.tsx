@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router';
-import { Mail, Lock, User, Phone } from 'lucide-react';
+import { Mail, Lock, User } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuth } from '../context/AuthContext';
 import { getErrorMessage } from '../services/api';
 import { useTranslation } from 'react-i18next';
+import PhoneInput from '../components/PhoneInput';
 
 export const RegisterPage = () => {
   const { t } = useTranslation();
@@ -102,17 +103,11 @@ export const RegisterPage = () => {
 
           <div className="space-y-1">
             <label className="text-sm font-medium">{t('registerPage.phoneNumber')}</label>
-            <div className="relative">
-              <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-              <input 
-                type="tel" 
-                required
-                placeholder={t('registerPage.phonePlaceholder')}
-                className="w-full bg-input-background border-none rounded-lg pl-10 pr-4 py-2.5 text-sm focus:ring-2 focus:ring-primary transition-all"
-                value={formData.phone}
-                onChange={(e) => setFormData({...formData, phone: e.target.value})}
-              />
-            </div>
+            <PhoneInput
+              value={formData.phone}
+              onChange={(value) => setFormData({...formData, phone: value || ''})}
+              placeholder={t('registerPage.phonePlaceholder')}
+            />
           </div>
 
           <div className="space-y-1">
@@ -144,7 +139,7 @@ export const RegisterPage = () => {
             {t('registerPage.alreadyAccount')}
             <button 
               onClick={() => navigate('/login')}
-              className="ml-1 text-primary font-bold hover:underline"
+              className="ml-1 text-primary font-bold hover:underline cursor-pointer hover:opacity-80"
             >
               {t('registerPage.login')}
             </button>

@@ -5,11 +5,11 @@ FROM node:18-alpine
 RUN apk add --no-cache libc6-compat
 WORKDIR /app
 
-# Enable pnpm
-RUN corepack enable pnpm && pnpm config set store-dir /pnpm-store
+# Enable pnpm with specific version
+RUN corepack enable && corepack prepare pnpm@10.32.1 --activate && pnpm config set store-dir /pnpm-store
 
 # Copy package files
-COPY package.json pnpm-lock.yaml* ./
+COPY package.json pnpm-lock.yaml ./
 
 # Install dependencies
 RUN pnpm i --frozen-lockfile
