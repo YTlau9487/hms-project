@@ -12,13 +12,12 @@ COPY . .
 # Create directory for SQLite database
 RUN mkdir -p /app/data
 
-# Install dos2unix and fix Windows line endings in start.sh
+# Install dos2unix and fix Windows line endings (build-time)
 RUN apt-get update && apt-get install -y dos2unix && \
-    dos2unix start.sh && \
+    dos2unix start.sh seed.py && \
     chmod +x start.sh && \
-    apt-get remove -y dos2unix && apt-get autoremove -y
+    rm -rf /var/lib/apt/lists/*
 
-# Expose port
 EXPOSE 8000
 
 # Run the application with seed

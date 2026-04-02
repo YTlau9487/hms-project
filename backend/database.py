@@ -6,7 +6,7 @@ import os
 DATABASE_URL = f"sqlite:///{os.path.join(os.path.dirname(__file__), 'data', 'hotel.db')}"
 
 # Create engine with check_same_thread=False for SQLite
-engine = create_engine(DATABASE_URL, echo=True, connect_args={"check_same_thread": False})
+engine = create_engine(DATABASE_URL, echo=False, connect_args={"check_same_thread": False})
 
 
 def init_db():
