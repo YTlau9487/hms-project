@@ -46,7 +46,8 @@ export const AdminLayout = () => {
           fixed lg:static inset-y-0 left-0 z-50
           w-64 bg-background border-r border-border p-4
           transform transition-transform duration-300 ease-in-out
-          ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+          ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
+          lg:translate-x-0
         `}>
           <div className="lg:hidden flex justify-end mb-4">
             <button
