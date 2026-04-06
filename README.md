@@ -163,17 +163,67 @@ The backend provides automatic API documentation:
 
 ## 🐳 Docker Configuration
 
-### Services
+### Development Setup
+
+#### Services
 - **backend**: FastAPI server on port 8000
 - **dev**: Vite development server on port 3000
 
-### Volumes
+#### Volumes
 - `backend-data`: SQLite database persistence
 - `pnpm-store`: pnpm package cache
 
-### Environment Variables
+#### Environment Variables
 - `DOCKER_ENV=true`: Enables Docker-specific configuration
 - `VITE_API_URL`: Backend API URL for frontend proxy
+
+### Production Deployment
+
+The production setup uses Nginx as a reverse proxy to serve the frontend and proxy API requests to the backend.
+
+#### Quick Start
+
+**Windows:**
+```bash
+start-prod.bat
+```
+
+**Linux/macOS:**
+```bash
+./start-prod.sh
+```
+
+#### Access
+- **Application**: http://localhost (port 80)
+- **Backend API**: Not exposed publicly (accessible only via Nginx proxy)
+
+#### Production Commands
+```bash
+# View logs
+docker compose -f docker-compose.prod.yml logs -f
+
+# Stop
+docker compose -f docker-compose.prod.yml down
+
+# Restart
+docker compose -f docker-compose.prod.yml restart
+
+# Reset database
+docker compose -f docker-compose.prod.yml down -v && docker compose -f docker-compose.prod.yml up --build -d
+```
+
+#### Production Architecture
+```
+Port 80 → Nginx (frontend container)
+  ├── Serves static files (built React app)
+  └── /api/* → backend:8000 (internal network only)
+```
+
+#### Custom Domain & SSL
+To configure a custom domain and SSL:
+1. Edit `nginx/nginx.conf` and update `server_name`
+2. Uncomment the SSL block and mount your certificate files
+3. Rebuild: `docker compose -f docker-compose.prod.yml up --build -d`
 
 ## 📚 Documentation
 
