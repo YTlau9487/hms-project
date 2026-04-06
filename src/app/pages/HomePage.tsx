@@ -27,6 +27,7 @@ export const HomePage = ({ onBookNow }: HomePageProps) => {
     }
   }, [user, navigate, searchParams]);
   const [rooms, setRooms] = useState<Room[]>([]);
+  const [allRooms, setAllRooms] = useState<Room[]>([]);
   const [activeFilter, setActiveFilter] = useState(t('homePage.allRooms'));
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -41,6 +42,7 @@ export const HomePage = ({ onBookNow }: HomePageProps) => {
       setError(null);
       const data = await roomsAPI.list({ status: 'available', lang: i18n.language });
       setRooms(data);
+      setAllRooms(data);
     } catch (err) {
       const errorMessage = err instanceof Error ? getErrorMessage(err) : t('homePage.loadingRooms');
       setError(errorMessage);
@@ -81,19 +83,19 @@ export const HomePage = ({ onBookNow }: HomePageProps) => {
     }
   };
 
-  const handleSearch = (params: any) => {
-    toast.promise(
-      new Promise((resolve) => setTimeout(resolve, 1500)),
-      {
-        loading: 'Searching available rooms...',
-        success: () => {
-          const element = document.getElementById('rooms-section');
-          element?.scrollIntoView({ behavior: 'smooth' });
-          return 'Found matching luxury rooms for your dates!';
-        },
-        error: 'Error searching for rooms',
-      }
-    );
+  const handleSearch = (params: { checkIn: string; checkOut: string; guests: string }) => {
+    // Filter rooms based on search params (placeholder - no actual availability check yet)
+    const filtered = allRooms.filter(room => room.status === 'available');
+    setRooms(filtered);
+    setActiveFilter(t('homePage.allRooms'));
+    
+    toast.success(t('homePage.searchSuccess'));
+    
+    // Scroll to rooms section
+    setTimeout(() => {
+      const element = document.getElementById('rooms-section');
+      element?.scrollIntoView({ behavior: 'smooth' });
+    }, 300);
   };
 
   if (isLoading) {
@@ -175,21 +177,30 @@ export const HomePage = ({ onBookNow }: HomePageProps) => {
             </p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="group relative h-80 rounded-2xl overflow-hidden shadow-lg cursor-pointer">
+            <div 
+              className="group relative h-80 rounded-2xl overflow-hidden shadow-lg cursor-pointer"
+              onClick={() => toast.info(t('homePage.facilityComingSoon'))}
+            >
               <img src="https://images.unsplash.com/photo-1769638913569-40fc740b44f5?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxob3RlbCUyMGJyZWFrZmFzdCUyMGJ1ZmZldCUyMHNlbGVjdGlvbiUyMGZyZXNoJTIwZm9vZHxlbnwxfHx8fDE3NzA4NTMyOTh8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" alt="Dining" />
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent flex flex-col justify-end p-8 text-white">
                 <h3 className="text-xl font-bold mb-2">{t('homePage.exquisiteDining')}</h3>
                 <p className="text-sm opacity-80">{t('homePage.exquisiteDiningDesc')}</p>
               </div>
             </div>
-            <div className="group relative h-80 rounded-2xl overflow-hidden shadow-lg cursor-pointer">
+            <div 
+              className="group relative h-80 rounded-2xl overflow-hidden shadow-lg cursor-pointer"
+              onClick={() => toast.info(t('homePage.facilityComingSoon'))}
+            >
               <img src="https://images.unsplash.com/photo-1761049862641-16616dea7b32?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxsdXh1cnklMjBob3RlbCUyMHNwYSUyMHdlbGxuZXNzJTIwY2VudGVyJTIwcG9vbHxlbnwxfHx8fDE3NzA4NTMyOTh8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" alt="Spa" />
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent flex flex-col justify-end p-8 text-white">
                 <h3 className="text-xl font-bold mb-2">{t('homePage.wellnessAndSpa')}</h3>
                 <p className="text-sm opacity-80">{t('homePage.wellnessAndSpaDesc')}</p>
               </div>
             </div>
-            <div className="group relative h-80 rounded-2xl overflow-hidden shadow-lg cursor-pointer">
+            <div 
+              className="group relative h-80 rounded-2xl overflow-hidden shadow-lg cursor-pointer"
+              onClick={() => toast.info(t('homePage.facilityComingSoon'))}
+            >
               <img src="https://images.unsplash.com/photo-1742844552193-2fd3425cd26d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxsdXh1cnklMjBob3RlbCUyMGxvYmJ5JTIwaW50ZXJpb3IlMjBoaWdoJTIwcmVzb2x1dGlvbnxlbnwxfHx8fDE3NzA4NTMyOTh8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" alt="Lobby" />
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent flex flex-col justify-end p-8 text-white">
                 <h3 className="text-xl font-bold mb-2">{t('homePage.luxuryLounge')}</h3>

@@ -37,11 +37,11 @@ export const UserProfile = ({ user, onBack, onUpdate }: UserProfileProps) => {
     const newErrors: Record<string, string> = {};
 
     if (formData.name.trim().length < 2) {
-      newErrors.name = 'Name must be at least 2 characters';
+      newErrors.name = t('userProfile.nameMinLength');
     }
 
     if (formData.phone && !isValidPhoneNumber(formData.phone)) {
-      newErrors.phone = 'Please enter a valid phone number';
+      newErrors.phone = t('userProfile.phoneInvalid');
     }
 
     setErrors(newErrors);

@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Country, getCountries, getCountryCallingCode } from 'react-phone-number-input';
 import flags from 'react-phone-number-input/flags';
 import { parsePhoneNumber } from 'libphonenumber-js';
+import { useTranslation } from 'react-i18next';
 
 interface PhoneInputProps {
   value: string | undefined;
@@ -94,6 +95,7 @@ const CountrySelect: React.FC<{
   disabled?: boolean;
   error?: boolean;
 }> = ({ value, onChange, disabled, error }) => {
+  const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -166,7 +168,7 @@ const CountrySelect: React.FC<{
             <input
               ref={searchInputRef}
               type="text"
-              placeholder="Search country or code..."
+              placeholder={t('phoneInput.searchPlaceholder')}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="flex-1 ml-2 border-none outline-none text-sm bg-transparent placeholder:text-muted-foreground"
@@ -193,7 +195,7 @@ const CountrySelect: React.FC<{
               );
             })}
             {filteredCountries.length === 0 && (
-              <div className="px-4 py-4 text-center text-sm text-muted-foreground">No countries found</div>
+              <div className="px-4 py-4 text-center text-sm text-muted-foreground">{t('phoneInput.noCountriesFound')}</div>
             )}
           </div>
         </div>
@@ -213,34 +215,38 @@ const PhoneInput: React.FC<PhoneInputProps> = ({
 }) => {
   const [selectedCountry, setSelectedCountry] = useState<Country>(defaultCountry);
   const [nationalInput, setNationalInput] = useState('');
+  const isInitialMount = useRef(true);
 
-  // Sync from E.164 value into local state
+  // Sync from E.164 value into local state - only on initial mount or when value changes externally
   useEffect(() => {
-    if (!value) {
-      setSelectedCountry(defaultCountry);
-      setNationalInput('');
-      return;
-    }
-    try {
-      const phoneNumber = parsePhoneNumber(value);
-      if (phoneNumber && phoneNumber.isValid()) {
-        setSelectedCountry((phoneNumber.country || defaultCountry) as Country);
-        setNationalInput(phoneNumber.formatNational());
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      if (!value) {
+        setSelectedCountry(defaultCountry);
+        setNationalInput('');
         return;
       }
-    } catch {
-      // fall through
+      try {
+        const phoneNumber = parsePhoneNumber(value);
+        if (phoneNumber && phoneNumber.isValid()) {
+          setSelectedCountry((phoneNumber.country || defaultCountry) as Country);
+          setNationalInput(phoneNumber.formatNational());
+          return;
+        }
+      } catch {
+        // fall through
+      }
+      // Fallback: strip leading + and digits matching default country code
+      const callingCode = `+${getCountryCallingCode(defaultCountry)}`;
+      if (value.startsWith(callingCode)) {
+        setSelectedCountry(defaultCountry);
+        setNationalInput(value.slice(callingCode.length));
+      } else {
+        setSelectedCountry(defaultCountry);
+        setNationalInput(value.replace(/^\+/, ''));
+      }
     }
-    // Fallback: strip leading + and digits matching default country code
-    const callingCode = `+${getCountryCallingCode(defaultCountry)}`;
-    if (value.startsWith(callingCode)) {
-      setSelectedCountry(defaultCountry);
-      setNationalInput(value.slice(callingCode.length));
-    } else {
-      setSelectedCountry(defaultCountry);
-      setNationalInput(value.replace(/^\+/, ''));
-    }
-  }, [value, defaultCountry]);
+  }, []); // Only run on mount
 
   const handleNationalChange = (raw: string) => {
     const digits = raw.replace(/\D/g, '');

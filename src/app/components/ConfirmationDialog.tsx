@@ -10,6 +10,7 @@ import {
   AlertDialogTitle,
 } from './ui/alert-dialog';
 import { AlertTriangle } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 interface ConfirmationDialogProps {
   isOpen: boolean;
@@ -28,10 +29,11 @@ export const ConfirmationDialog = ({
   onConfirm,
   title,
   description,
-  confirmText = 'Confirm',
-  cancelText = 'Cancel',
+  confirmText,
+  cancelText,
   variant = 'default',
 }: ConfirmationDialogProps) => {
+  const { t } = useTranslation();
   return (
     <AlertDialog open={isOpen} onOpenChange={onClose}>
       <AlertDialogContent>
@@ -49,12 +51,12 @@ export const ConfirmationDialog = ({
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel onClick={onClose}>{cancelText}</AlertDialogCancel>
+          <AlertDialogCancel onClick={onClose}>{cancelText || t('common.cancel')}</AlertDialogCancel>
           <AlertDialogAction
             onClick={onConfirm}
             className={variant === 'destructive' ? 'bg-destructive hover:bg-destructive/90' : ''}
           >
-            {confirmText}
+            {confirmText || t('common.confirm')}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

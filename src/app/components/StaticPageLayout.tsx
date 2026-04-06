@@ -22,6 +22,9 @@ export const StaticPageLayout: React.FC<StaticPageLayoutProps> = ({
 }) => {
   const navigate = useNavigate();
   const { t } = useTranslation();
+  
+  // Check sessionStorage for interface context (set by Navbar when staff switches views)
+  const isCustomerView = sessionStorage.getItem('interfaceContext') === 'customer';
 
   return (
     <div className="min-h-[calc(100vh-64px)] bg-muted/30 py-12">
@@ -33,7 +36,7 @@ export const StaticPageLayout: React.FC<StaticPageLayoutProps> = ({
         >
           <button
             onClick={() => {
-              navigate('/');
+              navigate(isCustomerView ? '/?view=customer' : '/');
               window.scrollTo({ top: 0, behavior: 'smooth' });
             }}
             className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors cursor-pointer hover:opacity-80"

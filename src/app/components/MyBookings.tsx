@@ -49,11 +49,16 @@ export const MyBookings = ({ bookings, onBack, onCancelBooking }: MyBookingsProp
 
   const handleConfirmCancel = () => {
     onCancelBooking(cancelDialog.bookingId);
-    toast.success('Booking cancelled successfully', {
-      description: 'You will receive a confirmation email shortly.',
+    toast.success(t('myBookings.cancelSuccess'), {
+      description: t('myBookings.cancelSuccessDesc'),
     });
     setCancelDialog({ isOpen: false, bookingId: '', roomName: '' });
   };
+
+  const handleViewReceipt = () => {
+    toast.info(t('myBookings.receiptNotAvailable'));
+  };
+
   return (
     <motion.div 
       initial={{ opacity: 0, y: 20 }}
@@ -120,7 +125,7 @@ export const MyBookings = ({ bookings, onBack, onCancelBooking }: MyBookingsProp
                       {booking.status === 'confirmed' && <CheckCircle className="w-3 h-3" />}
                       {booking.status === 'pending' && <Clock className="w-3 h-3" />}
                       {booking.status === 'cancelled' && <XCircle className="w-3 h-3" />}
-                      {booking.status}
+                      {booking.status === 'confirmed' ? t('myBookings.statusConfirmed') : booking.status === 'pending' ? t('myBookings.statusPending') : t('myBookings.statusCancelled')}
                     </span>
                   </div>
 
@@ -155,7 +160,10 @@ export const MyBookings = ({ bookings, onBack, onCancelBooking }: MyBookingsProp
                           {t('myBookings.cancelBooking')}
                         </button>
                       )}
-                      <button className="flex items-center gap-1 text-sm font-bold text-primary hover:gap-2 transition-all cursor-pointer hover:opacity-80">
+                      <button 
+                        onClick={handleViewReceipt}
+                        className="flex items-center gap-1 text-sm font-bold text-primary hover:gap-2 transition-all cursor-pointer hover:opacity-80"
+                      >
                         {t('myBookings.viewReceipt')} <ChevronRight className="w-4 h-4" />
                       </button>
                     </div>
@@ -171,10 +179,10 @@ export const MyBookings = ({ bookings, onBack, onCancelBooking }: MyBookingsProp
         isOpen={cancelDialog.isOpen}
         onClose={() => setCancelDialog({ isOpen: false, bookingId: '', roomName: '' })}
         onConfirm={handleConfirmCancel}
-        title="Cancel Booking"
-        description={`Are you sure you want to cancel your reservation for ${cancelDialog.roomName}? This action cannot be undone. You will receive a refund according to our cancellation policy.`}
-        confirmText="Yes, Cancel Booking"
-        cancelText="Keep Booking"
+        title={t('myBookings.cancelDialogTitle')}
+        description={t('myBookings.cancelDialogDesc', { name: cancelDialog.roomName })}
+        confirmText={t('myBookings.cancelDialogConfirm')}
+        cancelText={t('myBookings.cancelDialogCancel')}
         variant="destructive"
       />
     </motion.div>

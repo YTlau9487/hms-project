@@ -28,7 +28,7 @@ export const AdminLayout = () => {
         {/* Mobile sidebar toggle */}
         <button
           onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-          className="lg:hidden fixed bottom-6 right-6 z-50 p-4 bg-primary text-primary-foreground rounded-full shadow-xl hover:opacity-90 transition-all cursor-pointer hover:scale-105"
+          className="lg:hidden fixed bottom-6 right-6 z-[60] p-4 bg-primary text-primary-foreground rounded-full shadow-xl hover:opacity-90 transition-all cursor-pointer hover:scale-105"
         >
           {isSidebarOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
         </button>
@@ -36,18 +36,19 @@ export const AdminLayout = () => {
         {/* Mobile overlay - covers entire viewport when sidebar is open */}
         {isSidebarOpen && (
           <div 
-            className="fixed inset-0 bg-black/60 z-40 lg:hidden"
+            className="fixed inset-0 bg-black/60 z-[55] lg:hidden"
             onClick={() => setIsSidebarOpen(false)}
           />
         )}
 
-        {/* Sidebar - hidden on mobile when closed, always visible on lg+ */}
+        {/* Sidebar - hidden on mobile when closed, sticky on desktop below navbar */}
         <aside className={`
-          fixed lg:static inset-y-0 left-0 z-50
+          fixed lg:sticky top-16 left-0 z-40
           w-64 bg-background border-r border-border p-4
           transform transition-transform duration-300 ease-in-out
           ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
           lg:translate-x-0
+          h-[calc(100vh-4rem)] overflow-y-auto
         `}>
           <div className="lg:hidden flex justify-end mb-4">
             <button

@@ -1,10 +1,30 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Mail, Phone, MapPin, Instagram, Facebook, Twitter } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
+import { toast } from 'sonner';
+import { useAuth } from '../context/AuthContext';
 
 export const Footer = () => {
   const { t } = useTranslation();
+  const { user } = useAuth();
+  const [newsletterEmail, setNewsletterEmail] = useState('');
+
+  const handleNewsletterJoin = () => {
+    if (user?.role === 'staff') {
+      toast.info('Staff accounts cannot subscribe to the newsletter.');
+      return;
+    }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!newsletterEmail || !emailRegex.test(newsletterEmail)) {
+      toast.error(t('footer.newsletterError'));
+      return;
+    }
+    // Placeholder - no backend yet
+    toast.success(t('footer.newsletterSuccess'));
+    setNewsletterEmail('');
+  };
+
   return (
     <footer className="bg-primary text-primary-foreground pt-16 pb-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -67,9 +87,15 @@ export const Footer = () => {
               <input 
                 type="email" 
                 placeholder={t('footer.emailPlaceholder')}
+                value={newsletterEmail}
+                onChange={(e) => setNewsletterEmail(e.target.value)}
+                onKeyDown={(e) => { if (e.key === 'Enter') handleNewsletterJoin(); }}
                 className="flex-1 bg-primary-foreground/10 border-none rounded-md px-3 py-2 text-sm focus:ring-1 focus:ring-primary-foreground/30"
               />
-              <button className="bg-background text-primary px-4 py-2 rounded-md text-sm font-bold hover:opacity-90 transition-opacity cursor-pointer">
+              <button 
+                onClick={handleNewsletterJoin}
+                className="bg-background text-primary px-4 py-2 rounded-md text-sm font-bold hover:opacity-90 transition-opacity cursor-pointer"
+              >
                 {t('footer.join')}
               </button>
             </div>

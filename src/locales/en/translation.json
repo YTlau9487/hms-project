@@ -147,7 +147,15 @@
     "viewReceipt": "View Receipt",
     "statusConfirmed": "confirmed",
     "statusPending": "pending",
-    "statusCancelled": "cancelled"
+    "statusCancelled": "cancelled",
+    "cancelDialogTitle": "Cancel Booking",
+    "cancelDialogDesc": "Are you sure you want to cancel your reservation for {{name}}? This action cannot be undone.",
+    "cancelDialogConfirm": "Yes, Cancel Booking",
+    "cancelDialogCancel": "Keep Booking",
+    "receiptNotAvailable": "Receipt is not available yet",
+    "cancelSuccess": "Booking cancelled successfully",
+    "cancelSuccessDesc": "You will receive a confirmation email shortly.",
+    "cancelFailed": "Failed to cancel booking"
   },
   "userProfile": {
     "back": "Back",
@@ -208,7 +216,14 @@
     "saveChanges": "Save Changes",
     "roomUpdated": "Room updated successfully!",
     "packageAdded": "Package added!",
-    "fillAllFields": "Please fill in all package fields"
+    "fillAllFields": "Please fill in all package fields",
+    "name": "Name",
+    "description": "Description",
+    "notYetTranslated": "Not yet translated",
+    "amenities": "Amenities",
+    "addAmenity": "Add Amenity",
+    "noAmenities": "No amenities added yet. Click \"Add Amenity\" to add one.",
+    "loadingTranslations": "Loading translations..."
   },
   "adminPanel": {
     "title": "Staff Management Dashboard",
@@ -241,7 +256,8 @@
     "dashboardView": "Dashboard View",
     "dashboardViewDesc": "Revenue analytics and booking statistics will be displayed here.",
     "customerDatabase": "Customer Database",
-    "customerDatabaseDesc": "Customer information and history will be displayed here."
+    "customerDatabaseDesc": "Customer information and history will be displayed here.",
+    "viewDetails": "View Details"
   },
   "footer": {
     "brand": "GOLDEN MILE",
@@ -259,6 +275,8 @@
     "newsletterSubtitle": "Subscribe for exclusive offers and updates.",
     "emailPlaceholder": "Email address",
     "join": "Join",
+    "newsletterSuccess": "Thank you for subscribing!",
+    "newsletterError": "Failed to subscribe. Please try again.",
     "copyright": "© 2026 Golden Mile Hong Kong. All rights reserved.",
     "privacyPolicy": "Privacy Policy",
     "termsOfService": "Terms of Service",
@@ -292,7 +310,25 @@
     "no": "No",
     "ok": "OK",
     "success": "Success",
-    "failed": "Failed"
+    "failed": "Failed",
+    "viewDetails": "View Details",
+    "receiptNotAvailable": "Receipt is not available yet",
+    "forgotPasswordInstructions": "Please contact reception to reset your password",
+    "newsletterSuccess": "Thank you for subscribing!",
+    "newsletterError": "Failed to subscribe. Please try again.",
+    "bookingCancelled": "Booking cancelled successfully",
+    "cancelFailed": "Failed to cancel booking",
+    "bookingConfirmed": "Booking confirmed successfully",
+    "confirmFailed": "Failed to confirm booking",
+    "updateFailed": "Failed to update",
+    "deleteFailed": "Failed to delete",
+    "saveFailed": "Failed to save",
+    "createFailed": "Failed to create",
+    "loadingFailed": "Failed to load",
+    "roomUpdated": "Room updated successfully",
+    "roomCreated": "Room created successfully",
+    "roomDeleted": "Room deleted successfully",
+    "comingSoon": "Coming soon"
   },
   "loginPage": {
     "welcomeBack": "Welcome Back",
@@ -301,6 +337,7 @@
     "emailPlaceholder": "name@example.com",
     "password": "Password",
     "forgotPassword": "Forgot password?",
+    "forgotPasswordMsg": "Please contact reception to reset your password",
     "signIn": "Sign In",
     "signingIn": "Signing in...",
     "loginSuccess": "Login successful!",
@@ -324,7 +361,11 @@
     "registerSuccess": "Registration successful! Welcome!",
     "registerFailed": "Registration failed",
     "alreadyAccount": "Already have an account?",
-    "login": "Login"
+    "login": "Login",
+    "nameMinLength": "Name must be at least 2 characters",
+    "invalidEmail": "Invalid email format",
+    "passwordMinLength": "Password must be at least 6 characters",
+    "phoneRequired": "Phone number is required"
   },
   "homePage": {
     "ourCuratedRooms": "Our Curated Rooms",
@@ -343,9 +384,10 @@
     "luxuryLounge": "Luxury Lounge",
     "luxuryLoungeDesc": "Relax in our elegantly designed guest spaces.",
     "searchingRooms": "Searching available rooms...",
-    "searchSuccess": "Found matching luxury rooms for your dates!",
+    "searchSuccess": "Found matching rooms for your dates!",
     "searchError": "Error searching for rooms",
-    "loadingRooms": "Loading room data..."
+    "loadingRooms": "Loading room data...",
+    "facilityComingSoon": "This feature is coming soon. Stay tuned!"
   },
   "adminRooms": {
     "title": "Room Management",
@@ -400,7 +442,14 @@
     "deleteRoomBtn": "Delete Room",
     "roomDeleted": "Room deleted successfully",
     "deleteFailed": "Failed to delete room",
-    "nameAndPriceRequired": "Room name and price are required"
+    "nameAndPriceRequired": "Room name and price are required",
+    "nameLabel": "Name *",
+    "namePlaceholder": "Room name",
+    "descriptionLabel": "Description",
+    "descriptionPlaceholder": "Room description",
+    "roomType": "Room Type",
+    "addAmenity": "Add Amenity",
+    "noAmenities": "No amenities added yet. Click \"Add Amenity\" to add one."
   },
   "adminBookings": {
     "title": "Booking Management",
@@ -424,7 +473,9 @@
     "cancelled": "cancelled",
     "bookingConfirmed": "Booking confirmed successfully",
     "bookingCancelled": "Booking cancelled successfully",
-    "updateFailed": "Failed to update booking"
+    "updateFailed": "Failed to update booking",
+    "confirmFailed": "Failed to confirm booking",
+    "cancelFailed": "Failed to cancel booking"
   },
   "staticPages": {
     "back": "Back",
@@ -701,5 +752,9 @@
       "item2": "Audio-visual equipment",
       "item3": "Dedicated event coordinator"
     }
+  },
+  "phoneInput": {
+    "searchPlaceholder": "Search country or code...",
+    "noCountriesFound": "No countries found"
   }
 }

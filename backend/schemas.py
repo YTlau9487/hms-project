@@ -9,7 +9,7 @@ class UserRegister(BaseModel):
     email: EmailStr
     password: str
     name: str
-    phone: Optional[str] = None
+    phone: str
 
 
 class UserLogin(BaseModel):

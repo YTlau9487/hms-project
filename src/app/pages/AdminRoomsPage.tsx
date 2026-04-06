@@ -109,7 +109,7 @@ export const AdminRoomsPage = () => {
         })),
       });
     } catch (err) {
-      const errorMessage = err instanceof Error ? getErrorMessage(err) : 'Failed to load room data';
+      const errorMessage = err instanceof Error ? getErrorMessage(err) : t('common.loadingFailed');
       toast.error(errorMessage);
       setFormData({
         price: room.price,
@@ -129,7 +129,7 @@ export const AdminRoomsPage = () => {
   const handleSave = async () => {
     const hasAnyName = formData.translations.some(t => t.name.trim());
     if (!hasAnyName || formData.price <= 0) {
-      toast.error('Room name (at least one language) and price are required');
+      toast.error(t('adminRooms.nameAndPriceRequired'));
       return;
     }
 
@@ -149,15 +149,15 @@ export const AdminRoomsPage = () => {
 
       if (editingRoom) {
         await roomsAPI.update(editingRoom.id, payload);
-        toast.success('Room updated successfully');
+        toast.success(t('common.roomUpdated'));
       } else {
         await roomsAPI.create(payload);
-        toast.success('Room created successfully');
+        toast.success(t('common.roomCreated'));
       }
       setModalOpen(false);
       await fetchRooms();
     } catch (err) {
-      const errorMessage = err instanceof Error ? getErrorMessage(err) : 'Failed to save room';
+      const errorMessage = err instanceof Error ? getErrorMessage(err) : t('common.saveFailed');
       toast.error(errorMessage);
     } finally {
       setIsSaving(false);
@@ -171,10 +171,10 @@ export const AdminRoomsPage = () => {
   const handleConfirmDelete = async () => {
     try {
       await roomsAPI.delete(deleteDialog.roomId);
-      toast.success('Room deleted successfully');
+      toast.success(t('common.roomDeleted'));
       await fetchRooms();
     } catch (err) {
-      const errorMessage = err instanceof Error ? getErrorMessage(err) : 'Failed to delete room';
+      const errorMessage = err instanceof Error ? getErrorMessage(err) : t('common.deleteFailed');
       toast.error(errorMessage);
     }
     setDeleteDialog({ isOpen: false, roomId: 0, roomName: '' });
@@ -420,7 +420,7 @@ export const AdminRoomsPage = () => {
                 </button>
               </div>
 
-              {/* Form */}
+              {/* Content */}
               <div className="p-6 space-y-8">
                 {/* Image */}
                 <div>
@@ -524,7 +524,7 @@ export const AdminRoomsPage = () => {
                 <div>
                   <div className="flex items-center gap-2 mb-4">
                     <Globe className="w-4 h-4" />
-                    <h4 className="font-bold text-lg">Room Name & Description</h4>
+                    <h4 className="font-bold text-lg">{t('manageRooms.roomName')}</h4>
                   </div>
 
                   {/* Language Tabs */}
@@ -555,23 +555,23 @@ export const AdminRoomsPage = () => {
                   {formData.translations.filter(t => t.language === activeLangTab).map(trans => (
                     <div key={trans.language} className="space-y-4">
                       <div>
-                        <label className="text-sm font-bold mb-2 block">Name *</label>
+                        <label className="text-sm font-bold mb-2 block">{t('adminRooms.nameLabel')}</label>
                         <input
                           type="text"
                           value={trans.name}
                           onChange={(e) => updateTranslation(trans.language, 'name', e.target.value)}
                           className="w-full px-4 py-2 bg-input-background border border-border rounded-lg focus:ring-2 focus:ring-primary"
-                          placeholder="Room name"
+                          placeholder={t('adminRooms.namePlaceholder')}
                         />
                       </div>
                       <div>
-                        <label className="text-sm font-bold mb-2 block">Description</label>
+                        <label className="text-sm font-bold mb-2 block">{t('adminRooms.descriptionLabel')}</label>
                         <textarea
                           value={trans.description}
                           onChange={(e) => updateTranslation(trans.language, 'description', e.target.value)}
                           rows={3}
                           className="w-full px-4 py-2 bg-input-background border border-border rounded-lg focus:ring-2 focus:ring-primary resize-none"
-                          placeholder="Room description"
+                          placeholder={t('adminRooms.descriptionPlaceholder')}
                         />
                       </div>
                     </div>
@@ -583,13 +583,13 @@ export const AdminRoomsPage = () => {
                   <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center gap-2">
                       <Tag className="w-4 h-4" />
-                      <h4 className="font-bold text-lg">Amenities</h4>
+                      <h4 className="font-bold text-lg">{t('manageRooms.amenities')}</h4>
                     </div>
                     <button
                       onClick={addAmenity}
                       className="px-4 py-2 bg-accent text-accent-foreground rounded-lg font-bold hover:opacity-80 cursor-pointer flex items-center gap-2"
                     >
-                      <Plus className="w-4 h-4" /> Add Amenity
+                      <Plus className="w-4 h-4" /> {t('adminRooms.addAmenity')}
                     </button>
                   </div>
 
@@ -629,7 +629,7 @@ export const AdminRoomsPage = () => {
                       );
                     })}
                     {formData.amenities.length === 0 && (
-                      <p className="text-sm text-muted-foreground text-center py-4">No amenities added yet. Click "Add Amenity" to add one.</p>
+                      <p className="text-sm text-muted-foreground text-center py-4">{t('adminRooms.noAmenities')}</p>
                     )}
                   </div>
                 </div>
