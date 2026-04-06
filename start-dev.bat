@@ -1,5 +1,5 @@
 @echo off
-echo Starting HMS Project Development Environment with Docker...
+echo Starting HMS Project Development Environment...
 echo.
 
 REM Check if Docker is running
@@ -15,7 +15,7 @@ echo Docker is running. Building and starting development environment...
 echo.
 
 REM Build and start the development environment
-docker-compose up --build
+docker compose -f docker-compose.yml up --build -d
 
 if %errorlevel% neq 0 (
     echo.
@@ -28,7 +28,13 @@ if %errorlevel% neq 0 (
 echo.
 echo Development environment started successfully!
 echo Access your application at: http://localhost:3000
-echo Press Ctrl+C to stop the containers.
+echo API server at: http://localhost:8000
+echo.
+echo Useful commands:
+echo   View logs:     docker compose -f docker-compose.yml logs -f
+echo   Stop:          docker compose -f docker-compose.yml down
+echo   Restart:       docker compose -f docker-compose.yml restart
+echo   Access DB:     docker compose -f docker-compose.yml exec backend sqlite3 /app/data/hotel.db
 echo.
 
 pause
