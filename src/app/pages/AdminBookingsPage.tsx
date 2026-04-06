@@ -33,12 +33,16 @@ export const AdminBookingsPage = () => {
   const handleUpdateStatus = async (bookingId: number, status: 'confirmed' | 'cancelled') => {
     try {
       await adminAPI.updateBooking(bookingId, { status });
-      toast.success(`Booking ${status} successfully`);
+      toast.success(status === 'confirmed' ? t('adminBookings.bookingConfirmed') : t('adminBookings.bookingCancelled'));
       await fetchBookings();
     } catch (err) {
-      const errorMessage = err instanceof Error ? getErrorMessage(err) : 'Failed to update booking';
+      const errorMessage = err instanceof Error ? getErrorMessage(err) : t('adminBookings.updateFailed');
       toast.error(errorMessage);
     }
+  };
+
+  const handleViewDetails = (booking: Booking) => {
+    toast.info(t('common.comingSoon'));
   };
 
   return (
@@ -107,7 +111,11 @@ export const AdminBookingsPage = () => {
                   <td className="px-6 py-4 font-semibold">${booking.total_price}</td>
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-2">
-                      <button className="p-2 rounded-lg hover:bg-muted transition-colors cursor-pointer" title={t('adminBookings.viewDetails')}>
+                      <button 
+                        onClick={() => handleViewDetails(booking)}
+                        className="p-2 rounded-lg hover:bg-muted transition-colors cursor-pointer" 
+                        title={t('adminBookings.viewDetails')}
+                      >
                         <Eye className="w-4 h-4 text-muted-foreground" />
                       </button>
                       {booking.status === 'pending' && (
@@ -191,7 +199,10 @@ export const AdminBookingsPage = () => {
 
                 {/* Footer Actions */}
                 <div className="flex items-center gap-2 pt-3 border-t border-border">
-                  <button className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-muted hover:bg-muted/80 rounded-lg transition-colors cursor-pointer text-sm font-medium">
+                  <button 
+                    onClick={() => handleViewDetails(booking)}
+                    className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-muted hover:bg-muted/80 rounded-lg transition-colors cursor-pointer text-sm font-medium"
+                  >
                     <Eye className="w-4 h-4" />
                     {t('adminBookings.viewDetails')}
                   </button>

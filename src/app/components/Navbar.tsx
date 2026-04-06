@@ -26,6 +26,33 @@ export const Navbar = () => {
     i18n.changeLanguage(langs[nextIndex]);
   };
 
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleRoomsClick = () => {
+    if (user?.role === 'staff') {
+      sessionStorage.setItem('interfaceContext', 'customer');
+      navigate('/?view=customer');
+    } else {
+      navigate('/');
+    }
+    scrollToTop();
+  };
+
+  const handleAmenitiesClick = () => {
+    if (location.pathname !== '/') {
+      navigate('/');
+      setTimeout(() => {
+        const element = document.getElementById('amenities-section');
+        element?.scrollIntoView({ behavior: 'smooth' });
+      }, 100);
+    } else {
+      const element = document.getElementById('amenities-section');
+      element?.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
   return (
     <nav className="sticky top-0 z-50 w-full bg-background border-b border-border backdrop-blur-md bg-opacity-80">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -35,11 +62,13 @@ export const Navbar = () => {
               className="flex-shrink-0 flex items-center gap-2 cursor-pointer group" 
               onClick={() => {
                 if (user?.role === 'staff' && !location.pathname.startsWith('/admin')) {
+                  sessionStorage.setItem('interfaceContext', 'customer');
                   navigate('/?view=customer');
                 } else {
                   navigate('/');
                 }
                 setIsMobileMenuOpen(false);
+                scrollToTop();
               }}
             >
               <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center transition-transform group-hover:scale-110">
@@ -49,16 +78,10 @@ export const Navbar = () => {
             </div>
             
             <div className="hidden md:flex items-center space-x-4">
-              {(user?.role !== 'staff' || location.pathname === '/' || location.pathname.startsWith('/account')) && (
+              {user?.role !== 'staff' && (
                 <>
                   <button 
-                    onClick={() => {
-                      if (user?.role === 'staff') {
-                        navigate('/?view=customer');
-                      } else {
-                        navigate('/');
-                      }
-                    }}
+                    onClick={handleRoomsClick}
                     className={`px-3 py-2 text-sm font-bold transition-colors cursor-pointer ${isActive('/') ? 'text-primary' : 'text-muted-foreground hover:text-foreground'}`}
                   >
                     {t('navbar.rooms')}
@@ -66,13 +89,13 @@ export const Navbar = () => {
                   {user && (
                     <>
                       <button 
-                        onClick={() => navigate('/account/bookings')}
+                        onClick={() => { navigate('/account/bookings'); setTimeout(scrollToTop, 50); }}
                         className={`px-3 py-2 text-sm font-bold transition-colors cursor-pointer ${isActive('/account/bookings') ? 'text-primary' : 'text-muted-foreground hover:text-foreground'}`}
                       >
                         {t('navbar.myBookings')}
                       </button>
                       <button 
-                        onClick={() => navigate('/account/profile')}
+                        onClick={() => { navigate('/account/profile'); setTimeout(scrollToTop, 50); }}
                         className={`px-3 py-2 text-sm font-bold transition-colors cursor-pointer ${isActive('/account/profile') ? 'text-primary' : 'text-muted-foreground hover:text-foreground'}`}
                       >
                         {t('navbar.myProfile')}
@@ -80,18 +103,7 @@ export const Navbar = () => {
                     </>
                   )}
                   <button 
-                    onClick={() => {
-                      if (location.pathname !== '/') {
-                        navigate('/');
-                        setTimeout(() => {
-                          const element = document.getElementById('amenities-section');
-                          element?.scrollIntoView({ behavior: 'smooth' });
-                        }, 100);
-                      } else {
-                        const element = document.getElementById('amenities-section');
-                        element?.scrollIntoView({ behavior: 'smooth' });
-                      }
-                    }}
+                    onClick={handleAmenitiesClick}
                     className="px-3 py-2 text-sm font-bold text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
                   >
                     {t('navbar.amenities')}
@@ -116,8 +128,10 @@ export const Navbar = () => {
               <button 
                 onClick={() => {
                   if (location.pathname.startsWith('/admin')) {
+                    sessionStorage.setItem('interfaceContext', 'customer');
                     navigate('/?view=customer');
                   } else {
+                    sessionStorage.removeItem('interfaceContext');
                     navigate('/admin/dashboard');
                   }
                   setIsMobileMenuOpen(false);
@@ -189,15 +203,11 @@ export const Navbar = () => {
             className="md:hidden border-t border-border bg-background overflow-hidden"
           >
             <div className="px-4 py-6 space-y-4">
-              {(user?.role !== 'staff' || location.pathname === '/' || location.pathname.startsWith('/account')) && (
+              {user?.role !== 'staff' && (
                 <>
                   <button 
                     onClick={() => {
-                      if (user?.role === 'staff') {
-                        navigate('/?view=customer');
-                      } else {
-                        navigate('/');
-                      }
+                      handleRoomsClick();
                       setIsMobileMenuOpen(false);
                     }}
                     className={`block w-full text-left px-3 py-2 rounded-lg text-base font-bold cursor-pointer hover:opacity-80 ${isActive('/') ? 'bg-primary/10 text-primary' : 'text-muted-foreground'}`}
@@ -210,6 +220,7 @@ export const Navbar = () => {
                         onClick={() => {
                           navigate('/account/bookings');
                           setIsMobileMenuOpen(false);
+                          setTimeout(scrollToTop, 100);
                         }}
                         className={`block w-full text-left px-3 py-2 rounded-lg text-base font-bold cursor-pointer hover:opacity-80 ${isActive('/account/bookings') ? 'bg-primary/10 text-primary' : 'text-muted-foreground'}`}
                       >
@@ -219,6 +230,7 @@ export const Navbar = () => {
                         onClick={() => {
                           navigate('/account/profile');
                           setIsMobileMenuOpen(false);
+                          setTimeout(scrollToTop, 100);
                         }}
                         className={`block w-full text-left px-3 py-2 rounded-lg text-base font-bold cursor-pointer hover:opacity-80 ${isActive('/account/profile') ? 'bg-primary/10 text-primary' : 'text-muted-foreground'}`}
                       >
@@ -228,16 +240,7 @@ export const Navbar = () => {
                   )}
                   <button 
                     onClick={() => {
-                      if (location.pathname !== '/') {
-                        navigate('/');
-                        setTimeout(() => {
-                          const element = document.getElementById('amenities-section');
-                          element?.scrollIntoView({ behavior: 'smooth' });
-                        }, 100);
-                      } else {
-                        const element = document.getElementById('amenities-section');
-                        element?.scrollIntoView({ behavior: 'smooth' });
-                      }
+                      handleAmenitiesClick();
                       setIsMobileMenuOpen(false);
                     }}
                     className="block w-full text-left px-3 py-2 rounded-lg text-base font-bold text-muted-foreground cursor-pointer hover:opacity-80"

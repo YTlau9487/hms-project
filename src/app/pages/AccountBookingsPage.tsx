@@ -37,11 +37,11 @@ export const AccountBookingsPage = () => {
   const handleCancelBooking = async (bookingId: string) => {
     try {
       await bookingsAPI.cancel(parseInt(bookingId));
-      toast.success('Booking cancelled successfully');
+      toast.success(t('myBookings.cancelSuccess'));
       // Refresh bookings list
       await fetchBookings();
     } catch (err) {
-      const errorMessage = err instanceof Error ? getErrorMessage(err) : 'Failed to cancel booking';
+      const errorMessage = err instanceof Error ? getErrorMessage(err) : t('myBookings.cancelFailed');
       toast.error(errorMessage);
     }
   };

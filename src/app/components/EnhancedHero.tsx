@@ -14,14 +14,45 @@ interface EnhancedHeroProps {
 
 export const EnhancedHero = ({ onBookNow, onSearch, featuredRoom, onViewFeatured }: EnhancedHeroProps) => {
   const { t } = useTranslation();
+  
+  // Initialize dates dynamically: check-in = tomorrow, check-out = tomorrow + 2 days
+  const getDefaultDates = () => {
+    const today = new Date();
+    const checkIn = new Date(today);
+    checkIn.setDate(today.getDate() + 1);
+    const checkOut = new Date(checkIn);
+    checkOut.setDate(checkIn.getDate() + 2);
+    
+    const formatDate = (date: Date) => {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    };
+    
+    return {
+      checkIn: formatDate(checkIn),
+      checkOut: formatDate(checkOut),
+    };
+  };
+  
   const [searchParams, setSearchParams] = React.useState({
-    checkIn: '2026-02-12',
-    checkOut: '2026-02-14',
+    checkIn: getDefaultDates().checkIn,
+    checkOut: getDefaultDates().checkOut,
     guests: t('hero.guestOption1')
   });
 
   const handleSearch = () => {
     onSearch(searchParams);
+  };
+
+  const handleCheckInChange = (value: string) => {
+    setSearchParams(prev => {
+      const newCheckOut = value && prev.checkOut && value >= prev.checkOut
+        ? value
+        : prev.checkOut;
+      return { ...prev, checkIn: value, checkOut: newCheckOut };
+    });
   };
 
   // Use featured room or default image
@@ -72,14 +103,14 @@ export const EnhancedHero = ({ onBookNow, onSearch, featuredRoom, onViewFeatured
 
             {/* Featured Room Highlights */}
             <div className="flex flex-wrap gap-3 mb-6">
-              {featuredRoom.size_value && (
+              {featuredRoom.size && (
                 <div className="bg-white/10 backdrop-blur-sm px-3 py-1.5 rounded-lg border border-white/20">
-                  <span className="text-xs font-semibold">{t('roomCard.sizeLabel', { value: featuredRoom.size_value })}</span>
+                  <span className="text-xs font-semibold">{t('roomCard.sizeLabel', { value: featuredRoom.size.replace(/(\d+)\s*sq\.m/i, '$1') })}</span>
                 </div>
               )}
-              {featuredRoom.occupancy_count && (
+              {featuredRoom.occupancy && (
                 <div className="bg-white/10 backdrop-blur-sm px-3 py-1.5 rounded-lg border border-white/20">
-                  <span className="text-xs font-semibold">{t('roomCard.occupancyLabel', { count: featuredRoom.occupancy_count })}</span>
+                  <span className="text-xs font-semibold">{t('roomCard.occupancyLabel', { count: parseInt(featuredRoom.occupancy.replace(/(\d+)\s*Adult/i, '$1')) })}</span>
                 </div>
               )}
               <div className="bg-white/10 backdrop-blur-sm px-3 py-1.5 rounded-lg border border-white/20">
@@ -143,7 +174,8 @@ export const EnhancedHero = ({ onBookNow, onSearch, featuredRoom, onViewFeatured
                 type="date" 
                 className="w-full bg-input-background border-none rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-primary"
                 value={searchParams.checkIn}
-                onChange={(e) => setSearchParams({ ...searchParams, checkIn: e.target.value })}
+                onChange={(e) => handleCheckInChange(e.target.value)}
+                min={new Date().toISOString().split('T')[0]}
               />
             </div>
             <div className="space-y-1">
@@ -155,6 +187,7 @@ export const EnhancedHero = ({ onBookNow, onSearch, featuredRoom, onViewFeatured
                 className="w-full bg-input-background border-none rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-primary"
                 value={searchParams.checkOut}
                 onChange={(e) => setSearchParams({ ...searchParams, checkOut: e.target.value })}
+                min={searchParams.checkIn || new Date().toISOString().split('T')[0]}
               />
             </div>
             <div className="space-y-1">

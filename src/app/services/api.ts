@@ -53,7 +53,17 @@ async function fetchAPI<T>(
     // Handle other errors
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.detail || 'SERVER_ERROR');
+      const detail = errorData.detail;
+      // Handle FastAPI validation errors (array of objects)
+      if (Array.isArray(detail)) {
+        const messages = detail.map((e: any) => e.msg || e.message).filter(Boolean);
+        throw new Error(messages.join(', ') || 'SERVER_ERROR');
+      }
+      // Handle string detail
+      if (typeof detail === 'string') {
+        throw new Error(detail);
+      }
+      throw new Error('SERVER_ERROR');
     }
 
     // Handle 204 No Content

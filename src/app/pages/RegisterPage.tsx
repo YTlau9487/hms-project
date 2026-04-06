@@ -23,6 +23,8 @@ export const RegisterPage = () => {
     }
   }, [user, navigate]);
   const [isLoading, setIsLoading] = useState(false);
+  const [hasError, setHasError] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -30,8 +32,41 @@ export const RegisterPage = () => {
     password: ''
   });
 
+  const validateEmail = (email: string): boolean => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setHasError(false);
+    setErrorMessage('');
+    
+    // Frontend validation
+    if (!formData.name.trim() || formData.name.trim().length < 2) {
+      setHasError(true);
+      setErrorMessage(t('registerPage.nameMinLength'));
+      return;
+    }
+    
+    if (!validateEmail(formData.email)) {
+      setHasError(true);
+      setErrorMessage(t('registerPage.invalidEmail'));
+      return;
+    }
+    
+    if (!formData.password || formData.password.length < 6) {
+      setHasError(true);
+      setErrorMessage(t('registerPage.passwordMinLength'));
+      return;
+    }
+    
+    if (!formData.phone || formData.phone.trim().length < 6) {
+      setHasError(true);
+      setErrorMessage(t('registerPage.phoneRequired'));
+      return;
+    }
+    
     setIsLoading(true);
     
     try {
@@ -52,11 +87,13 @@ export const RegisterPage = () => {
           navigate('/');
         }
       } else {
-        toast.error(result.error || t('registerPage.registerFailed'));
+        setHasError(true);
+        setErrorMessage(result.error || t('registerPage.registerFailed'));
       }
     } catch (err) {
+      setHasError(true);
       const errorMessage = err instanceof Error ? getErrorMessage(err) : t('registerPage.registerFailed');
-      toast.error(errorMessage);
+      setErrorMessage(errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -124,6 +161,12 @@ export const RegisterPage = () => {
               />
             </div>
           </div>
+
+          {hasError && (
+            <div className="p-3 bg-destructive/10 border border-destructive/20 rounded-lg text-destructive text-sm">
+              {errorMessage}
+            </div>
+          )}
 
           <button 
             type="submit"

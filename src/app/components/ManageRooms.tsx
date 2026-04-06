@@ -50,7 +50,7 @@ export const ManageRooms = ({ rooms, onUpdateRoom, onAddPackage, onRemovePackage
       const adminData = await roomsAPI.getByIdAdmin(room.id);
       setRoomAdminData(adminData);
     } catch (err) {
-      const errorMessage = err instanceof Error ? getErrorMessage(err) : 'Failed to load room translations';
+      const errorMessage = err instanceof Error ? getErrorMessage(err) : t('common.loadingFailed');
       toast.error(errorMessage);
       setRoomAdminData(null);
     } finally {
@@ -72,14 +72,14 @@ export const ManageRooms = ({ rooms, onUpdateRoom, onAddPackage, onRemovePackage
         translations: roomAdminData.translations,
         amenities: roomAdminData.amenities.map(a => ({ translations: a.translations })),
       });
-      toast.success('Room updated successfully!');
+      toast.success(t('common.roomUpdated'));
       setEditingRoom(null);
       setEditFormData({});
       setRoomAdminData(null);
       // Trigger parent refresh
       onUpdateRoom(String(editingRoom.id), editFormData);
     } catch (err) {
-      const errorMessage = err instanceof Error ? getErrorMessage(err) : 'Failed to update room';
+      const errorMessage = err instanceof Error ? getErrorMessage(err) : t('common.updateFailed');
       toast.error(errorMessage);
     }
   };
@@ -218,7 +218,7 @@ export const ManageRooms = ({ rooms, onUpdateRoom, onAddPackage, onRemovePackage
               {/* Content */}
               <div className="p-6 space-y-8">
                 {isLoadingAdmin ? (
-                  <div className="text-center py-12 text-muted-foreground">Loading translations...</div>
+                  <div className="text-center py-12 text-muted-foreground">{t('manageRooms.loadingTranslations')}</div>
                 ) : (
                   <>
                     {/* Image Section */}
@@ -233,7 +233,7 @@ export const ManageRooms = ({ rooms, onUpdateRoom, onAddPackage, onRemovePackage
                         ];
                         const randomImage = mockImages[Math.floor(Math.random() * mockImages.length)];
                         setEditFormData({ ...editFormData, image_url: randomImage });
-                        toast.success('Image uploaded successfully!');
+                        toast.success(t('manageRooms.roomUpdated'));
                       }}>
                         <ImageWithFallback
                           src={editFormData.image_url || editingRoom.image_url || ''}
@@ -329,7 +329,7 @@ export const ManageRooms = ({ rooms, onUpdateRoom, onAddPackage, onRemovePackage
                       <div>
                         <div className="flex items-center gap-2 mb-4">
                           <Globe className="w-4 h-4" />
-                          <h4 className="font-bold text-lg">Room Name & Description</h4>
+                          <h4 className="font-bold text-lg">{t('manageRooms.roomName')}</h4>
                         </div>
 
                         {/* Language Tabs */}
@@ -358,23 +358,23 @@ export const ManageRooms = ({ rooms, onUpdateRoom, onAddPackage, onRemovePackage
                         {roomAdminData.translations.filter(t => t.language === activeLangTab).map(trans => (
                           <div key={trans.language} className="space-y-4">
                             <div>
-                              <label className="text-sm font-bold mb-2 block">Name</label>
+                              <label className="text-sm font-bold mb-2 block">{t('manageRooms.name')}</label>
                               <input
                                 type="text"
                                 value={trans.name}
                                 onChange={(e) => updateTranslation(trans.language, 'name', e.target.value)}
                                 className="w-full px-4 py-2 bg-input-background border border-border rounded-lg focus:ring-2 focus:ring-primary"
-                                placeholder={trans.name ? '' : 'Not yet translated'}
+                                placeholder={trans.name ? '' : t('manageRooms.notYetTranslated')}
                               />
                             </div>
                             <div>
-                              <label className="text-sm font-bold mb-2 block">Description</label>
+                              <label className="text-sm font-bold mb-2 block">{t('manageRooms.description')}</label>
                               <textarea
                                 value={trans.description}
                                 onChange={(e) => updateTranslation(trans.language, 'description', e.target.value)}
                                 rows={3}
                                 className="w-full px-4 py-2 bg-input-background border border-border rounded-lg focus:ring-2 focus:ring-primary resize-none"
-                                placeholder={trans.description ? '' : 'Not yet translated'}
+                                placeholder={trans.description ? '' : t('manageRooms.notYetTranslated')}
                               />
                             </div>
                           </div>
@@ -388,13 +388,13 @@ export const ManageRooms = ({ rooms, onUpdateRoom, onAddPackage, onRemovePackage
                         <div className="flex items-center justify-between mb-4">
                           <div className="flex items-center gap-2">
                             <Tag className="w-4 h-4" />
-                            <h4 className="font-bold text-lg">Amenities</h4>
+                            <h4 className="font-bold text-lg">{t('manageRooms.amenities')}</h4>
                           </div>
                           <button
                             onClick={addAmenity}
                             className="px-4 py-2 bg-accent text-accent-foreground rounded-lg font-bold hover:opacity-80 cursor-pointer flex items-center gap-2"
                           >
-                            <Plus className="w-4 h-4" /> Add Amenity
+                            <Plus className="w-4 h-4" /> {t('manageRooms.addAmenity')}
                           </button>
                         </div>
 
@@ -433,6 +433,9 @@ export const ManageRooms = ({ rooms, onUpdateRoom, onAddPackage, onRemovePackage
                               </div>
                             );
                           })}
+                          {roomAdminData.amenities.length === 0 && (
+                            <p className="text-sm text-muted-foreground text-center py-4">{t('manageRooms.noAmenities')}</p>
+                          )}
                         </div>
                       </div>
                     )}

@@ -52,13 +52,23 @@ export const RoomDetailsPage = ({ onBookNow }: RoomDetailsPageProps) => {
     );
   }
 
+  // Check sessionStorage for interface context (set by Navbar when staff switches views)
+  const isCustomerView = sessionStorage.getItem('interfaceContext') === 'customer';
+  const handleBackToRooms = () => {
+    navigate(isCustomerView ? '/?view=customer' : '/');
+    setTimeout(() => {
+      const element = document.getElementById('rooms-section');
+      element?.scrollIntoView({ behavior: 'smooth' });
+    }, 100);
+  };
+
   if (!room) {
     return (
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 text-center">
         <h2 className="text-2xl font-bold mb-4">{t('roomDetails.backToRooms')}</h2>
         <p className="text-muted-foreground mb-8">{t('roomDetails.backToRooms')}</p>
         <button 
-          onClick={() => navigate('/')}
+          onClick={handleBackToRooms}
           className="px-6 py-2 bg-primary text-primary-foreground rounded-lg font-bold hover:opacity-90 transition-opacity"
         >
           {t('roomDetails.backToRooms')}
@@ -75,7 +85,7 @@ export const RoomDetailsPage = ({ onBookNow }: RoomDetailsPageProps) => {
     >
       <RoomDetails
         room={room}
-        onBack={() => navigate('/')}
+        onBack={handleBackToRooms}
         onBookNow={onBookNow}
       />
     </motion.div>

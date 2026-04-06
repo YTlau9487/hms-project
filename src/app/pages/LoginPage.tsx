@@ -50,6 +50,10 @@ export const LoginPage = () => {
     }
   };
 
+  const handleForgotPassword = () => {
+    toast.info(t('loginPage.forgotPasswordMsg'));
+  };
+
   return (
     <div className="max-w-md mx-auto px-4 py-24">
       <div className="bg-background rounded-2xl shadow-2xl p-8 border border-border">
@@ -77,7 +81,7 @@ export const LoginPage = () => {
           <div className="space-y-1">
             <div className="flex justify-between items-center">
               <label className="text-sm font-medium">{t('loginPage.password')}</label>
-              <button type="button" className="text-xs text-primary font-medium hover:underline cursor-pointer hover:opacity-80">{t('loginPage.forgotPassword')}</button>
+              <button type="button" onClick={handleForgotPassword} className="text-xs text-primary font-medium hover:underline cursor-pointer hover:opacity-80">{t('loginPage.forgotPassword')}</button>
             </div>
             <div className="relative">
               <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />

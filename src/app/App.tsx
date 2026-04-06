@@ -1,11 +1,21 @@
-import React, { useState } from 'react';
-import { Routes, Route, Navigate, useNavigate } from 'react-router';
+import React, { useState, useEffect } from 'react';
+import { Routes, Route, Navigate, useNavigate, useLocation } from 'react-router';
 import { BookingModal } from './components/BookingModal';
 import { Toaster, toast } from 'sonner';
 import { AnimatePresence } from 'motion/react';
-import { useLocation } from 'react-router';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { Room, bookingsAPI, getErrorMessage } from './services/api';
+
+// Global scroll-to-top component that triggers on route change
+const ScrollToTop = () => {
+  const { pathname } = useLocation();
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'instant' });
+  }, [pathname]);
+
+  return null;
+};
 
 // Layouts
 import { PublicLayout } from './layouts/PublicLayout';
@@ -60,6 +70,10 @@ function AppContent() {
   };
 
   const handleBookNow = (room: Room) => {
+    if (user?.role === 'staff') {
+      toast.info('Staff accounts cannot book rooms. Please use the admin dashboard.');
+      return;
+    }
     if (!user) {
       toast.info('Please log in to book a room');
       navigate('/login');
@@ -71,7 +85,8 @@ function AppContent() {
 
   return (
     <>
-      <Toaster position="top-right" expand={false} richColors />
+      <ScrollToTop />
+      <Toaster position="top-right" expand={false} richColors offset={80} />
       
       <AnimatePresence mode="wait">
         <Routes location={location} key={location.pathname}>

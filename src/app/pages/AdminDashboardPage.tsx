@@ -49,29 +49,29 @@ export const AdminDashboardPage = () => {
         status: updates.status as 'available' | 'unavailable',
         featured: updates.featured
       });
-      toast.success('Room updated successfully');
+      toast.success(t('common.roomUpdated'));
       await fetchData();
     } catch (err) {
-      const errorMessage = err instanceof Error ? getErrorMessage(err) : 'Failed to update room';
+      const errorMessage = err instanceof Error ? getErrorMessage(err) : t('common.updateFailed');
       toast.error(errorMessage);
     }
   };
 
   const handleAddPackage = async (_roomId: string, _packageData: RoomPackage) => {
-    toast.info('Package management coming soon');
+    toast.info(t('common.comingSoon'));
   };
 
   const handleRemovePackage = async (_roomId: string, _packageId: string) => {
-    toast.info('Package management coming soon');
+    toast.info(t('common.comingSoon'));
   };
 
   const handleStatusChange = async (bookingId: number, status: 'confirmed' | 'cancelled') => {
     try {
       await adminAPI.updateBooking(bookingId, { status });
-      toast.success(`Booking #${bookingId} ${status} successfully`);
+      toast.success(status === 'confirmed' ? t('adminBookings.bookingConfirmed') : t('adminBookings.bookingCancelled'));
       await fetchData();
     } catch (err) {
-      const errorMessage = err instanceof Error ? getErrorMessage(err) : 'Failed to update booking';
+      const errorMessage = err instanceof Error ? getErrorMessage(err) : t('adminBookings.updateFailed');
       toast.error(errorMessage);
     }
   };

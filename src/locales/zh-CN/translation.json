@@ -147,7 +147,15 @@
     "viewReceipt": "查看收据",
     "statusConfirmed": "已确认",
     "statusPending": "待处理",
-    "statusCancelled": "已取消"
+    "statusCancelled": "已取消",
+    "cancelDialogTitle": "取消预订",
+    "cancelDialogDesc": "您确定要取消{{name}}的预订吗？此操作无法撤消。",
+    "cancelDialogConfirm": "是，取消预订",
+    "cancelDialogCancel": "保留预订",
+    "receiptNotAvailable": "收据暂不可用",
+    "cancelSuccess": "预订取消成功",
+    "cancelSuccessDesc": "您将很快收到确认电子邮件。",
+    "cancelFailed": "取消预订失败"
   },
   "userProfile": {
     "back": "返回",
@@ -208,7 +216,14 @@
     "saveChanges": "保存更改",
     "roomUpdated": "客房更新成功！",
     "packageAdded": "套餐添加成功！",
-    "fillAllFields": "请填写所有套餐字段"
+    "fillAllFields": "请填写所有套餐字段",
+    "name": "名称",
+    "description": "描述",
+    "notYetTranslated": "尚未翻译",
+    "amenities": "设施",
+    "addAmenity": "添加设施",
+    "noAmenities": "尚未添加设施。点击「添加设施」来添加。",
+    "loadingTranslations": "加载翻译中..."
   },
   "adminPanel": {
     "title": "员工管理仪表板",
@@ -241,7 +256,8 @@
     "dashboardView": "仪表板视图",
     "dashboardViewDesc": "收入分析和预订统计数据将在此显示。",
     "customerDatabase": "客户数据库",
-    "customerDatabaseDesc": "客户信息和历史记录将在此显示。"
+    "customerDatabaseDesc": "客户信息和历史记录将在此显示。",
+    "viewDetails": "查看详情"
   },
   "footer": {
     "brand": "黄金英里",
@@ -259,6 +275,8 @@
     "newsletterSubtitle": "订阅获取独家优惠和最新资讯。",
     "emailPlaceholder": "电子邮件地址",
     "join": "订阅",
+    "newsletterSuccess": "感谢您的订阅！",
+    "newsletterError": "订阅失败，请重试。",
     "copyright": "© 2026 黄金英里香港。保留所有权利。",
     "privacyPolicy": "隐私政策",
     "termsOfService": "服务条款",
@@ -292,7 +310,24 @@
     "no": "否",
     "ok": "确定",
     "success": "成功",
-    "failed": "失败"
+    "failed": "失败",
+    "viewDetails": "查看详情",
+    "receiptNotAvailable": "收据暂不可用",
+    "forgotPasswordInstructions": "请联系接待处重置密码",
+    "newsletterSuccess": "感谢您的订阅！",
+    "newsletterError": "订阅失败，请重试。",
+    "bookingCancelled": "预订取消成功",
+    "cancelFailed": "取消预订失败",
+    "bookingConfirmed": "预订确认成功",
+    "confirmFailed": "确认预订失败",
+    "updateFailed": "更新失败",
+    "deleteFailed": "删除失败",
+    "saveFailed": "保存失败",
+    "createFailed": "创建失败",
+    "loadingFailed": "加载失败",
+    "roomUpdated": "客房更新成功",
+    "roomCreated": "客房创建成功",
+    "roomDeleted": "客房删除成功"
   },
   "loginPage": {
     "welcomeBack": "欢迎回来",
@@ -301,6 +336,7 @@
     "emailPlaceholder": "name@example.com",
     "password": "密码",
     "forgotPassword": "忘记密码？",
+    "forgotPasswordMsg": "请联系接待处重置密码",
     "signIn": "登录",
     "signingIn": "登录中...",
     "loginSuccess": "登录成功！",
@@ -324,7 +360,11 @@
     "registerSuccess": "注册成功！欢迎加入！",
     "registerFailed": "注册失败",
     "alreadyAccount": "已有账户？",
-    "login": "登录"
+    "login": "登录",
+    "nameMinLength": "姓名必须至少为 2 个字符",
+    "invalidEmail": "电子邮件格式无效",
+    "passwordMinLength": "密码必须至少为 6 个字符",
+    "phoneRequired": "电话号码为必填项"
   },
   "homePage": {
     "ourCuratedRooms": "精选客房",
@@ -343,9 +383,10 @@
     "luxuryLounge": "豪华休息室",
     "luxuryLoungeDesc": "在我们优雅设计的宾客空间中放松。",
     "searchingRooms": "正在搜索可用客房...",
-    "searchSuccess": "已找到符合您日期的豪华客房！",
+    "searchSuccess": "已找到符合您日期的客房！",
     "searchError": "搜索客房时出错",
-    "loadingRooms": "加载客房数据中..."
+    "loadingRooms": "加载客房数据中...",
+    "facilityComingSoon": "此功能即将推出，敬请期待！"
   },
   "adminRooms": {
     "title": "客房管理",
@@ -400,7 +441,14 @@
     "deleteRoomBtn": "删除客房",
     "roomDeleted": "客房删除成功",
     "deleteFailed": "删除客房失败",
-    "nameAndPriceRequired": "客房名称和价格为必填项"
+    "nameAndPriceRequired": "客房名称和价格为必填项",
+    "nameLabel": "名称 *",
+    "namePlaceholder": "客房名称",
+    "descriptionLabel": "描述",
+    "descriptionPlaceholder": "客房描述",
+    "roomType": "客房类型",
+    "addAmenity": "添加设施",
+    "noAmenities": "尚未添加设施。点击「添加设施」来添加。"
   },
   "adminBookings": {
     "title": "预订管理",
@@ -424,7 +472,9 @@
     "cancelled": "已取消",
     "bookingConfirmed": "预订确认成功",
     "bookingCancelled": "预订取消成功",
-    "updateFailed": "更新预订失败"
+    "updateFailed": "更新预订失败",
+    "confirmFailed": "确认预订失败",
+    "cancelFailed": "取消预订失败"
   },
   "staticPages": {
     "back": "返回",
@@ -574,7 +624,7 @@
     },
     "ourValues": {
       "heading": "我们的价值观",
-      "item1": "卓越的服务交付",
+      "item1": "卓越的服务",
       "item2": "尊重文化多样性",
       "item3": "环境责任",
       "item4": "社区参与"
@@ -701,5 +751,9 @@
       "item2": "视听设备",
       "item3": "专业活动协调员"
     }
+  },
+  "phoneInput": {
+    "searchPlaceholder": "搜索国家或代码...",
+    "noCountriesFound": "未找到国家"
   }
 }

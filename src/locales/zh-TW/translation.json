@@ -147,7 +147,15 @@
     "viewReceipt": "查看收據",
     "statusConfirmed": "已確認",
     "statusPending": "待處理",
-    "statusCancelled": "已取消"
+    "statusCancelled": "已取消",
+    "cancelDialogTitle": "取消預訂",
+    "cancelDialogDesc": "您確定要取消{{name}}的預訂嗎？此操作無法撤消。",
+    "cancelDialogConfirm": "是，取消預訂",
+    "cancelDialogCancel": "保留預訂",
+    "receiptNotAvailable": "收據暫不可用",
+    "cancelSuccess": "預訂取消成功",
+    "cancelSuccessDesc": "您將很快收到確認電子郵件。",
+    "cancelFailed": "取消預訂失敗"
   },
   "userProfile": {
     "back": "返回",
@@ -208,7 +216,14 @@
     "saveChanges": "儲存變更",
     "roomUpdated": "客房更新成功！",
     "packageAdded": "套餐添加成功！",
-    "fillAllFields": "請填寫所有套餐欄位"
+    "fillAllFields": "請填寫所有套餐欄位",
+    "name": "名稱",
+    "description": "描述",
+    "notYetTranslated": "尚未翻譯",
+    "amenities": "設施",
+    "addAmenity": "添加設施",
+    "noAmenities": "尚未添加設施。點擊「添加設施」來添加。",
+    "loadingTranslations": "載入翻譯中..."
   },
   "adminPanel": {
     "title": "員工管理儀表板",
@@ -241,7 +256,8 @@
     "dashboardView": "儀表板視圖",
     "dashboardViewDesc": "收入分析和預訂統計資料將在此顯示。",
     "customerDatabase": "客戶資料庫",
-    "customerDatabaseDesc": "客戶資訊和歷史記錄將在此顯示。"
+    "customerDatabaseDesc": "客戶資訊和歷史記錄將在此顯示。",
+    "viewDetails": "查看詳情"
   },
   "footer": {
     "brand": "黃金英里",
@@ -259,6 +275,8 @@
     "newsletterSubtitle": "訂閱獲取獨家優惠和最新資訊。",
     "emailPlaceholder": "電子郵件地址",
     "join": "訂閱",
+    "newsletterSuccess": "感謝您的訂閱！",
+    "newsletterError": "訂閱失敗，請重試。",
     "copyright": "© 2026 黃金英里香港。保留所有權利。",
     "privacyPolicy": "私隱政策",
     "termsOfService": "服務條款",
@@ -292,7 +310,24 @@
     "no": "否",
     "ok": "確定",
     "success": "成功",
-    "failed": "失敗"
+    "failed": "失敗",
+    "viewDetails": "查看詳情",
+    "receiptNotAvailable": "收據暫不可用",
+    "forgotPasswordInstructions": "請聯絡接待處重設密碼",
+    "newsletterSuccess": "感謝您的訂閱！",
+    "newsletterError": "訂閱失敗，請重試。",
+    "bookingCancelled": "預訂取消成功",
+    "cancelFailed": "取消預訂失敗",
+    "bookingConfirmed": "預訂確認成功",
+    "confirmFailed": "確認預訂失敗",
+    "updateFailed": "更新失敗",
+    "deleteFailed": "刪除失敗",
+    "saveFailed": "儲存失敗",
+    "createFailed": "創建失敗",
+    "loadingFailed": "載入失敗",
+    "roomUpdated": "客房更新成功",
+    "roomCreated": "客房創建成功",
+    "roomDeleted": "客房刪除成功"
   },
   "loginPage": {
     "welcomeBack": "歡迎回來",
@@ -301,6 +336,7 @@
     "emailPlaceholder": "name@example.com",
     "password": "密碼",
     "forgotPassword": "忘記密碼？",
+    "forgotPasswordMsg": "請聯絡接待處重設密碼",
     "signIn": "登入",
     "signingIn": "登入中...",
     "loginSuccess": "登入成功！",
@@ -324,7 +360,11 @@
     "registerSuccess": "註冊成功！歡迎加入！",
     "registerFailed": "註冊失敗",
     "alreadyAccount": "已有帳戶？",
-    "login": "登入"
+    "login": "登入",
+    "nameMinLength": "姓名必須至少為 2 個字符",
+    "invalidEmail": "電子郵件格式無效",
+    "passwordMinLength": "密碼必須至少為 6 個字符",
+    "phoneRequired": "電話號碼為必填項"
   },
   "homePage": {
     "ourCuratedRooms": "精選客房",
@@ -343,9 +383,10 @@
     "luxuryLounge": "豪華休息室",
     "luxuryLoungeDesc": "在我們優雅設計的賓客空間中放鬆。",
     "searchingRooms": "正在搜尋可用客房...",
-    "searchSuccess": "已找到符合您日期的豪華客房！",
+    "searchSuccess": "已找到符合您日期的客房！",
     "searchError": "搜尋客房時出錯",
-    "loadingRooms": "載入客房資料中..."
+    "loadingRooms": "載入客房資料中...",
+    "facilityComingSoon": "此功能即將推出，敬請期待！"
   },
   "adminRooms": {
     "title": "客房管理",
@@ -400,7 +441,14 @@
     "deleteRoomBtn": "刪除客房",
     "roomDeleted": "客房刪除成功",
     "deleteFailed": "刪除客房失敗",
-    "nameAndPriceRequired": "客房名稱和價格為必填項"
+    "nameAndPriceRequired": "客房名稱和價格為必填項",
+    "nameLabel": "名稱 *",
+    "namePlaceholder": "客房名稱",
+    "descriptionLabel": "描述",
+    "descriptionPlaceholder": "客房描述",
+    "roomType": "客房類型",
+    "addAmenity": "添加設施",
+    "noAmenities": "尚未添加設施。點擊「添加設施」來添加。"
   },
   "adminBookings": {
     "title": "預訂管理",
@@ -424,7 +472,9 @@
     "cancelled": "已取消",
     "bookingConfirmed": "預訂確認成功",
     "bookingCancelled": "預訂取消成功",
-    "updateFailed": "更新預訂失敗"
+    "updateFailed": "更新預訂失敗",
+    "confirmFailed": "確認預訂失敗",
+    "cancelFailed": "取消預訂失敗"
   },
   "staticPages": {
     "back": "返回",
@@ -574,7 +624,7 @@
     },
     "ourValues": {
       "heading": "我們的價值觀",
-      "item1": "卓越的服務 delivery",
+      "item1": "卓越的服務",
       "item2": "尊重文化多樣性",
       "item3": "環境責任",
       "item4": "社區參與"
@@ -701,5 +751,9 @@
       "item2": "視聽設備",
       "item3": "專業活動協調員"
     }
+  },
+  "phoneInput": {
+    "searchPlaceholder": "搜尋國家或代碼...",
+    "noCountriesFound": "未找到國家"
   }
 }

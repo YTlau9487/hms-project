@@ -90,7 +90,7 @@ export const AdminPanel = ({
 
   const handleClearAllNotifications = () => {
     setNotifications([]);
-    toast.info('All notifications cleared');
+    toast.info(t('notifications.clearAll'));
   };
 
   const filteredBookings = bookings.filter(booking => {
@@ -180,8 +180,8 @@ export const AdminPanel = ({
                 transition={{ duration: 0.2 }}
                 className="text-center py-12 text-muted-foreground"
               >
-                <h3 className="text-xl font-bold mb-2">Dashboard View</h3>
-                <p>Revenue analytics and booking statistics will be displayed here.</p>
+                <h3 className="text-xl font-bold mb-2">{t('adminPanel.dashboardView')}</h3>
+                <p>{t('adminPanel.dashboardViewDesc')}</p>
               </motion.div>
             ) : activeTab === 'customers' ? (
               <motion.div
@@ -192,8 +192,8 @@ export const AdminPanel = ({
                 transition={{ duration: 0.2 }}
                 className="text-center py-12 text-muted-foreground"
               >
-                <h3 className="text-xl font-bold mb-2">Customer Database</h3>
-                <p>Customer information and history will be displayed here.</p>
+                <h3 className="text-xl font-bold mb-2">{t('adminPanel.customerDatabase')}</h3>
+                <p>{t('adminPanel.customerDatabaseDesc')}</p>
               </motion.div>
             ) : (
               <motion.div
@@ -276,7 +276,11 @@ export const AdminPanel = ({
                                   <XCircle className="w-4 h-4 text-destructive" />
                                 </button>
                               )}
-                              <button className="p-2 rounded-lg hover:bg-muted transition-colors cursor-pointer" title={t('adminPanel.actions')}>
+                              <button 
+                                onClick={() => toast.info(t('common.comingSoon'))}
+                                className="p-2 rounded-lg hover:bg-muted transition-colors cursor-pointer" 
+                                title={t('adminPanel.viewDetails')}
+                              >
                                 <MoreVertical className="w-4 h-4 text-muted-foreground" />
                               </button>
                             </div>

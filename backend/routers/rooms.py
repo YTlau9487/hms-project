@@ -106,6 +106,7 @@ def list_rooms(
     if featured is not None:
         query = query.where(Room.featured == featured)
 
+    query = query.order_by(Room.id.asc())
     rooms = session.exec(query).all()
 
     return [build_localized_room(room, lang, session) for room in rooms]
