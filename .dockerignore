@@ -104,8 +104,10 @@ Thumbs.db
 # Docker
 Dockerfile
 Dockerfile.dev
+Dockerfile.prod
 .dockerignore
 docker-compose.yml
+docker-compose.prod.yml
 
 # Documentation
 README.md
@@ -116,3 +118,6 @@ docs/
 **/*.spec.*
 tests/
 __tests__/
+
+# Memory bank (project documentation)
+memory-bank/
