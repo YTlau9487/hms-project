@@ -219,11 +219,47 @@ Port 80 → Nginx (frontend container)
   └── /api/* → backend:8000 (internal network only)
 ```
 
-#### Custom Domain & SSL
-To configure a custom domain and SSL:
-1. Edit `nginx/nginx.conf` and update `server_name`
-2. Uncomment the SSL block and mount your certificate files
-3. Rebuild: `docker compose -f docker-compose.prod.yml up --build -d`
+#### Production Deployment Scenarios
+
+The production Nginx configuration (`nginx/nginx.conf`) supports three deployment scenarios:
+
+##### Scenario A: Traditional Nginx HTTP (Default)
+- Nginx listens on port 80 with `server_name _;` (accepts any host header).
+- Suitable for:
+  - Local testing or on-prem deployments
+  - Behind another reverse proxy or load balancer
+  - VPS deployments without SSL
+- **No configuration changes needed** — just start the production stack.
+
+##### Scenario B: Nginx with HTTPS + SSL Certificates
+- To let Nginx terminate HTTPS directly:
+  1. Obtain valid SSL certificates (e.g., via Let's Encrypt or another CA).
+  2. Mount them into the container at `/etc/nginx/ssl/` by adding a volume in `docker-compose.prod.yml`:
+     ```yaml
+     volumes:
+       - ./nginx/ssl:/etc/nginx/ssl:ro
+     ```
+  3. Edit `nginx/nginx.conf`:
+     - Set `server_name` to your actual domain(s).
+     - Uncomment the HTTPS server block (`listen 443 ssl http2;` and `ssl_certificate` lines).
+     - Optionally enable the HTTP → HTTPS redirect server block.
+  4. Rebuild: `docker compose -f docker-compose.prod.yml up --build -d`
+- The `nginx/nginx.conf` file includes a commented-out example for reference.
+- For advanced SSL/TLS tuning, refer to the [official Nginx documentation](https://nginx.org/en/docs/http/configuring_https_servers.html).
+
+##### Scenario C: Deployment Behind Cloudflare Tunnel (No Port Forwarding)
+- Nginx still listens on HTTP port 80 inside the container.
+- Cloudflare Tunnel runs on the host and forwards traffic from Cloudflare's edge to `http://localhost:80`.
+- HTTPS is terminated at Cloudflare; Nginx only serves plain HTTP.
+- **Setup steps:**
+  1. Run the production stack: `./start-prod.sh` or `start-prod.bat`
+  2. Install `cloudflared` on the host machine.
+  3. Create a tunnel and route your hostname (e.g., `hotel.yourdomain.com`) to `http://localhost:80`.
+  4. Ensure Cloudflare DNS points the hostname to the tunnel.
+- The application code and Nginx config do not need special changes for Cloudflare Tunnel. Cloudflare handles encryption and DNS, while the Nginx container exposes a standard HTTP endpoint on port 80.
+- For detailed Cloudflare Tunnel setup and options, please refer to the [official Cloudflare documentation](https://developers.cloudflare.com/cloudflare-one/connections/connect-apps/).
+
+> **Note:** If your deployment scenario does not fall exactly into the examples above, you can still use the same Docker + Nginx setup as a base and adapt it. Please refer to the [official Nginx documentation](https://nginx.org/en/docs/) and your hosting provider's guides for advanced or custom configurations.
 
 ## 📚 Documentation
 
@@ -239,4 +275,4 @@ For detailed information about the Docker setup, troubleshooting, and advanced u
 
 ## 📄 License
 
-This project is licensed under the MIT License.
+This is a student project for educational purposes. All rights reserved.
