@@ -1,7 +1,7 @@
 from pydantic import BaseModel, EmailStr
 from typing import Optional, List
 from datetime import date, datetime
-from models import UserRole, BookingStatus, RoomStatus, RoomType
+from models import UserRole, BookingStatus, RoomStatus, RoomType, NotificationType
 
 
 # Auth schemas
@@ -173,8 +173,11 @@ class BookingResponse(BaseModel):
     status: BookingStatus
     total_price: float
     package_name: Optional[str]
+    checked_in_at: Optional[datetime]
+    checked_out_at: Optional[datetime]
     created_at: datetime
     room: Optional[RoomLocalizedResponse] = None
+    user: Optional[UserResponse] = None
 
     class Config:
         from_attributes = True
@@ -182,3 +185,69 @@ class BookingResponse(BaseModel):
 
 class BookingUpdate(BaseModel):
     status: Optional[BookingStatus] = None
+
+
+# Stay management schemas
+class CheckInOutResponse(BaseModel):
+    id: int
+    status: BookingStatus
+    checked_in_at: Optional[datetime]
+    checked_out_at: Optional[datetime]
+    message: str
+
+    class Config:
+        from_attributes = True
+
+
+# Notification schemas
+class NotificationResponse(BaseModel):
+    id: int
+    type: NotificationType
+    message: str
+    booking_id: Optional[int]
+    user_id: int
+    read: bool
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
+class NotificationReadResponse(BaseModel):
+    id: int
+    read: bool
+
+    class Config:
+        from_attributes = True
+
+
+# Availability schemas
+class AvailabilityRequest(BaseModel):
+    check_in: date
+    check_out: date
+
+
+class AvailabilityResponse(BaseModel):
+    rooms: List[RoomLocalizedResponse]
+    check_in: date
+    check_out: date
+
+
+# Staff management schemas
+class StaffCreate(BaseModel):
+    email: EmailStr
+    password: str
+    name: str
+    phone: Optional[str] = None
+
+
+class StaffResponse(BaseModel):
+    id: int
+    email: str
+    name: str
+    phone: Optional[str]
+    role: UserRole
+    created_at: datetime
+
+    class Config:
+        from_attributes = True

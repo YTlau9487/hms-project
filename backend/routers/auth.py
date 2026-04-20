@@ -5,12 +5,18 @@ from argon2.exceptions import VerifyMismatchError
 from datetime import datetime, timedelta
 from jose import JWTError, jwt
 from typing import Optional
+from collections import defaultdict
 
 from database import get_session
 from models import User, UserRole
 from schemas import UserRegister, UserLogin, Token, UserResponse, UserUpdate
 
 router = APIRouter(prefix="/api/auth", tags=["auth"])
+
+# Rate limiting storage
+login_attempts = defaultdict(list)
+RATE_LIMIT_MAX_ATTEMPTS = 5
+RATE_LIMIT_WINDOW = 900  # 15 minutes in seconds
 
 # Password hasher
 ph = PasswordHasher()
@@ -66,12 +72,38 @@ def get_current_user(
 
 def get_current_staff(current_user: User = Depends(get_current_user)) -> User:
     """Dependency to ensure user is staff"""
-    if current_user.role != UserRole.STAFF:
+    if current_user.role not in [UserRole.STAFF, UserRole.ADMIN]:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Not enough permissions"
         )
     return current_user
+
+
+def get_current_admin(current_user: User = Depends(get_current_user)) -> User:
+    """Dependency to ensure user is admin"""
+    if current_user.role != UserRole.ADMIN:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Admin access required"
+        )
+    return current_user
+
+
+def check_rate_limit(client_ip: str) -> bool:
+    """Check if client has exceeded rate limit"""
+    now = datetime.utcnow()
+    # Clean old attempts
+    login_attempts[client_ip] = [
+        t for t in login_attempts[client_ip]
+        if (now - t).total_seconds() < RATE_LIMIT_WINDOW
+    ]
+    return len(login_attempts[client_ip]) < RATE_LIMIT_MAX_ATTEMPTS
+
+
+def record_login_attempt(client_ip: str):
+    """Record a login attempt"""
+    login_attempts[client_ip].append(datetime.utcnow())
 
 
 @router.post("/register", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
@@ -105,11 +137,25 @@ def register(user_data: UserRegister, session: Session = Depends(get_session)):
 
 
 @router.post("/login", response_model=Token)
-def login(user_data: UserLogin, session: Session = Depends(get_session)):
-    """Login and get JWT token"""
+def login(
+    request: Request,
+    user_data: UserLogin,
+    session: Session = Depends(get_session)
+):
+    """Login and get JWT token with rate limiting"""
+    client_ip = request.client.host
+    
+    # Check rate limit
+    if not check_rate_limit(client_ip):
+        raise HTTPException(
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            detail="Too many login attempts. Please try again later."
+        )
+    
     # Find user by email
     user = session.exec(select(User).where(User.email == user_data.email)).first()
     if not user:
+        record_login_attempt(client_ip)
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect email or password"
@@ -119,6 +165,7 @@ def login(user_data: UserLogin, session: Session = Depends(get_session)):
     try:
         ph.verify(user.hashed_password, user_data.password)
     except VerifyMismatchError:
+        record_login_attempt(client_ip)
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect email or password"

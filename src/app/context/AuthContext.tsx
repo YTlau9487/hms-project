@@ -4,7 +4,7 @@ import { authAPI, usersAPI, setAuthToken, User } from '../services/api';
 interface AuthContextType {
   user: User | null;
   loading: boolean;
-  login: (email: string, password: string) => Promise<{ success: boolean; error?: string; user?: User }>;
+  login: (email: string, password: string, allowAdmin?: boolean) => Promise<{ success: boolean; error?: string; user?: User }>;
   register: (data: { email: string; password: string; name: string; phone?: string }) => Promise<{ success: boolean; error?: string }>;
   logout: () => void;
   refreshUser: () => Promise<void>;
@@ -25,7 +25,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setAuthToken(token);
         try {
           const userData = await authAPI.me();
-          setUser(userData);
+          // Admin accounts should use the admin portal, not the customer interface
+          if (userData.role === 'admin') {
+            localStorage.removeItem('hms_token');
+            setAuthToken(null);
+          } else {
+            setUser(userData);
+          }
         } catch (error) {
           // Token invalid or expired
           localStorage.removeItem('hms_token');
@@ -37,19 +43,35 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     initAuth();
   }, []);
 
-  const login = async (email: string, password: string): Promise<{ success: boolean; error?: string; user?: User }> => {
+  const login = async (email: string, password: string, allowAdmin: boolean = false): Promise<{ success: boolean; error?: string; user?: User }> => {
     try {
       const tokenData = await authAPI.login({ email, password });
       localStorage.setItem('hms_token', tokenData.access_token);
       setAuthToken(tokenData.access_token);
       
       const userData = await authAPI.me();
+      
+      // Admin accounts should use the admin portal, not the customer interface
+      if (userData.role === 'admin' && !allowAdmin) {
+        localStorage.removeItem('hms_token');
+        setAuthToken(null);
+        throw new Error('Admin accounts must use the admin portal at /admin/login');
+      }
+      
       setUser(userData);
       
       return { success: true, user: userData };
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Login failed';
-      return { success: false, error: errorMessage };
+      let errorMessage = 'Login failed';
+      if (error instanceof Error) {
+        try {
+          const errorData = JSON.parse(error.message);
+          errorMessage = errorData.detail || error.message;
+        } catch {
+          errorMessage = error.message;
+        }
+      }
+      throw new Error(errorMessage);
     }
   };
 

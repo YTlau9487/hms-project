@@ -30,7 +30,9 @@
     "guestOption2": "1 Adult",
     "guestOption3": "2 Adults, 1 Child",
     "guestOption4": "2 Adults, 2 Children",
-    "startingFrom": "Starting from ${{price}}/night"
+    "startingFrom": "Starting from ${{price}}/night",
+    "dateErrorRequired": "Please select both check-in and check-out dates",
+    "dateErrorInvalid": "Check-out date must be after check-in date"
   },
   "roomCard": {
     "featured": "Featured",
@@ -105,6 +107,22 @@
         "name": "VIP Experience",
         "desc": "Breakfast, airport transfer, and late check-out."
       }
+    },
+    "validation": {
+      "checkInRequired": "Check-in date is required",
+      "checkOutRequired": "Check-out date is required",
+      "checkOutAfterCheckIn": "Check-out date must be after check-in date",
+      "firstNameMin": "First name must be at least 2 characters",
+      "lastNameMin": "Last name must be at least 2 characters",
+      "emailInvalid": "Please enter a valid email address",
+      "phoneRequired": "Phone number is required",
+      "phoneInvalid": "Please enter a valid phone number"
+    },
+    "confirmDialog": {
+      "title": "Confirm Booking",
+      "description": "Are you sure you want to book {{room}} from {{checkIn}} to {{checkOut}}? Total: ${{total}}",
+      "confirmText": "Yes, Book Now",
+      "cancelText": "Cancel"
     }
   },
   "authModal": {
@@ -153,6 +171,7 @@
     "cancelDialogConfirm": "Yes, Cancel Booking",
     "cancelDialogCancel": "Keep Booking",
     "receiptNotAvailable": "Receipt is not available yet",
+    "contactForChanges": "Contact reception for changes or cancellations",
     "cancelSuccess": "Booking cancelled successfully",
     "cancelSuccessDesc": "You will receive a confirmation email shortly.",
     "cancelFailed": "Failed to cancel booking"
@@ -286,7 +305,9 @@
   "notifications": {
     "title": "Notifications",
     "clearAll": "Clear all",
-    "noNotifications": "No new notifications"
+    "noNotifications": "No new notifications",
+    "justNow": "Just now",
+    "loading": "Loading notifications..."
   },
   "common": {
     "loading": "Loading...",
@@ -756,5 +777,40 @@
   "phoneInput": {
     "searchPlaceholder": "Search country or code...",
     "noCountriesFound": "No countries found"
+  },
+  "stayManagement": {
+    "checkInTitle": "Check-in Management",
+    "checkOutTitle": "Check-out Management",
+    "checkInSubtitle": "Process guest check-ins for confirmed bookings",
+    "checkOutSubtitle": "Process guest check-outs for active stays",
+    "searchPlaceholder": "Search bookings...",
+    "bookingId": "Booking ID",
+    "guest": "Guest",
+    "room": "Room",
+    "checkInDate": "Check-in Date",
+    "checkOutDate": "Check-out Date",
+    "status": "Status",
+    "stayStatus": "Stay Status",
+    "action": "Action",
+    "loadingBookings": "Loading bookings...",
+    "loadingError": "Unable to load booking data",
+    "noCheckInBookings": "No bookings available for check-in",
+    "noCheckOutBookings": "No bookings available for check-out",
+    "confirmed": "confirmed",
+    "pending": "pending",
+    "cancelled": "cancelled",
+    "checkedIn": "Checked In",
+    "notCheckedIn": "Not Checked In",
+    "checkedOut": "Checked Out",
+    "checkInBtn": "Check In",
+    "checkOutBtn": "Check Out",
+    "confirmCheckInTitle": "Confirm Check-in",
+    "confirmCheckOutTitle": "Confirm Check-out",
+    "confirmCheckInDesc": "Are you sure you want to check in {{guest}}?",
+    "confirmCheckOutDesc": "Are you sure you want to check out {{guest}}?",
+    "goBack": "Go Back",
+    "checkInSuccess": "Guest checked in successfully",
+    "checkOutSuccess": "Guest checked out successfully",
+    "actionFailed": "Failed to process stay action"
   }
 }

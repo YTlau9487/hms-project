@@ -4,6 +4,7 @@ import {
   MoreVertical, 
   CheckCircle, 
   XCircle, 
+  AlertTriangle,
   Clock,
   ArrowUpRight,
   TrendingUp,
@@ -11,7 +12,7 @@ import {
   Users,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import { NotificationDropdown, Notification } from './NotificationDropdown';
+import { NotificationDropdown } from './NotificationDropdown';
 import { ConfirmationDialog } from './ConfirmationDialog';
 import { ManageRooms } from './ManageRooms';
 import { Room, RoomPackage } from './RoomCard';
@@ -42,7 +43,6 @@ export const AdminPanel = ({
 }: AdminPanelProps) => {
   const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState('bookings');
-  const [notifications, setNotifications] = useState<Notification[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [confirmDialog, setConfirmDialog] = useState<{
     isOpen: boolean;
@@ -66,39 +66,28 @@ export const AdminPanel = ({
     if (onStatusChange) {
       onStatusChange(id, status);
     }
-
-    const booking = bookings.find(b => b.id === id);
-    if (booking) {
-      const newNotification: Notification = {
-        id: `N-${Date.now()}`,
-        type: status === 'cancelled' ? 'cancellation' : 'check-in',
-        message: `Booking #${id} has been ${status}`,
-        customerName: `User #${booking.user_id}`,
-        bookingId: `BK-${id}`,
-        timestamp: 'Just now',
-        read: false,
-      };
-      setNotifications(prev => [newNotification, ...prev]);
-    }
-
     setConfirmDialog({ isOpen: false, bookingId: 0, action: 'cancel' });
   };
 
-  const handleMarkNotificationAsRead = (id: string) => {
-    setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n));
+  const getGuestName = (booking: Booking) => {
+    const name = booking.user?.name?.trim();
+    if (name) return name;
+    const email = booking.user?.email?.trim();
+    if (email) return email;
+    return `User #${booking.user_id}`;
   };
 
-  const handleClearAllNotifications = () => {
-    setNotifications([]);
-    toast.info(t('notifications.clearAll'));
+  const canCancel = (booking: Booking) => {
+    return booking.status !== 'cancelled' && !booking.checked_in_at && !booking.checked_out_at;
   };
 
   const filteredBookings = bookings.filter(booking => {
     if (!searchQuery) return true;
     const query = searchQuery.toLowerCase();
+    const guestName = getGuestName(booking).toLowerCase();
     return (
       `bk-${booking.id}`.includes(query) ||
-      `user #${booking.user_id}`.includes(query) ||
+      guestName.includes(query) ||
       (booking.room?.name || '').toLowerCase().includes(query) ||
       booking.status.toLowerCase().includes(query)
     );
@@ -114,11 +103,7 @@ export const AdminPanel = ({
               <p className="text-muted-foreground">{t('adminPanel.subtitle')}</p>
             </div>
             <div className="flex gap-2">
-              <NotificationDropdown 
-                notifications={notifications}
-                onMarkAsRead={handleMarkNotificationAsRead}
-                onClearAll={handleClearAllNotifications}
-              />
+              <NotificationDropdown />
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <input 
@@ -238,7 +223,7 @@ export const AdminPanel = ({
                       filteredBookings.map((booking) => (
                         <tr key={booking.id} className="text-sm hover:bg-muted/30 transition-colors">
                           <td className="px-6 py-4 font-mono text-xs font-bold">BK-{booking.id}</td>
-                          <td className="px-6 py-4 font-medium">User #{booking.user_id}</td>
+                          <td className="px-6 py-4 font-medium">{getGuestName(booking)}</td>
                           <td className="px-6 py-4 text-muted-foreground">{booking.room?.name || 'Unknown'}</td>
                           <td className="px-6 py-4">
                             <div className="flex flex-col">
@@ -267,7 +252,7 @@ export const AdminPanel = ({
                                   <CheckCircle className="w-4 h-4 text-green-600" />
                                 </button>
                               )}
-                              {booking.status !== 'cancelled' && (
+                              {canCancel(booking) && (
                                 <button 
                                   onClick={() => setConfirmDialog({ isOpen: true, bookingId: booking.id, action: 'cancel' })}
                                   className="p-2 rounded-lg hover:bg-destructive/10 transition-colors cursor-pointer"
@@ -314,7 +299,7 @@ export const AdminPanel = ({
                           {booking.status === 'confirmed' ? t('adminBookings.confirmed') : booking.status === 'pending' ? t('adminBookings.pending') : t('adminBookings.cancelled')}
                         </span>
                       </div>
-                      <div className="text-sm font-medium">User #{booking.user_id}</div>
+                      <div className="text-sm font-medium">{getGuestName(booking)}</div>
                       <div className="text-sm text-muted-foreground">{booking.room?.name || 'Unknown'}</div>
                       <div className="flex justify-between items-center text-sm">
                         <div className="text-muted-foreground">
@@ -332,7 +317,7 @@ export const AdminPanel = ({
                             {t('adminPanel.confirm')}
                           </button>
                         )}
-                        {booking.status !== 'cancelled' && (
+                        {canCancel(booking) && (
                           <button 
                             onClick={() => setConfirmDialog({ isOpen: true, bookingId: booking.id, action: 'cancel' })}
                             className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-destructive/10 hover:bg-destructive/20 text-destructive rounded-lg transition-colors cursor-pointer text-sm font-medium"
@@ -354,7 +339,7 @@ export const AdminPanel = ({
 
         <ConfirmationDialog
         isOpen={confirmDialog.isOpen}
-        onClose={() => setConfirmDialog({ isOpen: false, bookingId: 0, action: 'cancel' })}
+        onClose={() => setConfirmDialog(prev => ({ ...prev, isOpen: false }))}
         onConfirm={() => {
           const status = confirmDialog.action === 'confirm' ? 'confirmed' : 'cancelled';
           handleStatusChange(confirmDialog.bookingId, status);
@@ -368,6 +353,10 @@ export const AdminPanel = ({
         confirmText={confirmDialog.action === 'confirm' ? t('adminPanel.confirmBookingBtn') : t('adminPanel.cancelBookingBtn')}
         cancelText={t('adminPanel.goBack')}
         variant={confirmDialog.action === 'cancel' ? 'destructive' : 'default'}
+        icon={confirmDialog.action === 'confirm' ? CheckCircle : AlertTriangle}
+        iconColor={confirmDialog.action === 'confirm' ? 'text-green-600' : 'text-red-600'}
+        iconBgColor={confirmDialog.action === 'confirm' ? 'bg-green-100' : 'bg-red-100'}
+        confirmButtonClassName={confirmDialog.action === 'confirm' ? 'bg-green-600 hover:bg-green-700 text-white' : ''}
       />
     </div>
   );

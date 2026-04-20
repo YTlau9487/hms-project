@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Outlet, useNavigate, useLocation, Navigate } from 'react-router';
 import { Navbar } from '../components/Navbar';
-import { LayoutDashboard, BedDouble, CalendarCheck, Menu, X } from 'lucide-react';
+import { LayoutDashboard, BedDouble, CalendarCheck, Menu, X, LogIn, LogOut } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 export const AdminLayout = () => {
@@ -10,8 +10,8 @@ export const AdminLayout = () => {
   const { user } = useAuth();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
-  // Route guard: redirect to login if not authenticated or not staff
-  if (!user || user.role !== 'staff') {
+  // Route guard: redirect to login if not authenticated or not staff/admin
+  if (!user || (user.role !== 'staff' && user.role !== 'admin')) {
     return <Navigate to="/login" replace />;
   }
 
@@ -19,6 +19,11 @@ export const AdminLayout = () => {
     { path: '/admin/dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { path: '/admin/rooms', label: 'Rooms', icon: BedDouble },
     { path: '/admin/bookings', label: 'Bookings', icon: CalendarCheck },
+  ];
+
+  const stayManagementItems = [
+    { path: '/admin/stay-management/check-in', label: 'Check-in', icon: LogIn },
+    { path: '/admin/stay-management/check-out', label: 'Check-out', icon: LogOut },
   ];
 
   return (
@@ -43,7 +48,7 @@ export const AdminLayout = () => {
 
         {/* Sidebar - hidden on mobile when closed, sticky on desktop below navbar */}
         <aside className={`
-          fixed lg:sticky top-16 left-0 z-40
+          fixed lg:sticky top-16 left-0 z-[60]
           w-64 bg-background border-r border-border p-4
           transform transition-transform duration-300 ease-in-out
           ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
@@ -80,6 +85,36 @@ export const AdminLayout = () => {
                 </button>
               );
             })}
+
+            {/* Stay Management Section */}
+            <div className="pt-4 mt-4 border-t border-border">
+              <p className="px-4 text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2">
+                Stay Management
+              </p>
+              <div className="space-y-2">
+                {stayManagementItems.map((item) => {
+                  const Icon = item.icon;
+                  const isActive = location.pathname === item.path;
+                  return (
+                    <button
+                      key={item.path}
+                      onClick={() => {
+                        navigate(item.path);
+                        setIsSidebarOpen(false);
+                      }}
+                      className={`w-full flex items-center gap-3 px-4 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer ${
+                        isActive 
+                          ? 'bg-primary text-primary-foreground' 
+                          : 'text-muted-foreground hover:bg-muted hover:text-foreground'
+                      }`}
+                    >
+                      <Icon className="w-4 h-4" />
+                      {item.label}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
           </nav>
         </aside>
         

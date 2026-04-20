@@ -1,14 +1,17 @@
 from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlmodel import Session, select
 from typing import List, Optional
+from datetime import date
 
 from database import get_session
 from models import (
-    Room, RoomStatus, RoomTranslation, Amenity, AmenityTranslation, RoomAmenity
+    Room, RoomStatus, RoomTranslation, Amenity, AmenityTranslation, RoomAmenity,
+    Booking, BookingStatus
 )
 from schemas import (
     RoomLocalizedResponse, RoomCreate, RoomUpdate,
-    RoomAdminResponse, RoomTranslationAdmin, AmenityAdmin, AmenityTranslationAdmin
+    RoomAdminResponse, RoomTranslationAdmin, AmenityAdmin, AmenityTranslationAdmin,
+    AvailabilityResponse
 )
 from routers.auth import get_current_staff
 
@@ -358,3 +361,42 @@ def delete_room(
     # Delete the room (cascade will handle translations and bookings)
     session.delete(room)
     session.commit()
+
+
+@router.get("/availability", response_model=AvailabilityResponse)
+def check_availability(
+    check_in: date = Query(..., description="Check-in date (YYYY-MM-DD)"),
+    check_out: date = Query(..., description="Check-out date (YYYY-MM-DD)"),
+    lang: str = Query("en"),
+    session: Session = Depends(get_session)
+):
+    """Check room availability for given dates"""
+    # Validate dates
+    if check_out <= check_in:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Check-out date must be after check-in date"
+        )
+
+    # Get all rooms
+    rooms = session.exec(select(Room).order_by(Room.id.asc())).all()
+
+    # Find rooms with overlapping active bookings
+    # A room is unavailable if there exists a booking where:
+    # NOT (requested_check_out <= existing_check_in OR requested_check_in >= existing_check_out)
+    overlapping_bookings = session.exec(
+        select(Booking.room_id).where(
+            Booking.status != BookingStatus.CANCELLED,
+            Booking.check_in < check_out,
+            Booking.check_out > check_in,
+        )
+    ).all()
+
+    unavailable_room_ids = set(overlapping_bookings)
+    available_rooms = [room for room in rooms if room.id not in unavailable_room_ids]
+
+    return AvailabilityResponse(
+        rooms=[build_localized_room(room, lang, session) for room in available_rooms],
+        check_in=check_in,
+        check_out=check_out,
+    )

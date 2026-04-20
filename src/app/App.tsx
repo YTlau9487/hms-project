@@ -32,6 +32,7 @@ import { AccountBookingsPage } from './pages/AccountBookingsPage';
 import { AdminDashboardPage } from './pages/AdminDashboardPage';
 import { AdminRoomsPage } from './pages/AdminRoomsPage';
 import { AdminBookingsPage } from './pages/AdminBookingsPage';
+import { StayManagementPage } from './pages/StayManagementPage';
 import { PrivacyPage } from './pages/PrivacyPage';
 import { TermsPage } from './pages/TermsPage';
 import { CookiesPage } from './pages/CookiesPage';
@@ -40,6 +41,8 @@ import { AboutPage } from './pages/AboutPage';
 import { RoomsAndSuitesPage } from './pages/RoomsAndSuitesPage';
 import { DiningPage } from './pages/DiningPage';
 import { MeetingsEventsPage } from './pages/MeetingsEventsPage';
+import { AdminLoginPage } from './pages/AdminLoginPage';
+import { AdminStaffPage } from './pages/AdminStaffPage';
 
 function AppContent() {
   const [selectedRoomForBooking, setSelectedRoomForBooking] = useState<Room | null>(null);
@@ -170,7 +173,21 @@ function AppContent() {
               path="/admin/bookings" 
               element={<AdminBookingsPage />} 
             />
+            <Route 
+              path="/admin/stay-management/:action" 
+              element={<StayManagementPage />} 
+            />
           </Route>
+
+          {/* Admin Portal Routes (separate from main admin layout) */}
+          <Route 
+            path="/admin/login" 
+            element={<AdminLoginPage />} 
+          />
+          <Route 
+            path="/admin/staff" 
+            element={<AdminStaffPage />} 
+          />
         </Routes>
       </AnimatePresence>
 
