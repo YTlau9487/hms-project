@@ -21,6 +21,7 @@ const ScrollToTop = () => {
 import { PublicLayout } from './layouts/PublicLayout';
 import { AccountLayout } from './layouts/AccountLayout';
 import { AdminLayout } from './layouts/AdminLayout';
+import { StaffLayout } from './layouts/StaffLayout';
 
 // Pages
 import { HomePage } from './pages/HomePage';
@@ -32,6 +33,7 @@ import { AccountBookingsPage } from './pages/AccountBookingsPage';
 import { AdminDashboardPage } from './pages/AdminDashboardPage';
 import { AdminRoomsPage } from './pages/AdminRoomsPage';
 import { AdminBookingsPage } from './pages/AdminBookingsPage';
+import { AdminNotificationsPage } from './pages/AdminNotificationsPage';
 import { StayManagementPage } from './pages/StayManagementPage';
 import { PrivacyPage } from './pages/PrivacyPage';
 import { TermsPage } from './pages/TermsPage';
@@ -43,6 +45,7 @@ import { DiningPage } from './pages/DiningPage';
 import { MeetingsEventsPage } from './pages/MeetingsEventsPage';
 import { AdminLoginPage } from './pages/AdminLoginPage';
 import { AdminStaffPage } from './pages/AdminStaffPage';
+import { StaffRoomsPage } from './pages/StaffRoomsPage';
 
 function AppContent() {
   const [selectedRoomForBooking, setSelectedRoomForBooking] = useState<Room | null>(null);
@@ -158,6 +161,27 @@ function AppContent() {
             />
           </Route>
 
+          {/* Staff Routes - Protected */}
+          <Route element={<StaffLayout />}>
+            <Route path="/staff" element={<Navigate to="/staff/dashboard" replace />} />
+            <Route 
+              path="/staff/dashboard" 
+              element={<AdminDashboardPage />} 
+            />
+            <Route 
+              path="/staff/rooms" 
+              element={<StaffRoomsPage />} 
+            />
+            <Route 
+              path="/staff/bookings" 
+              element={<AdminBookingsPage />} 
+            />
+            <Route 
+              path="/staff/stay-management/:action" 
+              element={<StayManagementPage />} 
+            />
+          </Route>
+
           {/* Admin Routes - Protected */}
           <Route element={<AdminLayout />}>
             <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
@@ -170,23 +194,23 @@ function AppContent() {
               element={<AdminRoomsPage />} 
             />
             <Route 
+              path="/admin/staff" 
+              element={<AdminStaffPage />} 
+            />
+            <Route 
+              path="/admin/notifications" 
+              element={<AdminNotificationsPage />} 
+            />
+            <Route 
               path="/admin/bookings" 
               element={<AdminBookingsPage />} 
             />
-            <Route 
-              path="/admin/stay-management/:action" 
-              element={<StayManagementPage />} 
-            />
           </Route>
 
-          {/* Admin Portal Routes (separate from main admin layout) */}
+          {/* Admin Login Route */}
           <Route 
             path="/admin/login" 
             element={<AdminLoginPage />} 
-          />
-          <Route 
-            path="/admin/staff" 
-            element={<AdminStaffPage />} 
           />
         </Routes>
       </AnimatePresence>

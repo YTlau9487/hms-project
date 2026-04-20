@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { ReactNode } from 'react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -17,7 +17,8 @@ interface ConfirmationDialogProps {
   onClose: () => void;
   onConfirm: () => void;
   title: string;
-  description: string;
+  description?: string;
+  children?: ReactNode;
   confirmText?: string;
   cancelText?: string;
   variant?: 'default' | 'destructive';
@@ -33,6 +34,7 @@ export const ConfirmationDialog = ({
   onConfirm,
   title,
   description,
+  children,
   confirmText,
   cancelText,
   variant = 'default',
@@ -60,9 +62,12 @@ export const ConfirmationDialog = ({
             )}
             <AlertDialogTitle>{title}</AlertDialogTitle>
           </div>
-          <AlertDialogDescription className="pt-2">
-            {description}
-          </AlertDialogDescription>
+          {description && (
+            <AlertDialogDescription className="pt-2">
+              {description}
+            </AlertDialogDescription>
+          )}
+          {children && <div className="pt-2">{children}</div>}
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel onClick={onClose}>{cancelText || t('common.cancel')}</AlertDialogCancel>

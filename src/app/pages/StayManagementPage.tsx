@@ -11,7 +11,7 @@ import { useParams } from 'react-router';
 type StayAction = 'check-in' | 'check-out';
 
 export const StayManagementPage = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { action } = useParams<{ action: StayAction }>();
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -25,13 +25,13 @@ export const StayManagementPage = () => {
 
   useEffect(() => {
     fetchBookings();
-  }, []);
+  }, [i18n.language]);
 
   const fetchBookings = async () => {
     try {
       setIsLoading(true);
       setError(null);
-      const data = await adminAPI.bookings();
+      const data = await adminAPI.bookings(i18n.language);
       setBookings(data);
     } catch (err) {
       const errorMessage = err instanceof Error ? getErrorMessage(err) : t('stayManagement.loadingError');
@@ -160,7 +160,7 @@ export const StayManagementPage = () => {
                   <tr key={booking.id} className="text-sm hover:bg-muted/30 transition-colors">
                     <td className="px-6 py-4 font-medium">BK-{booking.id}</td>
                     <td className="px-6 py-4">{getGuestName(booking)}</td>
-                    <td className="px-6 py-4">{booking.room?.name || 'Unknown Room'}</td>
+                    <td className="px-6 py-4">{booking.room?.name || t('stayManagement.unknownRoom')}</td>
                     <td className="px-6 py-4">{booking.check_in}</td>
                     <td className="px-6 py-4">{booking.check_out}</td>
                     <td className="px-6 py-4">
@@ -238,7 +238,7 @@ export const StayManagementPage = () => {
                 </div>
                 <div className="space-y-2 mb-4">
                   <div className="text-sm font-medium">{getGuestName(booking)}</div>
-                  <div className="text-sm text-muted-foreground">{booking.room?.name || 'Unknown Room'}</div>
+                  <div className="text-sm text-muted-foreground">{booking.room?.name || t('stayManagement.unknownRoom')}</div>
                   <div className="text-sm">{booking.check_in} – {booking.check_out}</div>
                 </div>
                 <button

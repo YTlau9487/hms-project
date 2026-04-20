@@ -46,8 +46,9 @@ class RoomLocalizedResponse(BaseModel):
     description: str
     price: float
     image_url: Optional[str]
-    size: Optional[str]
-    occupancy: Optional[str]
+    size_sqm: Optional[int]
+    adults: int
+    children: int
     amenities: List[str]
     status: RoomStatus
     featured: bool
@@ -64,8 +65,9 @@ class RoomResponse(BaseModel):
     description: str
     price: float
     image_url: Optional[str]
-    size: Optional[str]
-    occupancy: Optional[str]
+    size_sqm: Optional[int]
+    adults: int
+    children: int
     amenities: Optional[str]
     status: RoomStatus
     featured: bool
@@ -93,8 +95,9 @@ class AmenityInput(BaseModel):
 class RoomCreate(BaseModel):
     price: float
     image_url: Optional[str] = None
-    size: Optional[str] = None
-    occupancy: Optional[str] = None
+    size_sqm: Optional[int] = None
+    adults: int = 2
+    children: int = 0
     status: RoomStatus = RoomStatus.AVAILABLE
     featured: bool = False
     room_type: RoomType = RoomType.STANDARD
@@ -105,8 +108,9 @@ class RoomCreate(BaseModel):
 class RoomUpdate(BaseModel):
     price: Optional[float] = None
     image_url: Optional[str] = None
-    size: Optional[str] = None
-    occupancy: Optional[str] = None
+    size_sqm: Optional[int] = None
+    adults: Optional[int] = None
+    children: Optional[int] = None
     status: Optional[RoomStatus] = None
     featured: Optional[bool] = None
     room_type: Optional[RoomType] = None
@@ -144,8 +148,9 @@ class RoomAdminResponse(BaseModel):
     id: int
     price: float
     image_url: Optional[str]
-    size: Optional[str]
-    occupancy: Optional[str]
+    size_sqm: Optional[int]
+    adults: int
+    children: int
     status: RoomStatus
     featured: bool
     room_type: RoomType

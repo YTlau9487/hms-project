@@ -14,6 +14,8 @@ export const LoginPage = () => {
   useEffect(() => {
     if (user) {
       if (user.role === 'staff') {
+        navigate('/staff/dashboard');
+      } else if (user.role === 'admin') {
         navigate('/admin/dashboard');
       } else {
         navigate('/');
@@ -36,6 +38,8 @@ export const LoginPage = () => {
       if (result.success) {
         toast.success(t('loginPage.loginSuccess'));
         if (result.user?.role === 'staff') {
+          navigate('/staff/dashboard');
+        } else if (result.user?.role === 'admin') {
           navigate('/admin/dashboard');
         } else {
           navigate('/');

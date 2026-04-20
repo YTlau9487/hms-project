@@ -117,8 +117,9 @@ export interface Room {
   description: string;
   price: number;
   image_url: string | null;
-  size: string | null;
-  occupancy: string | null;
+  size_sqm: number | null;
+  adults: number;
+  children: number;
   amenities: string[];
   status: 'available' | 'unavailable';
   featured: boolean;
@@ -152,7 +153,7 @@ export interface Booking {
 
 export interface Notification {
   id: number;
-  type: 'booking_created' | 'booking_cancelled' | 'checked_in' | 'checked_out';
+  type: 'booking_created' | 'booking_cancelled' | 'checked_in' | 'checked_out' | 'broadcast';
   message: string;
   booking_id: number | null;
   user_id: number;
@@ -204,8 +205,9 @@ export interface RoomAdminData {
   id: number;
   price: number;
   image_url: string | null;
-  size: string | null;
-  occupancy: string | null;
+  size_sqm: number | null;
+  adults: number;
+  children: number;
   status: 'available' | 'unavailable';
   featured: boolean;
   room_type: 'luxury' | 'suite' | 'business' | 'standard';
@@ -216,8 +218,9 @@ export interface RoomAdminData {
 export interface RoomCreatePayload {
   price: number;
   image_url?: string;
-  size?: string;
-  occupancy?: string;
+  size_sqm?: number;
+  adults: number;
+  children: number;
   status: 'available' | 'unavailable';
   featured: boolean;
   room_type: 'luxury' | 'suite' | 'business' | 'standard';
@@ -228,8 +231,9 @@ export interface RoomCreatePayload {
 export interface RoomUpdatePayload {
   price?: number;
   image_url?: string;
-  size?: string;
-  occupancy?: string;
+  size_sqm?: number;
+  adults?: number;
+  children?: number;
   status?: 'available' | 'unavailable';
   featured?: boolean;
   room_type?: 'luxury' | 'suite' | 'business' | 'standard';
@@ -356,6 +360,20 @@ export const notificationsAPI = {
   markAllRead: () =>
     fetchAPI<{ message: string }>('/notifications/read-all', {
       method: 'POST',
+    }),
+
+  // Admin-only endpoints
+  listAll: () => fetchAPI<Notification[]>('/notifications/admin'),
+
+  delete: (id: number) =>
+    fetchAPI<{ message: string }>(`/notifications/admin/${id}`, {
+      method: 'DELETE',
+    }),
+
+  broadcast: (message: string) =>
+    fetchAPI<Notification>('/notifications/admin/broadcast', {
+      method: 'POST',
+      body: JSON.stringify(message),
     }),
 };
 

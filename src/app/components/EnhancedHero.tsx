@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Search, Calendar, Users, ArrowRight, Sparkles } from 'lucide-react';
+import { Search, Calendar, Users, ArrowRight, Sparkles, Minus, Plus } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useTranslation } from 'react-i18next';
 import { ImageWithFallback } from './ImageWithFallback';
@@ -7,7 +7,7 @@ import { Room } from './RoomCard';
 
 interface EnhancedHeroProps {
   onBookNow: () => void;
-  onSearch: (params: { checkIn: string; checkOut: string; guests: string }) => void;
+  onSearch: (params: { checkIn: string; checkOut: string; adults: number; children: number }) => void;
   featuredRoom?: Room | null;
   onViewFeatured?: () => void;
 }
@@ -50,8 +50,10 @@ export const EnhancedHero = ({ onBookNow, onSearch, featuredRoom, onViewFeatured
   const [searchParams, setSearchParams] = React.useState({
     checkIn: getDefaultDates().checkIn,
     checkOut: getDefaultDates().checkOut,
-    guests: t('hero.guestOption1')
+    adults: 2,
+    children: 0
   });
+  const [showGuestSelector, setShowGuestSelector] = useState(false);
 
   const handleSearch = () => {
     // Validate dates
@@ -127,16 +129,17 @@ export const EnhancedHero = ({ onBookNow, onSearch, featuredRoom, onViewFeatured
 
             {/* Featured Room Highlights */}
             <div className="flex flex-wrap gap-3 mb-6">
-              {featuredRoom.size && (
+              {featuredRoom.size_sqm && (
                 <div className="bg-white/10 backdrop-blur-sm px-3 py-1.5 rounded-lg border border-white/20">
-                  <span className="text-xs font-semibold">{t('roomCard.sizeLabel', { value: featuredRoom.size.replace(/(\d+)\s*sq\.m/i, '$1') })}</span>
+                  <span className="text-xs font-semibold">{t('roomCard.sizeLabel', { value: featuredRoom.size_sqm })}</span>
                 </div>
               )}
-              {featuredRoom.occupancy && (
-                <div className="bg-white/10 backdrop-blur-sm px-3 py-1.5 rounded-lg border border-white/20">
-                  <span className="text-xs font-semibold">{t('roomCard.occupancyLabel', { count: parseInt(featuredRoom.occupancy.replace(/(\d+)\s*Adult/i, '$1')) })}</span>
-                </div>
-              )}
+              <div className="bg-white/10 backdrop-blur-sm px-3 py-1.5 rounded-lg border border-white/20">
+                <span className="text-xs font-semibold">
+                  {t('roomCard.adults', { count: featuredRoom.adults })}
+                  {featuredRoom.children > 0 && `, ${t('roomCard.children', { count: featuredRoom.children })}`}
+                </span>
+              </div>
               <div className="bg-white/10 backdrop-blur-sm px-3 py-1.5 rounded-lg border border-white/20">
                 <span className="text-xs font-semibold">{t('hero.startingFrom', { price: featuredRoom.price })}</span>
               </div>
@@ -221,16 +224,64 @@ export const EnhancedHero = ({ onBookNow, onSearch, featuredRoom, onViewFeatured
               <label className="text-xs uppercase font-bold text-muted-foreground flex items-center gap-1">
                 <Users className="w-3 h-3" /> {t('hero.guests')}
               </label>
-              <select 
-                className="w-full bg-input-background border-none rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-primary"
-                value={searchParams.guests}
-                onChange={(e) => setSearchParams({ ...searchParams, guests: e.target.value })}
-              >
-                <option>{t('hero.guestOption1')}</option>
-                <option>{t('hero.guestOption2')}</option>
-                <option>{t('hero.guestOption3')}</option>
-                <option>{t('hero.guestOption4')}</option>
-              </select>
+              <div className="relative">
+                <button
+                  type="button"
+                  onClick={() => setShowGuestSelector(!showGuestSelector)}
+                  className="w-full bg-input-background border-none rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-primary text-left flex items-center justify-between"
+                >
+                  <span>
+                    {t('roomCard.adults', { count: searchParams.adults })}
+                    {searchParams.children > 0 && `, ${t('roomCard.children', { count: searchParams.children })}`}
+                  </span>
+                </button>
+                {showGuestSelector && (
+                  <div className="absolute top-full left-0 right-0 mt-1 bg-background border border-border rounded-lg shadow-lg p-4 z-20">
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm font-medium">{t('roomCard.adults', { count: 1 })}</span>
+                        <div className="flex items-center gap-3">
+                          <button
+                            type="button"
+                            onClick={() => setSearchParams(prev => ({ ...prev, adults: Math.max(1, prev.adults - 1) }))}
+                            className="w-8 h-8 rounded-full border border-border flex items-center justify-center hover:bg-muted cursor-pointer"
+                          >
+                            <Minus className="w-4 h-4" />
+                          </button>
+                          <span className="w-6 text-center text-sm">{searchParams.adults}</span>
+                          <button
+                            type="button"
+                            onClick={() => setSearchParams(prev => ({ ...prev, adults: Math.min(6, prev.adults + 1) }))}
+                            className="w-8 h-8 rounded-full border border-border flex items-center justify-center hover:bg-muted cursor-pointer"
+                          >
+                            <Plus className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm font-medium">{t('roomCard.children', { count: 1 })}</span>
+                        <div className="flex items-center gap-3">
+                          <button
+                            type="button"
+                            onClick={() => setSearchParams(prev => ({ ...prev, children: Math.max(0, prev.children - 1) }))}
+                            className="w-8 h-8 rounded-full border border-border flex items-center justify-center hover:bg-muted cursor-pointer"
+                          >
+                            <Minus className="w-4 h-4" />
+                          </button>
+                          <span className="w-6 text-center text-sm">{searchParams.children}</span>
+                          <button
+                            type="button"
+                            onClick={() => setSearchParams(prev => ({ ...prev, children: Math.min(4, prev.children + 1) }))}
+                            className="w-8 h-8 rounded-full border border-border flex items-center justify-center hover:bg-muted cursor-pointer"
+                          >
+                            <Plus className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
           <button 

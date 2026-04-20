@@ -8,7 +8,7 @@ import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 
 export const AdminDashboardPage = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [rooms, setRooms] = useState<Room[]>([]);
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [stats, setStats] = useState<DashboardStats | null>(null);
@@ -17,15 +17,15 @@ export const AdminDashboardPage = () => {
 
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [i18n.language]);
 
   const fetchData = async () => {
     try {
       setIsLoading(true);
       setError(null);
       const [roomsData, bookingsData, statsData] = await Promise.all([
-        roomsAPI.list(),
-        adminAPI.bookings(),
+        roomsAPI.list({ lang: i18n.language }),
+        adminAPI.bookings(i18n.language),
         adminAPI.stats(),
       ]);
       setRooms(roomsData);
@@ -44,8 +44,9 @@ export const AdminDashboardPage = () => {
       await roomsAPI.update(parseInt(roomId), {
         price: updates.price,
         image_url: updates.image_url || undefined,
-        size: updates.size || undefined,
-        occupancy: updates.occupancy || undefined,
+        size_sqm: updates.size_sqm || undefined,
+        adults: updates.adults,
+        children: updates.children,
         status: updates.status as 'available' | 'unavailable',
         featured: updates.featured
       });
