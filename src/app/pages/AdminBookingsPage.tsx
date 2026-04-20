@@ -8,7 +8,7 @@ import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 
 export const AdminBookingsPage = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -21,13 +21,13 @@ export const AdminBookingsPage = () => {
 
   useEffect(() => {
     fetchBookings();
-  }, []);
+  }, [i18n.language]);
 
   const fetchBookings = async () => {
     try {
       setIsLoading(true);
       setError(null);
-      const data = await adminAPI.bookings();
+      const data = await adminAPI.bookings(i18n.language);
       setBookings(data);
     } catch (err) {
       const errorMessage = err instanceof Error ? getErrorMessage(err) : t('adminBookings.loadingError');
@@ -114,7 +114,7 @@ export const AdminBookingsPage = () => {
                 <tr key={booking.id} className="text-sm hover:bg-muted/30 transition-colors">
                   <td className="px-6 py-4 font-medium">BK-{booking.id}</td>
                   <td className="px-6 py-4">{getGuestName(booking)}</td>
-                  <td className="px-6 py-4">{booking.room?.name || 'Unknown Room'}</td>
+                  <td className="px-6 py-4">{booking.room?.name || t('adminBookings.unknownRoom')}</td>
                   <td className="px-6 py-4">{booking.check_in}</td>
                   <td className="px-6 py-4">{booking.check_out}</td>
                   <td className="px-6 py-4">
@@ -200,7 +200,7 @@ export const AdminBookingsPage = () => {
                     <span className="text-sm font-medium">{getGuestName(booking)}</span>
                   </div>
                   <div className="text-sm text-muted-foreground pl-6">
-                    {booking.room?.name || 'Unknown Room'}
+                    {booking.room?.name || t('adminBookings.unknownRoom')}
                   </div>
                   <div className="grid grid-cols-2 gap-3 pl-6 text-sm">
                     <div>

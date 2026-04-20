@@ -65,8 +65,9 @@ export const ManageRooms = ({ rooms, onUpdateRoom, onAddPackage, onRemovePackage
       await roomsAPI.update(editingRoom.id, {
         price: editFormData.price,
         image_url: editFormData.image_url || undefined,
-        size: editFormData.size || undefined,
-        occupancy: editFormData.occupancy || undefined,
+        size_sqm: editFormData.size_sqm ? parseInt(String(editFormData.size_sqm)) : undefined,
+        adults: editFormData.adults ? parseInt(String(editFormData.adults)) : 2,
+        children: editFormData.children ? parseInt(String(editFormData.children)) : 0,
         status: editFormData.status as 'available' | 'unavailable',
         featured: editFormData.featured,
         translations: roomAdminData.translations,
@@ -270,31 +271,42 @@ export const ManageRooms = ({ rooms, onUpdateRoom, onAddPackage, onRemovePackage
                         <div className="relative">
                           <input
                             type="number"
-                            value={editFormData.size || ''}
-                            onChange={(e) => setEditFormData({ ...editFormData, size: e.target.value })}
+                            value={editFormData.size_sqm || ''}
+                            onChange={(e) => setEditFormData({ ...editFormData, size_sqm: e.target.value ? parseInt(e.target.value) : null })}
                             className="w-full px-4 py-2 pr-16 bg-input-background border border-border rounded-lg focus:ring-2 focus:ring-primary"
                             placeholder="35"
                             min="0"
                           />
-                          <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">sqm</span>
+                          <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">{t('staffRooms.sqm')}</span>
                         </div>
                       </div>
 
                       <div>
                         <label className="flex items-center gap-2 text-sm font-bold mb-2">
-                          <SettingsIcon className="w-4 h-4" /> {t('manageRooms.occupancy')}
+                          <SettingsIcon className="w-4 h-4" /> {t('staffRooms.adults')}
                         </label>
-                        <div className="relative">
-                          <input
-                            type="number"
-                            value={editFormData.occupancy || ''}
-                            onChange={(e) => setEditFormData({ ...editFormData, occupancy: e.target.value })}
-                            className="w-full px-4 py-2 pr-20 bg-input-background border border-border rounded-lg focus:ring-2 focus:ring-primary"
-                            placeholder="2"
-                            min="1"
-                          />
-                          <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">guests</span>
-                        </div>
+                        <input
+                          type="number"
+                          value={editFormData.adults || ''}
+                          onChange={(e) => setEditFormData({ ...editFormData, adults: e.target.value ? parseInt(e.target.value) : 2 })}
+                          className="w-full px-4 py-2 bg-input-background border border-border rounded-lg focus:ring-2 focus:ring-primary"
+                          placeholder="2"
+                          min="1"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="flex items-center gap-2 text-sm font-bold mb-2">
+                          <SettingsIcon className="w-4 h-4" /> {t('staffRooms.children')}
+                        </label>
+                        <input
+                          type="number"
+                          value={editFormData.children || ''}
+                          onChange={(e) => setEditFormData({ ...editFormData, children: e.target.value ? parseInt(e.target.value) : 0 })}
+                          className="w-full px-4 py-2 bg-input-background border border-border rounded-lg focus:ring-2 focus:ring-primary"
+                          placeholder="0"
+                          min="0"
+                        />
                       </div>
 
                       <div>

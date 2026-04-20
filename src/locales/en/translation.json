@@ -42,7 +42,11 @@
     "details": "Details",
     "book": "Book",
     "sizeLabel": "{{value}} sq.m",
-    "occupancyLabel": "{{count}} Adults"
+    "occupancyLabel": "{{count}} Adults",
+    "adults": "{{count}} Adult",
+    "adults_other": "{{count}} Adults",
+    "children": "{{count}} Child",
+    "children_other": "{{count}} Children"
   },
   "roomDetails": {
     "backToRooms": "Back to Rooms",
@@ -174,7 +178,8 @@
     "contactForChanges": "Contact reception for changes or cancellations",
     "cancelSuccess": "Booking cancelled successfully",
     "cancelSuccessDesc": "You will receive a confirmation email shortly.",
-    "cancelFailed": "Failed to cancel booking"
+    "cancelFailed": "Failed to cancel booking",
+    "unknownRoom": "Unknown Room"
   },
   "userProfile": {
     "back": "Back",
@@ -276,7 +281,8 @@
     "dashboardViewDesc": "Revenue analytics and booking statistics will be displayed here.",
     "customerDatabase": "Customer Database",
     "customerDatabaseDesc": "Customer information and history will be displayed here.",
-    "viewDetails": "View Details"
+    "viewDetails": "View Details",
+    "unknownRoom": "Unknown"
   },
   "footer": {
     "brand": "GOLDEN MILE",
@@ -405,7 +411,8 @@
     "luxuryLounge": "Luxury Lounge",
     "luxuryLoungeDesc": "Relax in our elegantly designed guest spaces.",
     "searchingRooms": "Searching available rooms...",
-    "searchSuccess": "Found matching rooms for your dates!",
+    "searchSuccess": "Found {{count}} available rooms for your dates!",
+    "searchSuccess_one": "Found {{count}} available room for your dates!",
     "searchError": "Error searching for rooms",
     "loadingRooms": "Loading room data...",
     "facilityComingSoon": "This feature is coming soon. Stay tuned!"
@@ -779,6 +786,118 @@
     "searchPlaceholder": "Search country or code...",
     "noCountriesFound": "No countries found"
   },
+  "adminNotifications": {
+    "title": "Notification Management",
+    "subtitle": "View and manage all system notifications",
+    "broadcast": "Broadcast",
+    "broadcastTitle": "Broadcast Notification",
+    "broadcastMessage": "Enter the message to send to all staff:",
+    "broadcastPlaceholder": "Type your broadcast message here...",
+    "sendBroadcast": "Send Broadcast",
+    "broadcastRequired": "Please enter a broadcast message",
+    "broadcastSent": "Broadcast sent successfully",
+    "broadcastFailed": "Failed to send broadcast",
+    "deleted": "Notification deleted successfully",
+    "deleteTitle": "Delete Notification",
+    "deleteMessage": "Are you sure you want to delete this notification? This action cannot be undone.",
+    "noNotifications": "No notifications found",
+    "filters": {
+      "all": "All"
+    },
+    "types": {
+      "bookingCreated": "Booking Created",
+      "bookingCancelled": "Booking Cancelled",
+      "checkedIn": "Checked In",
+      "checkedOut": "Checked Out",
+      "broadcast": "Broadcast"
+    },
+    "columns": {
+      "type": "Type",
+      "message": "Message",
+      "user": "User",
+      "date": "Date",
+      "status": "Status",
+      "actions": "Actions"
+    },
+    "status": {
+      "read": "Read",
+      "unread": "Unread"
+    }
+  },
+  "staffRooms": {
+    "title": "Room Overview",
+    "subtitle": "View all room types and their details",
+    "wifi": "WiFi",
+    "sqm": "sq.m",
+    "adults": "Adults",
+    "children": "Children",
+    "perNight": "/ night",
+    "amenities": "Amenities",
+    "available": "Available",
+    "unavailable": "Unavailable"
+  },
+  "adminStaff": {
+    "title": "Staff Management",
+    "subtitle": "Manage hotel staff accounts",
+    "welcome": "Welcome",
+    "logout": "Logout",
+    "staffAccounts": "Staff Accounts",
+    "addStaff": "Add Staff",
+    "cancel": "Cancel",
+    "createTitle": "Create New Staff Account",
+    "fullName": "Full Name",
+    "email": "Email",
+    "password": "Password",
+    "phone": "Phone (Optional)",
+    "emailRegistered": "Email already registered",
+    "createFailed": "Failed to create staff account",
+    "creating": "Creating...",
+    "createStaff": "Create Staff Account",
+    "loadingStaff": "Loading staff accounts...",
+    "noStaffFound": "No staff accounts found",
+    "noStaffSubtitle": "Create your first staff account to get started",
+    "notProvided": "Not provided",
+    "deleteStaff": "Delete staff",
+    "deleteTitle": "Delete Staff Account",
+    "deleteDesc": "Are you sure you want to delete the staff account \"{{name}}\"? This action cannot be undone.",
+    "deleteBtn": "Delete",
+    "createConfirmTitle": "Create Staff Account",
+    "createConfirmDesc": "Create a new staff account for \"{{name}}\" ({{email}})?",
+    "createBtn": "Create",
+    "sessionExpiring": "Session expiring in 1 minute",
+    "sessionExpiringDesc": "Please interact to stay logged in.",
+    "sessionExpired": "Session expired due to inactivity",
+    "loadFailed": "Failed to load staff accounts",
+    "deleteFailed": "Failed to delete staff account",
+    "createdSuccess": "Staff account created successfully",
+    "deletedSuccess": "Staff account deleted",
+    "created": "Created",
+    "actions": "Actions",
+    "name": "Name",
+    "phoneLabel": "Phone"
+  },
+  "staffLayout": {
+    "title": "Staff Portal",
+    "dashboard": "Dashboard",
+    "rooms": "Rooms",
+    "bookings": "Bookings",
+    "stayManagement": "Stay Management",
+    "checkIn": "Check-in",
+    "checkOut": "Check-out",
+    "sessionExpires": "Session expires in",
+    "stayLoggedIn": "Stay Logged In"
+  },
+  "adminLayout": {
+    "title": "Admin Panel",
+    "dashboard": "Dashboard",
+    "bookings": "Bookings",
+    "management": "Management",
+    "rooms": "Rooms",
+    "staff": "Staff",
+    "notifications": "Notifications",
+    "sessionExpires": "Session expires in",
+    "stayLoggedIn": "Stay Logged In"
+  },
   "stayManagement": {
     "checkInTitle": "Check-in Management",
     "checkOutTitle": "Check-out Management",
@@ -812,6 +931,7 @@
     "goBack": "Go Back",
     "checkInSuccess": "Guest checked in successfully",
     "checkOutSuccess": "Guest checked out successfully",
-    "actionFailed": "Failed to process stay action"
+    "actionFailed": "Failed to process stay action",
+    "unknownRoom": "Unknown Room"
   }
 }

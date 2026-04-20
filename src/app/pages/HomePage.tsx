@@ -4,7 +4,7 @@ import { motion } from 'motion/react';
 import { EnhancedHero } from '../components/EnhancedHero';
 import { RoomCard, Room } from '../components/RoomCard';
 import { toast } from 'sonner';
-import { roomsAPI, getErrorMessage } from '../services/api';
+import { roomsAPI, availabilityAPI, getErrorMessage } from '../services/api';
 import { LoadingSpinner } from '../components/LoadingSpinner';
 import { ErrorMessage } from '../components/ErrorMessage';
 import { useTranslation } from 'react-i18next';
@@ -83,19 +83,26 @@ export const HomePage = ({ onBookNow }: HomePageProps) => {
     }
   };
 
-  const handleSearch = (params: { checkIn: string; checkOut: string; guests: string }) => {
-    // Filter rooms based on search params (placeholder - no actual availability check yet)
-    const filtered = allRooms.filter(room => room.status === 'available');
-    setRooms(filtered);
-    setActiveFilter(t('homePage.allRooms'));
-    
-    toast.success(t('homePage.searchSuccess'));
-    
-    // Scroll to rooms section
-    setTimeout(() => {
-      const element = document.getElementById('rooms-section');
-      element?.scrollIntoView({ behavior: 'smooth' });
-    }, 300);
+  const handleSearch = async (params: { checkIn: string; checkOut: string; adults: number; children: number }) => {
+    try {
+      setIsLoading(true);
+      const data = await availabilityAPI.check(params.checkIn, params.checkOut, i18n.language);
+      setRooms(data.rooms);
+      setActiveFilter(t('homePage.allRooms'));
+      
+      toast.success(t('homePage.searchSuccess', { count: data.rooms.length }));
+      
+      // Scroll to rooms section
+      setTimeout(() => {
+        const element = document.getElementById('rooms-section');
+        element?.scrollIntoView({ behavior: 'smooth' });
+      }, 300);
+    } catch (err) {
+      const errorMessage = err instanceof Error ? getErrorMessage(err) : t('homePage.searchError');
+      toast.error(errorMessage);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   if (isLoading) {

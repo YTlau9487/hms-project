@@ -1,6 +1,9 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { authAPI, usersAPI, setAuthToken, User } from '../services/api';
 
+const ADMIN_SESSION_KEY = 'hms_admin_login_time';
+const ADMIN_SESSION_TIMEOUT = 5 * 60 * 1000; // 5 minutes
+
 interface AuthContextType {
   user: User | null;
   loading: boolean;
@@ -25,16 +28,24 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setAuthToken(token);
         try {
           const userData = await authAPI.me();
-          // Admin accounts should use the admin portal, not the customer interface
-          if (userData.role === 'admin') {
-            localStorage.removeItem('hms_token');
-            setAuthToken(null);
+          // Admin/staff: only restore session if within 5-minute window
+          if (userData.role === 'admin' || userData.role === 'staff') {
+            const adminLoginTime = localStorage.getItem(ADMIN_SESSION_KEY);
+            if (adminLoginTime && Date.now() - parseInt(adminLoginTime) < ADMIN_SESSION_TIMEOUT) {
+              setUser(userData);
+            } else {
+              // Session expired
+              localStorage.removeItem('hms_token');
+              localStorage.removeItem(ADMIN_SESSION_KEY);
+              setAuthToken(null);
+            }
           } else {
             setUser(userData);
           }
         } catch (error) {
           // Token invalid or expired
           localStorage.removeItem('hms_token');
+          localStorage.removeItem(ADMIN_SESSION_KEY);
           setAuthToken(null);
         }
       }
@@ -56,6 +67,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         localStorage.removeItem('hms_token');
         setAuthToken(null);
         throw new Error('Admin accounts must use the admin portal at /admin/login');
+      }
+
+      // Store admin/staff login timestamp for session persistence
+      if (userData.role === 'admin' || userData.role === 'staff') {
+        localStorage.setItem(ADMIN_SESSION_KEY, String(Date.now()));
       }
       
       setUser(userData);
@@ -90,6 +106,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const logout = () => {
     setUser(null);
     localStorage.removeItem('hms_token');
+    localStorage.removeItem(ADMIN_SESSION_KEY);
     setAuthToken(null);
   };
 

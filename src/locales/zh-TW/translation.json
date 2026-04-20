@@ -42,7 +42,9 @@
     "details": "詳情",
     "book": "預訂",
     "sizeLabel": "{{value}} 平方米",
-    "occupancyLabel": "{{count}} 位成人"
+    "occupancyLabel": "{{count}} 位成人",
+    "adults": "{{count}} 位成人",
+    "children": "{{count}} 位兒童"
   },
   "roomDetails": {
     "backToRooms": "返回客房列表",
@@ -174,7 +176,8 @@
     "contactForChanges": "如需更改或取消，請聯絡接待處",
     "cancelSuccess": "預訂取消成功",
     "cancelSuccessDesc": "您將很快收到確認電子郵件。",
-    "cancelFailed": "取消預訂失敗"
+    "cancelFailed": "取消預訂失敗",
+    "unknownRoom": "未知客房"
   },
   "userProfile": {
     "back": "返回",
@@ -276,7 +279,8 @@
     "dashboardViewDesc": "收入分析和預訂統計資料將在此顯示。",
     "customerDatabase": "客戶資料庫",
     "customerDatabaseDesc": "客戶資訊和歷史記錄將在此顯示。",
-    "viewDetails": "查看詳情"
+    "viewDetails": "查看詳情",
+    "unknownRoom": "未知"
   },
   "footer": {
     "brand": "黃金英里",
@@ -314,6 +318,7 @@
     "error": "發生錯誤",
     "errorTitle": "發生錯誤",
     "retry": "重試",
+    "comingSoon": "即將推出",
     "confirm": "確認",
     "cancel": "取消",
     "save": "儲存",
@@ -778,6 +783,118 @@
     "searchPlaceholder": "搜尋國家或代碼...",
     "noCountriesFound": "未找到國家"
   },
+  "staffRooms": {
+    "title": "客房概覽",
+    "subtitle": "查看所有客房類型及其詳情",
+    "wifi": "WiFi",
+    "sqm": "平方米",
+    "adults": "位成人",
+    "children": "位兒童",
+    "perNight": "/ 晚",
+    "amenities": "設施",
+    "available": "可用",
+    "unavailable": "不可用"
+  },
+  "adminStaff": {
+    "title": "員工管理",
+    "subtitle": "管理酒店員工帳戶",
+    "welcome": "歡迎",
+    "logout": "登出",
+    "staffAccounts": "員工帳戶",
+    "addStaff": "添加員工",
+    "cancel": "取消",
+    "createTitle": "創建新員工帳戶",
+    "fullName": "全名",
+    "email": "電子郵件",
+    "password": "密碼",
+    "phone": "電話（選填）",
+    "emailRegistered": "電子郵件已註冊",
+    "createFailed": "創建員工帳戶失敗",
+    "creating": "創建中...",
+    "createStaff": "創建員工帳戶",
+    "loadingStaff": "載入員工帳戶中...",
+    "noStaffFound": "未找到員工帳戶",
+    "noStaffSubtitle": "創建您的第一個員工帳戶以開始",
+    "notProvided": "未提供",
+    "deleteStaff": "刪除員工",
+    "deleteTitle": "刪除員工帳戶",
+    "deleteDesc": "您確定要刪除員工帳戶「{{name}}」嗎？此操作無法撤消。",
+    "deleteBtn": "刪除",
+    "createConfirmTitle": "創建員工帳戶",
+    "createConfirmDesc": "為「{{name}}」（{{email}}）創建新員工帳戶？",
+    "createBtn": "創建",
+    "sessionExpiring": "會話將於1分鐘後過期",
+    "sessionExpiringDesc": "請互動以保持登入狀態。",
+    "sessionExpired": "由於不活動，會話已過期",
+    "loadFailed": "載入員工帳戶失敗",
+    "deleteFailed": "刪除員工帳戶失敗",
+    "createdSuccess": "員工帳戶創建成功",
+    "deletedSuccess": "員工帳戶已刪除",
+    "created": "已創建",
+    "actions": "操作",
+    "name": "姓名",
+    "phoneLabel": "電話"
+  },
+  "staffLayout": {
+    "title": "員工門戶",
+    "dashboard": "儀表板",
+    "rooms": "客房",
+    "bookings": "預訂管理",
+    "stayManagement": "住宿管理",
+    "checkIn": "入住",
+    "checkOut": "退房",
+    "sessionExpires": "會話將於",
+    "stayLoggedIn": "保持登入"
+  },
+  "adminLayout": {
+    "title": "管理面板",
+    "dashboard": "儀表板",
+    "bookings": "預訂管理",
+    "management": "管理",
+    "rooms": "客房",
+    "staff": "員工",
+    "notifications": "通知",
+    "sessionExpires": "會話將於",
+    "stayLoggedIn": "保持登入"
+  },
+  "adminNotifications": {
+    "title": "通知管理",
+    "subtitle": "查看和管理所有系統通知",
+    "broadcast": "廣播",
+    "broadcastTitle": "廣播通知",
+    "broadcastMessage": "輸入要發送給所有員工的訊息：",
+    "broadcastPlaceholder": "在此輸入您的廣播訊息...",
+    "sendBroadcast": "發送廣播",
+    "broadcastRequired": "請輸入廣播訊息",
+    "broadcastSent": "廣播發送成功",
+    "broadcastFailed": "廣播發送失敗",
+    "deleted": "通知刪除成功",
+    "deleteTitle": "刪除通知",
+    "deleteMessage": "您確定要刪除此通知嗎？此操作無法撤消。",
+    "noNotifications": "未找到通知",
+    "filters": {
+      "all": "全部"
+    },
+    "types": {
+      "bookingCreated": "預訂已創建",
+      "bookingCancelled": "預訂已取消",
+      "checkedIn": "已入住",
+      "checkedOut": "已退房",
+      "broadcast": "廣播"
+    },
+    "columns": {
+      "type": "類型",
+      "message": "訊息",
+      "user": "用戶",
+      "date": "日期",
+      "status": "狀態",
+      "actions": "操作"
+    },
+    "status": {
+      "read": "已讀",
+      "unread": "未讀"
+    }
+  },
   "stayManagement": {
     "checkInTitle": "入住管理",
     "checkOutTitle": "退房管理",
@@ -811,6 +928,7 @@
     "goBack": "返回",
     "checkInSuccess": "賓客入住成功",
     "checkOutSuccess": "賓客退房成功",
-    "actionFailed": "處理住宿操作失敗"
+    "actionFailed": "處理住宿操作失敗",
+    "unknownRoom": "未知客房"
   }
 }

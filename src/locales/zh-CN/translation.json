@@ -42,7 +42,9 @@
     "details": "详情",
     "book": "预订",
     "sizeLabel": "{{value}} 平方米",
-    "occupancyLabel": "{{count}} 位成人"
+    "occupancyLabel": "{{count}} 位成人",
+    "adults": "{{count}} 位成人",
+    "children": "{{count}} 位儿童"
   },
   "roomDetails": {
     "backToRooms": "返回客房列表",
@@ -174,7 +176,8 @@
     "contactForChanges": "如需更改或取消，请联系接待处",
     "cancelSuccess": "预订取消成功",
     "cancelSuccessDesc": "您将很快收到确认电子邮件。",
-    "cancelFailed": "取消预订失败"
+    "cancelFailed": "取消预订失败",
+    "unknownRoom": "未知客房"
   },
   "userProfile": {
     "back": "返回",
@@ -276,7 +279,8 @@
     "dashboardViewDesc": "收入分析和预订统计数据将在此显示。",
     "customerDatabase": "客户数据库",
     "customerDatabaseDesc": "客户信息和历史记录将在此显示。",
-    "viewDetails": "查看详情"
+    "viewDetails": "查看详情",
+    "unknownRoom": "未知"
   },
   "footer": {
     "brand": "黄金英里",
@@ -314,6 +318,7 @@
     "error": "发生错误",
     "errorTitle": "发生错误",
     "retry": "重试",
+    "comingSoon": "即将推出",
     "confirm": "确认",
     "cancel": "取消",
     "save": "保存",
@@ -778,6 +783,118 @@
     "searchPlaceholder": "搜索国家或代码...",
     "noCountriesFound": "未找到国家"
   },
+  "staffRooms": {
+    "title": "客房概览",
+    "subtitle": "查看所有客房类型及其详情",
+    "wifi": "WiFi",
+    "sqm": "平方米",
+    "adults": "位成人",
+    "children": "位儿童",
+    "perNight": "/ 晚",
+    "amenities": "设施",
+    "available": "可用",
+    "unavailable": "不可用"
+  },
+  "adminStaff": {
+    "title": "员工管理",
+    "subtitle": "管理酒店员工账户",
+    "welcome": "欢迎",
+    "logout": "登出",
+    "staffAccounts": "员工账户",
+    "addStaff": "添加员工",
+    "cancel": "取消",
+    "createTitle": "创建新员工账户",
+    "fullName": "全名",
+    "email": "电子邮件",
+    "password": "密码",
+    "phone": "电话（选填）",
+    "emailRegistered": "电子邮件已注册",
+    "createFailed": "创建员工账户失败",
+    "creating": "创建中...",
+    "createStaff": "创建员工账户",
+    "loadingStaff": "加载员工账户中...",
+    "noStaffFound": "未找到员工账户",
+    "noStaffSubtitle": "创建您的第一个员工账户以开始",
+    "notProvided": "未提供",
+    "deleteStaff": "删除员工",
+    "deleteTitle": "删除员工账户",
+    "deleteDesc": "您确定要删除员工账户「{{name}}」吗？此操作无法撤消。",
+    "deleteBtn": "删除",
+    "createConfirmTitle": "创建员工账户",
+    "createConfirmDesc": "为「{{name}}」（{{email}}）创建新员工账户？",
+    "createBtn": "创建",
+    "sessionExpiring": "会话将于1分钟后过期",
+    "sessionExpiringDesc": "请互动以保持登录状态。",
+    "sessionExpired": "由于不活动，会话已过期",
+    "loadFailed": "加载员工账户失败",
+    "deleteFailed": "删除员工账户失败",
+    "createdSuccess": "员工账户创建成功",
+    "deletedSuccess": "员工账户已删除",
+    "created": "已创建",
+    "actions": "操作",
+    "name": "姓名",
+    "phoneLabel": "电话"
+  },
+  "staffLayout": {
+    "title": "员工门户",
+    "dashboard": "仪表板",
+    "rooms": "客房",
+    "bookings": "预订管理",
+    "stayManagement": "住宿管理",
+    "checkIn": "入住",
+    "checkOut": "退房",
+    "sessionExpires": "会话将于",
+    "stayLoggedIn": "保持登录"
+  },
+  "adminLayout": {
+    "title": "管理面板",
+    "dashboard": "仪表板",
+    "bookings": "预订管理",
+    "management": "管理",
+    "rooms": "客房",
+    "staff": "员工",
+    "notifications": "通知",
+    "sessionExpires": "会话将于",
+    "stayLoggedIn": "保持登录"
+  },
+  "adminNotifications": {
+    "title": "通知管理",
+    "subtitle": "查看和管理所有系统通知",
+    "broadcast": "广播",
+    "broadcastTitle": "广播通知",
+    "broadcastMessage": "输入要发送给所有员工的消息：",
+    "broadcastPlaceholder": "在此输入您的广播消息...",
+    "sendBroadcast": "发送广播",
+    "broadcastRequired": "请输入广播消息",
+    "broadcastSent": "广播发送成功",
+    "broadcastFailed": "广播发送失败",
+    "deleted": "通知删除成功",
+    "deleteTitle": "删除通知",
+    "deleteMessage": "您确定要删除此通知吗？此操作无法撤销。",
+    "noNotifications": "未找到通知",
+    "filters": {
+      "all": "全部"
+    },
+    "types": {
+      "bookingCreated": "预订已创建",
+      "bookingCancelled": "预订已取消",
+      "checkedIn": "已入住",
+      "checkedOut": "已退房",
+      "broadcast": "广播"
+    },
+    "columns": {
+      "type": "类型",
+      "message": "消息",
+      "user": "用户",
+      "date": "日期",
+      "status": "状态",
+      "actions": "操作"
+    },
+    "status": {
+      "read": "已读",
+      "unread": "未读"
+    }
+  },
   "stayManagement": {
     "checkInTitle": "入住管理",
     "checkOutTitle": "退房管理",
@@ -811,6 +928,7 @@
     "goBack": "返回",
     "checkInSuccess": "宾客入住成功",
     "checkOutSuccess": "宾客退房成功",
-    "actionFailed": "处理住宿操作失败"
+    "actionFailed": "处理住宿操作失败",
+    "unknownRoom": "未知客房"
   }
 }

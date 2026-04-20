@@ -1,11 +1,16 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlmodel import Session, select
 from typing import List
+from pydantic import BaseModel
 
 from database import get_session
 from models import Notification, NotificationType, User
 from schemas import NotificationResponse
-from routers.auth import get_current_staff
+from routers.auth import get_current_staff, get_current_admin
+
+
+class BroadcastRequest(BaseModel):
+    message: str
 
 router = APIRouter(prefix="/api/notifications", tags=["notifications"])
 
@@ -96,3 +101,71 @@ def mark_all_notifications_read(
         notification.read = True
     session.commit()
     return {"message": "All notifications marked as read"}
+
+
+# Admin-only notification management endpoints
+@router.get("/admin", response_model=List[NotificationResponse])
+def get_all_notifications_admin(
+    current_user=Depends(get_current_admin),
+    session: Session = Depends(get_session),
+):
+    """Get all notifications (admin only)."""
+    notifications = session.exec(
+        select(Notification).order_by(Notification.created_at.desc())
+    ).all()
+    return notifications
+
+
+@router.delete("/admin/{notification_id}")
+def delete_notification_admin(
+    notification_id: int,
+    current_user=Depends(get_current_admin),
+    session: Session = Depends(get_session),
+):
+    """Delete a notification (admin only)."""
+    notification = session.get(Notification, notification_id)
+    if not notification:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Notification not found",
+        )
+    session.delete(notification)
+    session.commit()
+    return {"message": "Notification deleted successfully"}
+
+
+@router.post("/admin/broadcast", response_model=NotificationResponse)
+def broadcast_notification(
+    request: BroadcastRequest,
+    current_user=Depends(get_current_admin),
+    session: Session = Depends(get_session),
+):
+    """Broadcast a notification to all staff users (admin only)."""
+    message = request.message
+    # Get all staff users
+    staff_users = session.exec(
+        select(User).where(User.role == "staff")
+    ).all()
+    
+    # Create notification for each staff user
+    created_notifications = []
+    for staff_user in staff_users:
+        notification = Notification(
+            type=NotificationType.BROADCAST,
+            message=message,
+            user_id=staff_user.id,
+        )
+        session.add(notification)
+        created_notifications.append(notification)
+    
+    session.commit()
+    
+    # Return the first created notification as response
+    if created_notifications:
+        session.refresh(created_notifications[0])
+        return created_notifications[0]
+    
+    raise HTTPException(
+        status_code=status.HTTP_404_NOT_FOUND,
+        detail="No staff users found",
+    )

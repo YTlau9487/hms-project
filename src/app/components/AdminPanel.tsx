@@ -224,7 +224,7 @@ export const AdminPanel = ({
                         <tr key={booking.id} className="text-sm hover:bg-muted/30 transition-colors">
                           <td className="px-6 py-4 font-mono text-xs font-bold">BK-{booking.id}</td>
                           <td className="px-6 py-4 font-medium">{getGuestName(booking)}</td>
-                          <td className="px-6 py-4 text-muted-foreground">{booking.room?.name || 'Unknown'}</td>
+                           <td className="px-6 py-4 text-muted-foreground">{booking.room?.name || t('adminPanel.unknownRoom')}</td>
                           <td className="px-6 py-4">
                             <div className="flex flex-col">
                               <span>{booking.check_in}</span>
@@ -300,7 +300,7 @@ export const AdminPanel = ({
                         </span>
                       </div>
                       <div className="text-sm font-medium">{getGuestName(booking)}</div>
-                      <div className="text-sm text-muted-foreground">{booking.room?.name || 'Unknown'}</div>
+                       <div className="text-sm text-muted-foreground">{booking.room?.name || t('adminPanel.unknownRoom')}</div>
                       <div className="flex justify-between items-center text-sm">
                         <div className="text-muted-foreground">
                           {booking.check_in} – {booking.check_out}

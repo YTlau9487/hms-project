@@ -5,7 +5,7 @@ from datetime import date, datetime
 
 from database import get_session
 from models import Booking, BookingStatus, Room, RoomStatus, NotificationType, User
-from schemas import BookingCreate, BookingResponse, BookingUpdate, CheckInOutResponse
+from schemas import BookingCreate, BookingResponse, BookingUpdate, CheckInOutResponse, UserResponse
 from routers.auth import get_current_user, get_current_staff
 from routers.rooms import build_localized_room
 from routers.notifications import create_notification
@@ -18,7 +18,7 @@ def build_booking_response(booking: Booking, lang: str, session: Session) -> Boo
     room = session.get(Room, booking.room_id)
     user = session.get(User, booking.user_id)
     room_data = build_localized_room(room, lang, session) if room else None
-    user_data = user.model_dump() if user else None
+    user_data = UserResponse.model_validate(user) if user else None
     
     return BookingResponse(
         id=booking.id,

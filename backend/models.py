@@ -21,6 +21,7 @@ class NotificationType(str, Enum):
     BOOKING_CANCELLED = "booking_cancelled"
     CHECKED_IN = "checked_in"
     CHECKED_OUT = "checked_out"
+    BROADCAST = "broadcast"
 
 
 class RoomStatus(str, Enum):
@@ -57,8 +58,9 @@ class Room(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
     price: float
     image_url: Optional[str] = None
-    size: Optional[str] = None
-    occupancy: Optional[str] = None
+    size_sqm: Optional[int] = None
+    adults: int = Field(default=2)
+    children: int = Field(default=0)
     status: RoomStatus = Field(default=RoomStatus.AVAILABLE)
     featured: bool = Field(default=False)
     room_type: RoomType = Field(default=RoomType.STANDARD)

@@ -160,8 +160,9 @@ def seed_database():
             {
                 "price": 280.0,
                 "image_url": "https://images.unsplash.com/photo-1590490359854-dfba19688d70?w=800",
-                "size": "38 sq.m",
-                "occupancy": "2 Adults",
+                "size_sqm": 38,
+                "adults": 2,
+                "children": 0,
                 "status": RoomStatus.AVAILABLE,
                 "featured": False,
                 "room_type": RoomType.LUXURY
@@ -169,8 +170,9 @@ def seed_database():
             {
                 "price": 240.0,
                 "image_url": "https://images.unsplash.com/photo-1566665797739-1674de7a421a?w=800",
-                "size": "35 sq.m",
-                "occupancy": "2 Adults",
+                "size_sqm": 35,
+                "adults": 2,
+                "children": 0,
                 "status": RoomStatus.AVAILABLE,
                 "featured": False,
                 "room_type": RoomType.STANDARD
@@ -178,8 +180,9 @@ def seed_database():
             {
                 "price": 850.0,
                 "image_url": "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=800",
-                "size": "120 sq.m",
-                "occupancy": "4 Adults",
+                "size_sqm": 120,
+                "adults": 4,
+                "children": 2,
                 "status": RoomStatus.AVAILABLE,
                 "featured": True,
                 "room_type": RoomType.SUITE
@@ -187,8 +190,9 @@ def seed_database():
             {
                 "price": 420.0,
                 "image_url": "https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=800",
-                "size": "45 sq.m",
-                "occupancy": "2 Adults",
+                "size_sqm": 45,
+                "adults": 2,
+                "children": 1,
                 "status": RoomStatus.AVAILABLE,
                 "featured": False,
                 "room_type": RoomType.BUSINESS

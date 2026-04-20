@@ -19,8 +19,9 @@ const LANGUAGES = [
 interface RoomFormState {
   price: number;
   image_url: string;
-  size: string;
-  occupancy: string;
+  size_sqm: number | null;
+  adults: number;
+  children: number;
   status: 'available' | 'unavailable';
   featured: boolean;
   room_type: 'luxury' | 'suite' | 'business' | 'standard';
@@ -37,8 +38,9 @@ const emptyTranslations: RoomTranslationData[] = LANGUAGES.map(l => ({
 const emptyForm: RoomFormState = {
   price: 0,
   image_url: '',
-  size: '',
-  occupancy: '',
+  size_sqm: null,
+  adults: 2,
+  children: 0,
   status: 'available',
   featured: false,
   room_type: 'standard',
@@ -47,7 +49,7 @@ const emptyForm: RoomFormState = {
 };
 
 export const AdminRoomsPage = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { user } = useAuth();
   const isAdmin = user?.role === 'admin';
   const [rooms, setRooms] = useState<Room[]>([]);
@@ -66,13 +68,13 @@ export const AdminRoomsPage = () => {
 
   useEffect(() => {
     fetchRooms();
-  }, []);
+  }, [i18n.language]);
 
   const fetchRooms = async () => {
     try {
       setIsLoading(true);
       setError(null);
-      const data = await roomsAPI.list();
+      const data = await roomsAPI.list({ lang: i18n.language });
       setRooms(data);
     } catch (err) {
       const errorMessage = err instanceof Error ? getErrorMessage(err) : t('homePage.loadingRooms');
@@ -97,8 +99,9 @@ export const AdminRoomsPage = () => {
       setFormData({
         price: adminData.price,
         image_url: adminData.image_url || '',
-        size: adminData.size || '',
-        occupancy: adminData.occupancy || '',
+        size_sqm: adminData.size_sqm,
+        adults: adminData.adults,
+        children: adminData.children,
         status: adminData.status,
         featured: adminData.featured,
         room_type: adminData.room_type,
@@ -117,8 +120,9 @@ export const AdminRoomsPage = () => {
       setFormData({
         price: room.price,
         image_url: room.image_url || '',
-        size: room.size || '',
-        occupancy: room.occupancy || '',
+        size_sqm: room.size_sqm,
+        adults: room.adults,
+        children: room.children,
         status: room.status,
         featured: room.featured,
         room_type: room.room_type,
@@ -141,8 +145,9 @@ export const AdminRoomsPage = () => {
       const payload = {
         price: formData.price,
         image_url: formData.image_url || undefined,
-        size: formData.size || undefined,
-        occupancy: formData.occupancy || undefined,
+        size_sqm: formData.size_sqm ? parseInt(String(formData.size_sqm)) : undefined,
+        adults: parseInt(String(formData.adults)) || 2,
+        children: parseInt(String(formData.children)) || 0,
         status: formData.status,
         featured: formData.featured,
         room_type: formData.room_type,
@@ -222,8 +227,8 @@ export const AdminRoomsPage = () => {
 
   const getTranslationStatus = (translations: { language: string; name: string; description?: string }[]) => {
     return LANGUAGES.map(lang => {
-      const t = translations.find(tr => tr.language === lang.code);
-      const filled = t ? (t.name && (t.description === undefined || t.description)) : false;
+      const trans = translations.find(tr => tr.language === lang.code);
+      const filled = trans ? (trans.name && (trans.description === undefined || trans.description)) : false;
       return { ...lang, filled };
     });
   };
@@ -287,7 +292,7 @@ export const AdminRoomsPage = () => {
                       </div>
                       <div>
                         <p className="font-medium">{room.name}</p>
-                        <p className="text-sm text-muted-foreground">{room.size || 'N/A'} • {room.occupancy || 'N/A'}</p>
+                        <p className="text-sm text-muted-foreground">{room.size_sqm ? `${room.size_sqm} ${t('staffRooms.sqm')}` : 'N/A'} • {room.adults} {t('staffRooms.adults')}{room.children > 0 ? `, ${room.children} ${t('staffRooms.children')}` : ''}</p>
                       </div>
                     </div>
                   </td>
@@ -368,7 +373,7 @@ export const AdminRoomsPage = () => {
                   </div>
                   
                   <div className="space-y-1.5 text-sm text-muted-foreground">
-                    <p>{room.size || 'N/A'} • {room.occupancy || 'N/A'}</p>
+                    <p>{room.size_sqm ? `${room.size_sqm} ${t('staffRooms.sqm')}` : 'N/A'} • {room.adults} {t('staffRooms.adults')}{room.children > 0 ? `, ${room.children} ${t('staffRooms.children')}` : ''}</p>
                     <div className="flex items-center gap-2">
                       <span className="font-medium text-foreground">${room.price}{t('adminRooms.perNight')}</span>
                       <span className="inline-flex items-center px-2.5 py-0.5 bg-primary/10 text-primary rounded-full text-xs font-medium capitalize">
@@ -469,29 +474,38 @@ export const AdminRoomsPage = () => {
                     <div className="relative">
                       <input
                         type="number"
-                        value={formData.size}
-                        onChange={(e) => setFormData({ ...formData, size: e.target.value })}
+                        value={formData.size_sqm || ''}
+                        onChange={(e) => setFormData({ ...formData, size_sqm: e.target.value ? parseInt(e.target.value) : null })}
                         className="w-full px-4 py-2 pr-16 bg-input-background border border-border rounded-lg focus:ring-2 focus:ring-primary"
                         placeholder="35"
                         min="0"
                       />
-                      <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">sqm</span>
+                      <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">{t('staffRooms.sqm')}</span>
                     </div>
                   </div>
 
                   <div>
-                    <label className="text-sm font-bold mb-2 block">{t('adminRooms.occupancy')}</label>
-                    <div className="relative">
-                      <input
-                        type="number"
-                        value={formData.occupancy}
-                        onChange={(e) => setFormData({ ...formData, occupancy: e.target.value })}
-                        className="w-full px-4 py-2 pr-20 bg-input-background border border-border rounded-lg focus:ring-2 focus:ring-primary"
-                        placeholder="2"
-                        min="1"
-                      />
-                      <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">guests</span>
-                    </div>
+                    <label className="text-sm font-bold mb-2 block">{t('staffRooms.adults')}</label>
+                    <input
+                      type="number"
+                      value={formData.adults}
+                      onChange={(e) => setFormData({ ...formData, adults: parseInt(e.target.value) || 1 })}
+                      className="w-full px-4 py-2 bg-input-background border border-border rounded-lg focus:ring-2 focus:ring-primary"
+                      placeholder="2"
+                      min="1"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-sm font-bold mb-2 block">{t('staffRooms.children')}</label>
+                    <input
+                      type="number"
+                      value={formData.children}
+                      onChange={(e) => setFormData({ ...formData, children: parseInt(e.target.value) || 0 })}
+                      className="w-full px-4 py-2 bg-input-background border border-border rounded-lg focus:ring-2 focus:ring-primary"
+                      placeholder="0"
+                      min="0"
+                    />
                   </div>
 
                   <div>

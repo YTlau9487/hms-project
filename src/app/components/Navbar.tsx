@@ -61,7 +61,7 @@ export const Navbar = () => {
             <div 
               className="flex-shrink-0 flex items-center gap-2 cursor-pointer group" 
               onClick={() => {
-                if (user?.role === 'staff' && !location.pathname.startsWith('/admin')) {
+                if (user?.role === 'staff' && !location.pathname.startsWith('/staff')) {
                   sessionStorage.setItem('interfaceContext', 'customer');
                   navigate('/?view=customer');
                 } else {
@@ -127,23 +127,23 @@ export const Navbar = () => {
             {user?.role === 'staff' && (
               <button 
                 onClick={() => {
-                  if (location.pathname.startsWith('/admin')) {
+                  if (location.pathname.startsWith('/staff')) {
                     sessionStorage.setItem('interfaceContext', 'customer');
                     navigate('/?view=customer');
                   } else {
                     sessionStorage.removeItem('interfaceContext');
-                    navigate('/admin/dashboard');
+                    navigate('/staff/dashboard');
                   }
                   setIsMobileMenuOpen(false);
                 }}
                 className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition-all cursor-pointer ${
-                  location.pathname.startsWith('/admin')
+                  location.pathname.startsWith('/staff')
                     ? 'bg-blue-100 text-blue-700 hover:bg-blue-200 border border-blue-300'
                     : 'bg-amber-100 text-amber-700 hover:bg-amber-200 border border-amber-300'
                 }`}
-                title={location.pathname.startsWith('/admin') ? 'Switch to customer browsing view' : 'Switch to staff management dashboard'}
+                title={location.pathname.startsWith('/staff') ? 'Switch to customer browsing view' : 'Switch to staff management dashboard'}
               >
-                {location.pathname.startsWith('/admin') ? (
+                {location.pathname.startsWith('/staff') ? (
                   <>
                     <Eye className="w-4 h-4" />
                     <span className="hidden sm:inline">{t('navbar.customerView')}</span>
