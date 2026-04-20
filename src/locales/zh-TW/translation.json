@@ -469,7 +469,8 @@
     "descriptionPlaceholder": "客房描述",
     "roomType": "客房類型",
     "addAmenity": "添加設施",
-    "noAmenities": "尚未添加設施。點擊「添加設施」來添加。"
+    "noAmenities": "尚未添加設施。點擊「添加設施」來添加。",
+    "viewOnly": "僅供查看"
   },
   "adminBookings": {
     "title": "預訂管理",

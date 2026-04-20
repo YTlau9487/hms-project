@@ -8,6 +8,7 @@ import { ErrorMessage } from '../components/ErrorMessage';
 import { ConfirmationDialog } from '../components/ConfirmationDialog';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
+import { useAuth } from '../context/AuthContext';
 
 const LANGUAGES = [
   { code: 'en', label: 'EN', fullLabel: 'English' },
@@ -47,6 +48,8 @@ const emptyForm: RoomFormState = {
 
 export const AdminRoomsPage = () => {
   const { t } = useTranslation();
+  const { user } = useAuth();
+  const isAdmin = user?.role === 'admin';
   const [rooms, setRooms] = useState<Room[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -240,13 +243,15 @@ export const AdminRoomsPage = () => {
           <h1 className="text-3xl font-bold">{t('adminRooms.title')}</h1>
           <p className="text-muted-foreground mt-1">{t('adminRooms.subtitle')}</p>
         </div>
-        <button 
-          onClick={openCreateModal}
-          className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg font-bold hover:opacity-80 transition-opacity cursor-pointer"
-        >
-          <Plus className="w-4 h-4" />
-          {t('adminRooms.addRoom')}
-        </button>
+        {isAdmin && (
+          <button 
+            onClick={openCreateModal}
+            className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg font-bold hover:opacity-80 transition-opacity cursor-pointer"
+          >
+            <Plus className="w-4 h-4" />
+            {t('adminRooms.addRoom')}
+          </button>
+        )}
       </div>
 
       {/* Desktop Table View */}
@@ -302,22 +307,26 @@ export const AdminRoomsPage = () => {
                     </span>
                   </td>
                   <td className="px-6 py-4">
-                    <div className="flex items-center gap-2">
-                      <button 
-                        onClick={() => openEditModal(room)}
-                        className="p-2 rounded-lg hover:bg-muted transition-colors cursor-pointer"
-                        title={t('adminRooms.editRoom')}
-                      >
-                        <Edit className="w-4 h-4 text-muted-foreground" />
-                      </button>
-                      <button 
-                        onClick={() => handleDeleteClick(room)}
-                        className="p-2 rounded-lg hover:bg-destructive/10 transition-colors cursor-pointer"
-                        title={t('adminRooms.deleteRoom')}
-                      >
-                        <Trash2 className="w-4 h-4 text-destructive" />
-                      </button>
-                    </div>
+                    {isAdmin ? (
+                      <div className="flex items-center gap-2">
+                        <button 
+                          onClick={() => openEditModal(room)}
+                          className="p-2 rounded-lg hover:bg-muted transition-colors cursor-pointer"
+                          title={t('adminRooms.editRoom')}
+                        >
+                          <Edit className="w-4 h-4 text-muted-foreground" />
+                        </button>
+                        <button 
+                          onClick={() => handleDeleteClick(room)}
+                          className="p-2 rounded-lg hover:bg-destructive/10 transition-colors cursor-pointer"
+                          title={t('adminRooms.deleteRoom')}
+                        >
+                          <Trash2 className="w-4 h-4 text-destructive" />
+                        </button>
+                      </div>
+                    ) : (
+                      <span className="text-xs text-muted-foreground">{t('adminRooms.viewOnly')}</span>
+                    )}
                   </td>
                 </tr>
               ))
@@ -369,22 +378,26 @@ export const AdminRoomsPage = () => {
                   </div>
                   
                   {/* Actions */}
-                  <div className="flex items-center gap-2 pt-3 border-t border-border">
-                    <button 
-                      onClick={() => openEditModal(room)}
-                      className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-muted hover:bg-muted/80 rounded-lg transition-colors cursor-pointer text-sm font-medium"
-                    >
-                      <Edit className="w-4 h-4" />
-                      {t('adminRooms.editRoom')}
-                    </button>
-                    <button 
-                      onClick={() => handleDeleteClick(room)}
-                      className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-destructive/10 hover:bg-destructive/20 text-destructive rounded-lg transition-colors cursor-pointer text-sm font-medium"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                      {t('adminRooms.deleteRoom')}
-                    </button>
-                  </div>
+                  {isAdmin ? (
+                    <div className="flex items-center gap-2 pt-3 border-t border-border">
+                      <button 
+                        onClick={() => openEditModal(room)}
+                        className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-muted hover:bg-muted/80 rounded-lg transition-colors cursor-pointer text-sm font-medium"
+                      >
+                        <Edit className="w-4 h-4" />
+                        {t('adminRooms.editRoom')}
+                      </button>
+                      <button 
+                        onClick={() => handleDeleteClick(room)}
+                        className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-destructive/10 hover:bg-destructive/20 text-destructive rounded-lg transition-colors cursor-pointer text-sm font-medium"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                        {t('adminRooms.deleteRoom')}
+                      </button>
+                    </div>
+                  ) : (
+                    <p className="pt-3 border-t border-border text-xs text-muted-foreground">{t('adminRooms.viewOnly')}</p>
+                  )}
                 </div>
               </div>
             </div>

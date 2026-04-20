@@ -470,7 +470,8 @@
     "descriptionPlaceholder": "Room description",
     "roomType": "Room Type",
     "addAmenity": "Add Amenity",
-    "noAmenities": "No amenities added yet. Click \"Add Amenity\" to add one."
+    "noAmenities": "No amenities added yet. Click \"Add Amenity\" to add one.",
+    "viewOnly": "View only"
   },
   "adminBookings": {
     "title": "Booking Management",

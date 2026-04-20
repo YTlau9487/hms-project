@@ -13,7 +13,7 @@ from schemas import (
     RoomAdminResponse, RoomTranslationAdmin, AmenityAdmin, AmenityTranslationAdmin,
     AvailabilityResponse
 )
-from routers.auth import get_current_staff
+from routers.auth import get_current_staff, get_current_admin
 
 router = APIRouter(prefix="/api/rooms", tags=["rooms"])
 
@@ -207,9 +207,9 @@ def get_room_admin(
 def create_room(
     room_data: RoomCreate,
     session: Session = Depends(get_session),
-    current_user=Depends(get_current_staff)
+    current_user=Depends(get_current_admin)
 ):
-    """Create a new room with translations and amenities (staff only)"""
+    """Create a new room with translations and amenities (admin only)"""
     # Create room
     room = Room(
         price=room_data.price,
@@ -266,9 +266,9 @@ def update_room(
     room_id: int,
     room_data: RoomUpdate,
     session: Session = Depends(get_session),
-    current_user=Depends(get_current_staff)
+    current_user=Depends(get_current_admin)
 ):
-    """Update a room with translations and amenities (staff only)"""
+    """Update a room with translations and amenities (admin only)"""
     room = session.get(Room, room_id)
     if not room:
         raise HTTPException(
@@ -337,18 +337,57 @@ def update_room(
     return get_room_admin(room_id, session, current_user)
 
 
+def check_room_occupancy(room_id: int, session: Session, check_date: date = None) -> bool:
+    """Check if room has any active or future bookings. Returns True if occupied."""
+    today = check_date or date.today()
+    
+    # Check for active bookings (guest currently staying)
+    active_booking = session.exec(
+        select(Booking).where(
+            Booking.room_id == room_id,
+            Booking.status != BookingStatus.CANCELLED,
+            Booking.check_in <= today,
+            Booking.check_out > today,
+        )
+    ).first()
+    
+    if active_booking:
+        return True
+    
+    # Check for future bookings
+    future_booking = session.exec(
+        select(Booking).where(
+            Booking.room_id == room_id,
+            Booking.status != BookingStatus.CANCELLED,
+            Booking.check_in > today,
+        )
+    ).first()
+    
+    if future_booking:
+        return True
+    
+    return False
+
+
 @router.delete("/{room_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_room(
     room_id: int,
     session: Session = Depends(get_session),
-    current_user=Depends(get_current_staff)
+    current_user=Depends(get_current_admin)
 ):
-    """Delete a room (staff only)"""
+    """Delete a room (admin only) - blocked if room has active or future bookings"""
     room = session.get(Room, room_id)
     if not room:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Room not found"
+        )
+
+    # Check for active or future bookings
+    if check_room_occupancy(room_id, session):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Cannot delete room: Room has active or future bookings"
         )
 
     # Delete RoomAmenity links first

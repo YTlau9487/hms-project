@@ -469,7 +469,8 @@
     "descriptionPlaceholder": "客房描述",
     "roomType": "客房类型",
     "addAmenity": "添加设施",
-    "noAmenities": "尚未添加设施。点击「添加设施」来添加。"
+    "noAmenities": "尚未添加设施。点击「添加设施」来添加。",
+    "viewOnly": "仅供查看"
   },
   "adminBookings": {
     "title": "预订管理",
