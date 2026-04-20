@@ -7,12 +7,20 @@ from enum import Enum
 class UserRole(str, Enum):
     CUSTOMER = "customer"
     STAFF = "staff"
+    ADMIN = "admin"
 
 
 class BookingStatus(str, Enum):
     PENDING = "pending"
     CONFIRMED = "confirmed"
     CANCELLED = "cancelled"
+
+
+class NotificationType(str, Enum):
+    BOOKING_CREATED = "booking_created"
+    BOOKING_CANCELLED = "booking_cancelled"
+    CHECKED_IN = "checked_in"
+    CHECKED_OUT = "checked_out"
 
 
 class RoomStatus(str, Enum):
@@ -37,6 +45,7 @@ class User(SQLModel, table=True):
     created_at: datetime = Field(default_factory=datetime.utcnow)
 
     bookings: List["Booking"] = Relationship(back_populates="user")
+    notifications: List["Notification"] = Relationship(back_populates="user")
 
 
 class RoomAmenity(SQLModel, table=True):
@@ -94,7 +103,23 @@ class Booking(SQLModel, table=True):
     status: BookingStatus = Field(default=BookingStatus.PENDING)
     total_price: float
     package_name: Optional[str] = None
+    checked_in_at: Optional[datetime] = Field(default=None)
+    checked_out_at: Optional[datetime] = Field(default=None)
     created_at: datetime = Field(default_factory=datetime.utcnow)
 
     user: Optional[User] = Relationship(back_populates="bookings")
     room: Optional[Room] = Relationship(back_populates="bookings")
+    notifications: List["Notification"] = Relationship(back_populates="booking")
+
+
+class Notification(SQLModel, table=True):
+    id: Optional[int] = Field(default=None, primary_key=True)
+    type: NotificationType
+    message: str
+    booking_id: Optional[int] = Field(foreign_key="booking.id", nullable=True)
+    user_id: int = Field(foreign_key="user.id")
+    read: bool = Field(default=False)
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+
+    booking: Optional[Booking] = Relationship(back_populates="notifications")
+    user: Optional[User] = Relationship(back_populates="notifications")

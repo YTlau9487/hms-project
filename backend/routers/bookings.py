@@ -1,15 +1,40 @@
 from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlmodel import Session, select
 from typing import List
-from datetime import date
+from datetime import date, datetime
 
 from database import get_session
-from models import Booking, BookingStatus, Room, RoomStatus
-from schemas import BookingCreate, BookingResponse, BookingUpdate
+from models import Booking, BookingStatus, Room, RoomStatus, NotificationType, User
+from schemas import BookingCreate, BookingResponse, BookingUpdate, CheckInOutResponse
 from routers.auth import get_current_user, get_current_staff
 from routers.rooms import build_localized_room
+from routers.notifications import create_notification
 
 router = APIRouter(prefix="/api/bookings", tags=["bookings"])
+
+
+def build_booking_response(booking: Booking, lang: str, session: Session) -> BookingResponse:
+    """Build booking response with room and user data."""
+    room = session.get(Room, booking.room_id)
+    user = session.get(User, booking.user_id)
+    room_data = build_localized_room(room, lang, session) if room else None
+    user_data = user.model_dump() if user else None
+    
+    return BookingResponse(
+        id=booking.id,
+        user_id=booking.user_id,
+        room_id=booking.room_id,
+        check_in=booking.check_in,
+        check_out=booking.check_out,
+        status=booking.status,
+        total_price=booking.total_price,
+        package_name=booking.package_name,
+        checked_in_at=booking.checked_in_at,
+        checked_out_at=booking.checked_out_at,
+        created_at=booking.created_at,
+        room=room_data,
+        user=user_data,
+    )
 
 
 @router.get("/my", response_model=List[BookingResponse])
@@ -25,15 +50,8 @@ def get_my_bookings(
         .order_by(Booking.created_at.desc())
     ).all()
 
-    # Load room data for each booking with localization
-    result = []
-    for booking in bookings:
-        room = session.get(Room, booking.room_id)
-        booking_dict = booking.dict()
-        booking_dict["room"] = build_localized_room(room, lang, session) if room else None
-        result.append(BookingResponse(**booking_dict))
-
-    return result
+    # Load room and user data for each booking
+    return [build_booking_response(booking, lang, session) for booking in bookings]
 
 
 @router.post("/", response_model=BookingResponse, status_code=status.HTTP_201_CREATED)
@@ -90,11 +108,18 @@ def create_booking(
     session.commit()
     session.refresh(booking)
     
-    # Load room data with localization
-    booking_dict = booking.dict()
-    booking_dict["room"] = build_localized_room(room, lang, session)
-
-    return BookingResponse(**booking_dict)
+    # Create notification for all staff users
+    staff_users = session.exec(select(User).where(User.role == "staff")).all()
+    for staff_user in staff_users:
+        create_notification(
+            session,
+            NotificationType.BOOKING_CREATED,
+            f"New booking #{booking.id} created by {current_user.name}",
+            booking.id,
+            staff_user.id,
+        )
+    
+    return build_booking_response(booking, lang, session)
 
 
 @router.get("/{booking_id}", response_model=BookingResponse)
@@ -119,12 +144,7 @@ def get_booking(
             detail="Not enough permissions"
         )
     
-    # Load room data with localization
-    room = session.get(Room, booking.room_id)
-    booking_dict = booking.dict()
-    booking_dict["room"] = build_localized_room(room, lang, session) if room else None
-
-    return BookingResponse(**booking_dict)
+    return build_booking_response(booking, lang, session)
 
 
 @router.put("/{booking_id}", response_model=BookingResponse)
@@ -150,12 +170,7 @@ def update_booking(
     session.commit()
     session.refresh(booking)
     
-    # Load room data with localization
-    room = session.get(Room, booking.room_id)
-    booking_dict = booking.dict()
-    booking_dict["room"] = build_localized_room(room, lang, session) if room else None
-
-    return BookingResponse(**booking_dict)
+    return build_booking_response(booking, lang, session)
 
 
 @router.delete("/{booking_id}", status_code=status.HTTP_204_NO_CONTENT)
@@ -179,6 +194,131 @@ def cancel_booking(
             detail="Not enough permissions"
         )
     
+    if booking.status == BookingStatus.CANCELLED:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Booking is already cancelled"
+        )
+    
     booking.status = BookingStatus.CANCELLED
     session.add(booking)
     session.commit()
+    
+    # Create notification for all staff users
+    staff_users = session.exec(select(User).where(User.role == "staff")).all()
+    for staff_user in staff_users:
+        create_notification(
+            session,
+            NotificationType.BOOKING_CANCELLED,
+            f"Booking #{booking.id} has been cancelled",
+            booking.id,
+            staff_user.id,
+        )
+
+
+@router.post("/{booking_id}/check-in", response_model=CheckInOutResponse)
+def check_in_booking(
+    booking_id: int,
+    current_user = Depends(get_current_staff),
+    session: Session = Depends(get_session)
+):
+    """Check in a booking (staff only)"""
+    booking = session.get(Booking, booking_id)
+    if not booking:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Booking not found"
+        )
+    
+    if booking.status != BookingStatus.CONFIRMED:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Booking must be confirmed to check in"
+        )
+    
+    if booking.status == BookingStatus.CANCELLED:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Cannot check in a cancelled booking"
+        )
+    
+    if booking.checked_in_at is not None:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Booking already checked in"
+        )
+    
+    booking.checked_in_at = datetime.utcnow()
+    session.add(booking)
+    session.commit()
+    session.refresh(booking)
+    
+    # Create notification for all staff users
+    staff_users = session.exec(select(User).where(User.role == "staff")).all()
+    for staff_user in staff_users:
+        create_notification(
+            session,
+            NotificationType.CHECKED_IN,
+            f"Booking #{booking.id} has been checked in",
+            booking.id,
+            staff_user.id,
+        )
+    
+    return CheckInOutResponse(
+        id=booking.id,
+        status=booking.status,
+        checked_in_at=booking.checked_in_at,
+        checked_out_at=booking.checked_out_at,
+        message="Check-in successful"
+    )
+
+
+@router.post("/{booking_id}/check-out", response_model=CheckInOutResponse)
+def check_out_booking(
+    booking_id: int,
+    current_user = Depends(get_current_staff),
+    session: Session = Depends(get_session)
+):
+    """Check out a booking (staff only)"""
+    booking = session.get(Booking, booking_id)
+    if not booking:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Booking not found"
+        )
+    
+    if booking.checked_in_at is None:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Cannot check out before check-in"
+        )
+    
+    if booking.checked_out_at is not None:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Booking already checked out"
+        )
+    
+    booking.checked_out_at = datetime.utcnow()
+    session.add(booking)
+    session.commit()
+    session.refresh(booking)
+    
+    # Create notification for all staff users
+    staff_users = session.exec(select(User).where(User.role == "staff")).all()
+    for staff_user in staff_users:
+        create_notification(
+            session,
+            NotificationType.CHECKED_OUT,
+            f"Booking #{booking.id} has been checked out",
+            booking.id,
+            staff_user.id,
+        )
+    
+    return CheckInOutResponse(
+        id=booking.id,
+        status=booking.status,
+        checked_in_at=booking.checked_in_at,
+        checked_out_at=booking.checked_out_at,
+        message="Check-out successful"
+    )

@@ -1,9 +1,7 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { motion } from 'motion/react';
 import { Calendar, MapPin, CreditCard, ChevronRight, Clock, CheckCircle, XCircle } from 'lucide-react';
 import { ImageWithFallback } from './ImageWithFallback';
-import { ConfirmationDialog } from './ConfirmationDialog';
-import { toast } from 'sonner';
 import { Booking as APIBooking } from '../services/api';
 import { useTranslation } from 'react-i18next';
 
@@ -21,10 +19,9 @@ interface Booking {
 interface MyBookingsProps {
   bookings: APIBooking[];
   onBack: () => void;
-  onCancelBooking: (bookingId: string) => void;
 }
 
-export const MyBookings = ({ bookings, onBack, onCancelBooking }: MyBookingsProps) => {
+export const MyBookings = ({ bookings, onBack }: MyBookingsProps) => {
   const { t } = useTranslation();
   // Map API bookings to component format
   const mappedBookings: Booking[] = bookings.map(b => ({
@@ -37,27 +34,6 @@ export const MyBookings = ({ bookings, onBack, onCancelBooking }: MyBookingsProp
     status: b.status,
     package: b.package_name || 'Room Only'
   }));
-  const [cancelDialog, setCancelDialog] = useState<{ isOpen: boolean; bookingId: string; roomName: string }>({
-    isOpen: false,
-    bookingId: '',
-    roomName: '',
-  });
-
-  const handleCancelClick = (bookingId: string, roomName: string) => {
-    setCancelDialog({ isOpen: true, bookingId, roomName });
-  };
-
-  const handleConfirmCancel = () => {
-    onCancelBooking(cancelDialog.bookingId);
-    toast.success(t('myBookings.cancelSuccess'), {
-      description: t('myBookings.cancelSuccessDesc'),
-    });
-    setCancelDialog({ isOpen: false, bookingId: '', roomName: '' });
-  };
-
-  const handleViewReceipt = () => {
-    toast.info(t('myBookings.receiptNotAvailable'));
-  };
 
   return (
     <motion.div 
@@ -147,44 +123,20 @@ export const MyBookings = ({ bookings, onBack, onCancelBooking }: MyBookingsProp
                   </div>
                 </div>
 
-                  <div className="flex items-center justify-between mt-8 pt-4 border-t border-border">
-                    <div className="text-xs text-muted-foreground">
-                      {t('myBookings.package')}: <span className="font-bold text-foreground">{booking.package}</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      {booking.status !== 'cancelled' && (
-                        <button 
-                          onClick={() => handleCancelClick(booking.id, booking.roomName)}
-                          className="px-3 py-1.5 text-sm font-bold text-red-600 hover:bg-red-50 rounded-lg transition-colors cursor-pointer hover:opacity-80"
-                        >
-                          {t('myBookings.cancelBooking')}
-                        </button>
-                      )}
-                      <button 
-                        onClick={handleViewReceipt}
-                        className="flex items-center gap-1 text-sm font-bold text-primary hover:gap-2 transition-all cursor-pointer hover:opacity-80"
-                      >
-                        {t('myBookings.viewReceipt')} <ChevronRight className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </div>
+                   <div className="flex items-center justify-between mt-8 pt-4 border-t border-border">
+                     <div className="text-xs text-muted-foreground">
+                       {t('myBookings.package')}: <span className="font-bold text-foreground">{booking.package}</span>
+                     </div>
+                     <div className="text-xs text-muted-foreground">
+                       {t('myBookings.contactForChanges')}
+                     </div>
+                   </div>
               </div>
             </motion.div>
           ))}
         </div>
       )}
 
-      {/* Confirmation Dialog */}
-      <ConfirmationDialog
-        isOpen={cancelDialog.isOpen}
-        onClose={() => setCancelDialog({ isOpen: false, bookingId: '', roomName: '' })}
-        onConfirm={handleConfirmCancel}
-        title={t('myBookings.cancelDialogTitle')}
-        description={t('myBookings.cancelDialogDesc', { name: cancelDialog.roomName })}
-        confirmText={t('myBookings.cancelDialogConfirm')}
-        cancelText={t('myBookings.cancelDialogCancel')}
-        variant="destructive"
-      />
     </motion.div>
   );
 };

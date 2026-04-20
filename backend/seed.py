@@ -4,6 +4,7 @@ Creates test accounts for customer and staff, sample rooms, and bookings.
 This script is idempotent - it only creates data if it doesn't already exist.
 """
 
+import os
 from sqlmodel import Session, select
 from database import engine, init_db
 from models import (
@@ -106,12 +107,28 @@ def seed_database():
         )
         session.add(staff)
 
+        # Create admin account (from env vars or default)
+        admin_email = os.environ.get("ADMIN_EMAIL", "admin@test.com")
+        admin_password = os.environ.get("ADMIN_PASSWORD", "admin123")
+        admin_name = os.environ.get("ADMIN_NAME", "System Admin")
+        
+        admin = User(
+            email=admin_email,
+            hashed_password=ph.hash(admin_password),
+            name=admin_name,
+            phone="+85211111111",
+            role=UserRole.ADMIN
+        )
+        session.add(admin)
+
         session.commit()
         session.refresh(customer)
         session.refresh(staff)
+        session.refresh(admin)
 
         print(f"✅ Created customer: {customer.email} (ID: {customer.id})")
         print(f"✅ Created staff: {staff.email} (ID: {staff.id})")
+        print(f"✅ Created admin: {admin.email} (ID: {admin.id})")
 
         print("🏷️ Creating amenities with translations...")
 

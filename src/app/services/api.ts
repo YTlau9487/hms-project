@@ -86,7 +86,23 @@ export interface User {
   email: string;
   name: string;
   phone: string | null;
-  role: 'customer' | 'staff';
+  role: 'customer' | 'staff' | 'admin';
+  created_at: string;
+}
+
+export interface StaffCreate {
+  email: string;
+  password: string;
+  name: string;
+  phone?: string;
+}
+
+export interface StaffMember {
+  id: number;
+  email: string;
+  name: string;
+  phone: string | null;
+  role: string;
   created_at: string;
 }
 
@@ -109,6 +125,15 @@ export interface Room {
   room_type: 'luxury' | 'suite' | 'business' | 'standard';
 }
 
+export interface BookingUser {
+  id: number;
+  email: string;
+  name: string;
+  phone: string | null;
+  role: 'customer' | 'staff' | 'admin';
+  created_at: string;
+}
+
 export interface Booking {
   id: number;
   user_id: number;
@@ -118,8 +143,35 @@ export interface Booking {
   status: 'pending' | 'confirmed' | 'cancelled';
   total_price: number;
   package_name: string | null;
+  checked_in_at: string | null;
+  checked_out_at: string | null;
   created_at: string;
   room?: Room;
+  user?: BookingUser;
+}
+
+export interface Notification {
+  id: number;
+  type: 'booking_created' | 'booking_cancelled' | 'checked_in' | 'checked_out';
+  message: string;
+  booking_id: number | null;
+  user_id: number;
+  read: boolean;
+  created_at: string;
+}
+
+export interface CheckInOutResponse {
+  id: number;
+  status: 'pending' | 'confirmed' | 'cancelled';
+  checked_in_at: string | null;
+  checked_out_at: string | null;
+  message: string;
+}
+
+export interface AvailabilityResponse {
+  rooms: Room[];
+  check_in: string;
+  check_out: string;
 }
 
 export interface DashboardStats {
@@ -271,6 +323,40 @@ export const bookingsAPI = {
     fetchAPI<void>(`/bookings/${id}`, {
       method: 'DELETE',
     }),
+
+  checkIn: (id: number) =>
+    fetchAPI<CheckInOutResponse>(`/bookings/${id}/check-in`, {
+      method: 'POST',
+    }),
+
+  checkOut: (id: number) =>
+    fetchAPI<CheckInOutResponse>(`/bookings/${id}/check-out`, {
+      method: 'POST',
+    }),
+};
+
+// Availability API
+export const availabilityAPI = {
+  check: (checkIn: string, checkOut: string, lang?: string) => {
+    const params = new URLSearchParams({ check_in: checkIn, check_out: checkOut });
+    if (lang) params.append('lang', lang);
+    return fetchAPI<AvailabilityResponse>(`/rooms/availability?${params.toString()}`);
+  },
+};
+
+// Notifications API
+export const notificationsAPI = {
+  list: () => fetchAPI<Notification[]>('/notifications/'),
+
+  markRead: (id: number) =>
+    fetchAPI<Notification>(`/notifications/${id}/read`, {
+      method: 'POST',
+    }),
+
+  markAllRead: () =>
+    fetchAPI<{ message: string }>('/notifications/read-all', {
+      method: 'POST',
+    }),
 };
 
 // Admin API
@@ -291,6 +377,16 @@ export const adminAPI = {
   },
 
   users: () => fetchAPI<User[]>('/admin/users'),
+
+  // Staff management (admin only)
+  listStaff: () => fetchAPI<StaffMember[]>('/admin/staff'),
+  createStaff: (data: StaffCreate) => fetchAPI<StaffMember>('/admin/staff', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  }),
+  deleteStaff: (id: number) => fetchAPI<void>(`/admin/staff/${id}`, {
+    method: 'DELETE',
+  }),
 };
 
 // Error message helper

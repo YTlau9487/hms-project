@@ -3,6 +3,7 @@ import { CalendarCheck, Eye, X, Check } from 'lucide-react';
 import { adminAPI, getErrorMessage, Booking } from '../services/api';
 import { LoadingSpinner } from '../components/LoadingSpinner';
 import { ErrorMessage } from '../components/ErrorMessage';
+import { ConfirmationDialog } from '../components/ConfirmationDialog';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 
@@ -11,6 +12,12 @@ export const AdminBookingsPage = () => {
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [confirmDialog, setConfirmDialog] = useState<{
+    isOpen: boolean;
+    bookingId: number;
+    action: 'confirm' | 'cancel';
+    guestName: string;
+  }>({ isOpen: false, bookingId: 0, action: 'cancel', guestName: '' });
 
   useEffect(() => {
     fetchBookings();
@@ -39,10 +46,23 @@ export const AdminBookingsPage = () => {
       const errorMessage = err instanceof Error ? getErrorMessage(err) : t('adminBookings.updateFailed');
       toast.error(errorMessage);
     }
+    setConfirmDialog({ isOpen: false, bookingId: 0, action: 'cancel', guestName: '' });
   };
 
   const handleViewDetails = (booking: Booking) => {
     toast.info(t('common.comingSoon'));
+  };
+
+  const getGuestName = (booking: Booking) => {
+    const name = booking.user?.name?.trim();
+    if (name) return name;
+    const email = booking.user?.email?.trim();
+    if (email) return email;
+    return `User #${booking.user_id}`;
+  };
+
+  const canCancel = (booking: Booking) => {
+    return booking.status !== 'cancelled' && !booking.checked_in_at && !booking.checked_out_at;
   };
 
   return (
@@ -93,7 +113,7 @@ export const AdminBookingsPage = () => {
               bookings.map((booking) => (
                 <tr key={booking.id} className="text-sm hover:bg-muted/30 transition-colors">
                   <td className="px-6 py-4 font-medium">BK-{booking.id}</td>
-                  <td className="px-6 py-4">User #{booking.user_id}</td>
+                  <td className="px-6 py-4">{getGuestName(booking)}</td>
                   <td className="px-6 py-4">{booking.room?.name || 'Unknown Room'}</td>
                   <td className="px-6 py-4">{booking.check_in}</td>
                   <td className="px-6 py-4">{booking.check_out}</td>
@@ -120,16 +140,16 @@ export const AdminBookingsPage = () => {
                       </button>
                       {booking.status === 'pending' && (
                         <button 
-                          onClick={() => handleUpdateStatus(booking.id, 'confirmed')}
+                          onClick={() => setConfirmDialog({ isOpen: true, bookingId: booking.id, action: 'confirm', guestName: getGuestName(booking) })}
                           className="p-2 rounded-lg hover:bg-green-50 transition-colors cursor-pointer" 
                           title={t('adminBookings.confirm')}
                         >
                           <Check className="w-4 h-4 text-green-600" />
                         </button>
                       )}
-                      {booking.status !== 'cancelled' && (
+                      {canCancel(booking) && (
                         <button 
-                          onClick={() => handleUpdateStatus(booking.id, 'cancelled')}
+                          onClick={() => setConfirmDialog({ isOpen: true, bookingId: booking.id, action: 'cancel', guestName: getGuestName(booking) })}
                           className="p-2 rounded-lg hover:bg-destructive/10 transition-colors cursor-pointer" 
                           title={t('adminBookings.cancel')}
                         >
@@ -177,7 +197,7 @@ export const AdminBookingsPage = () => {
                 <div className="space-y-2 mb-4">
                   <div className="flex items-center gap-2">
                     <CalendarCheck className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-                    <span className="text-sm font-medium">User #{booking.user_id}</span>
+                    <span className="text-sm font-medium">{getGuestName(booking)}</span>
                   </div>
                   <div className="text-sm text-muted-foreground pl-6">
                     {booking.room?.name || 'Unknown Room'}
@@ -198,27 +218,27 @@ export const AdminBookingsPage = () => {
                 </div>
 
                 {/* Footer Actions */}
-                <div className="flex items-center gap-2 pt-3 border-t border-border">
+                <div className="flex flex-wrap items-center gap-2 pt-3 border-t border-border">
                   <button 
                     onClick={() => handleViewDetails(booking)}
-                    className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-muted hover:bg-muted/80 rounded-lg transition-colors cursor-pointer text-sm font-medium"
+                    className="flex-1 min-w-[80px] flex items-center justify-center gap-2 px-3 py-2 bg-muted hover:bg-muted/80 rounded-lg transition-colors cursor-pointer text-sm font-medium"
                   >
                     <Eye className="w-4 h-4" />
                     {t('adminBookings.viewDetails')}
                   </button>
                   {booking.status === 'pending' && (
                     <button 
-                      onClick={() => handleUpdateStatus(booking.id, 'confirmed')}
-                      className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-green-50 hover:bg-green-100 text-green-700 rounded-lg transition-colors cursor-pointer text-sm font-medium"
+                      onClick={() => setConfirmDialog({ isOpen: true, bookingId: booking.id, action: 'confirm', guestName: getGuestName(booking) })}
+                      className="flex-1 min-w-[80px] flex items-center justify-center gap-2 px-3 py-2 bg-green-50 hover:bg-green-100 text-green-700 rounded-lg transition-colors cursor-pointer text-sm font-medium"
                     >
                       <Check className="w-4 h-4" />
                       {t('adminBookings.confirm')}
                     </button>
                   )}
-                  {booking.status !== 'cancelled' && (
+                  {canCancel(booking) && (
                     <button 
-                      onClick={() => handleUpdateStatus(booking.id, 'cancelled')}
-                      className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-destructive/10 hover:bg-destructive/20 text-destructive rounded-lg transition-colors cursor-pointer text-sm font-medium"
+                      onClick={() => setConfirmDialog({ isOpen: true, bookingId: booking.id, action: 'cancel', guestName: getGuestName(booking) })}
+                      className="flex-1 min-w-[80px] flex items-center justify-center gap-2 px-3 py-2 bg-destructive/10 hover:bg-destructive/20 text-destructive rounded-lg transition-colors cursor-pointer text-sm font-medium"
                     >
                       <X className="w-4 h-4" />
                       {t('adminBookings.cancel')}
@@ -230,6 +250,28 @@ export const AdminBookingsPage = () => {
           )}
         </div>
       </div>
+
+      <ConfirmationDialog
+        isOpen={confirmDialog.isOpen}
+        onClose={() => setConfirmDialog({ isOpen: false, bookingId: 0, action: 'cancel', guestName: '' })}
+        onConfirm={() => {
+          handleUpdateStatus(confirmDialog.bookingId, confirmDialog.action === 'confirm' ? 'confirmed' : 'cancelled');
+        }}
+        title={
+          confirmDialog.action === 'confirm' ? t('adminPanel.confirmBooking') :
+          t('adminPanel.cancelBooking')
+        }
+        description={
+          confirmDialog.action === 'confirm' ? t('adminPanel.confirmBookingDesc', { id: confirmDialog.bookingId }) :
+          t('adminPanel.cancelBookingDesc', { id: confirmDialog.bookingId })
+        }
+        confirmText={
+          confirmDialog.action === 'confirm' ? t('adminPanel.confirmBookingBtn') :
+          t('adminPanel.cancelBookingBtn')
+        }
+        cancelText={t('adminPanel.goBack')}
+        variant={confirmDialog.action === 'cancel' ? 'destructive' : 'default'}
+      />
     </div>
   );
 };

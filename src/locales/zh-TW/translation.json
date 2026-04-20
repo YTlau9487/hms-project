@@ -30,7 +30,9 @@
     "guestOption2": "1位成人",
     "guestOption3": "2位成人，1位兒童",
     "guestOption4": "2位成人，2位兒童",
-    "startingFrom": "每晚${{price}}起"
+    "startingFrom": "每晚${{price}}起",
+    "dateErrorRequired": "請選擇入住和退房日期",
+    "dateErrorInvalid": "退房日期必須晚於入住日期"
   },
   "roomCard": {
     "featured": "精選",
@@ -105,6 +107,22 @@
         "name": "VIP體驗",
         "desc": "早餐、機場接送和延遲退房。"
       }
+    },
+    "validation": {
+      "checkInRequired": "請選擇入住日期",
+      "checkOutRequired": "請選擇退房日期",
+      "checkOutAfterCheckIn": "退房日期必須晚於入住日期",
+      "firstNameMin": "名至少需要2個字元",
+      "lastNameMin": "姓至少需要2個字元",
+      "emailInvalid": "請輸入有效的電子郵件地址",
+      "phoneRequired": "電話號碼為必填項",
+      "phoneInvalid": "請輸入有效的電話號碼"
+    },
+    "confirmDialog": {
+      "title": "確認預訂",
+      "description": "您確定要預訂 {{room}}，從 {{checkIn}} 到 {{checkOut}} 嗎？總計：${{total}}",
+      "confirmText": "是，立即預訂",
+      "cancelText": "取消"
     }
   },
   "authModal": {
@@ -153,6 +171,7 @@
     "cancelDialogConfirm": "是，取消預訂",
     "cancelDialogCancel": "保留預訂",
     "receiptNotAvailable": "收據暫不可用",
+    "contactForChanges": "如需更改或取消，請聯絡接待處",
     "cancelSuccess": "預訂取消成功",
     "cancelSuccessDesc": "您將很快收到確認電子郵件。",
     "cancelFailed": "取消預訂失敗"
@@ -286,7 +305,9 @@
   "notifications": {
     "title": "通知",
     "clearAll": "清除全部",
-    "noNotifications": "暫無新通知"
+    "noNotifications": "暫無新通知",
+    "justNow": "剛剛",
+    "loading": "載入通知中..."
   },
   "common": {
     "loading": "載入中...",
@@ -755,5 +776,40 @@
   "phoneInput": {
     "searchPlaceholder": "搜尋國家或代碼...",
     "noCountriesFound": "未找到國家"
+  },
+  "stayManagement": {
+    "checkInTitle": "入住管理",
+    "checkOutTitle": "退房管理",
+    "checkInSubtitle": "為已確認預訂辦理入住手續",
+    "checkOutSubtitle": "為活躍住宿辦理退房手續",
+    "searchPlaceholder": "搜尋預訂...",
+    "bookingId": "預訂編號",
+    "guest": "賓客",
+    "room": "客房",
+    "checkInDate": "入住日期",
+    "checkOutDate": "退房日期",
+    "status": "狀態",
+    "stayStatus": "住宿狀態",
+    "action": "操作",
+    "loadingBookings": "載入預訂中...",
+    "loadingError": "無法載入預訂數據",
+    "noCheckInBookings": "沒有可辦理入住的預訂",
+    "noCheckOutBookings": "沒有可辦理退房的預訂",
+    "confirmed": "已確認",
+    "pending": "待處理",
+    "cancelled": "已取消",
+    "checkedIn": "已入住",
+    "notCheckedIn": "未入住",
+    "checkedOut": "已退房",
+    "checkInBtn": "辦理入住",
+    "checkOutBtn": "辦理退房",
+    "confirmCheckInTitle": "確認入住",
+    "confirmCheckOutTitle": "確認退房",
+    "confirmCheckInDesc": "確定要為 {{guest}} 辦理入住嗎？",
+    "confirmCheckOutDesc": "確定要為 {{guest}} 辦理退房嗎？",
+    "goBack": "返回",
+    "checkInSuccess": "賓客入住成功",
+    "checkOutSuccess": "賓客退房成功",
+    "actionFailed": "處理住宿操作失敗"
   }
 }

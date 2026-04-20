@@ -3,7 +3,11 @@ import { X, ChevronRight, Check, Coffee, Wifi, Car, Waves, Tv, Shield, ArrowLeft
 import { motion, AnimatePresence } from 'motion/react';
 import { ImageWithFallback } from './ImageWithFallback';
 import { Room } from './RoomCard';
+import PhoneInput from './PhoneInput';
+import { ConfirmationDialog } from './ConfirmationDialog';
 import { useTranslation } from 'react-i18next';
+import { useAuth } from '../context/AuthContext';
+import { parsePhoneNumber } from 'libphonenumber-js';
 
 const amenityIcons: Record<string, React.ComponentType<{ className?: string }>> = {
   'WiFi': Wifi, 'Free WiFi': Wifi, 'High-Speed WiFi': Wifi, '免費WiFi': Wifi, '免费WiFi': Wifi, '高速WiFi': Wifi,
@@ -12,6 +16,34 @@ const amenityIcons: Record<string, React.ComponentType<{ className?: string }>> 
   'Safe': Shield, 'Digital Safe': Shield,
   'Pool': Waves, 'Pool Access': Waves,
   'Parking': Car, 'Valet Parking': Car,
+};
+
+// Format date based on locale
+const formatDateForDisplay = (dateStr: string, lang: string) => {
+  if (!dateStr) return '';
+  const date = new Date(dateStr + 'T00:00:00');
+  // Check for Chinese languages (zh-TW, zh-CN, zh, etc.)
+  if (lang && lang.startsWith('zh')) {
+    const year = date.getFullYear();
+    const month = date.getMonth() + 1;
+    const day = date.getDate();
+    return `${year}年${month}月${day}日`;
+  }
+  // dd/mm/yyyy for English and other languages
+  const dd = String(date.getDate()).padStart(2, '0');
+  const mm = String(date.getMonth() + 1).padStart(2, '0');
+  const yyyy = date.getFullYear();
+  return `${dd}/${mm}/${yyyy}`;
+};
+
+// Calculate min check-out date (must be strictly after check-in)
+const getMinCheckOut = (checkInDate: string, todayStr: string) => {
+  if (checkInDate) {
+    const date = new Date(checkInDate + 'T00:00:00');
+    date.setDate(date.getDate() + 1);
+    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+  }
+  return todayStr;
 };
 
 interface BookingModalProps {
@@ -23,16 +55,23 @@ interface BookingModalProps {
 }
 
 export const BookingModal = ({ room, isOpen, onClose, onConfirm, user }: BookingModalProps) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const { user: authUser } = useAuth();
   const [step, setStep] = useState(1);
   const [selectedPackageId, setSelectedPackageId] = useState<string>('');
   const [checkIn, setCheckIn] = useState('');
   const [checkOut, setCheckOut] = useState('');
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  
+  // Get today's date in local timezone as YYYY-MM-DD
+  const today = new Date();
+  const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
   const [formData, setFormData] = useState({
     firstName: user?.name?.split(' ')[0] || '',
     lastName: user?.name?.split(' ')[1] || '',
     email: user?.email || '',
-    phone: '',
+    phone: user?.phone || authUser?.phone || '',
     specialRequests: ''
   });
 
@@ -43,15 +82,16 @@ export const BookingModal = ({ room, isOpen, onClose, onConfirm, user }: Booking
       setSelectedPackageId('');
       setCheckIn('');
       setCheckOut('');
+      setFieldErrors({});
       setFormData({
         firstName: user?.name?.split(' ')[0] || '',
         lastName: user?.name?.split(' ')[1] || '',
         email: user?.email || '',
-        phone: '',
+        phone: user?.phone || authUser?.phone || '',
         specialRequests: ''
       });
     }
-  }, [isOpen, user]);
+  }, [isOpen, user, authUser]);
 
   // Calculate number of nights
   const calculateNights = () => {
@@ -81,10 +121,61 @@ export const BookingModal = ({ room, isOpen, onClose, onConfirm, user }: Booking
 
   const selectedPackage = packages.find(p => p.id === selectedPackageId) || packages[0];
 
+  const validateStep2 = (): boolean => {
+    const errors: Record<string, string> = {};
+    
+    // Date validation
+    if (!checkIn) {
+      errors.checkIn = t('bookingModal.validation.checkInRequired');
+    }
+    if (!checkOut) {
+      errors.checkOut = t('bookingModal.validation.checkOutRequired');
+    }
+    if (checkIn && checkOut && checkOut <= checkIn) {
+      errors.checkOut = t('bookingModal.validation.checkOutAfterCheckIn');
+    }
+    
+    // Name validation
+    if (!formData.firstName || formData.firstName.trim().length < 2) {
+      errors.firstName = t('bookingModal.validation.firstNameMin');
+    }
+    if (!formData.lastName || formData.lastName.trim().length < 2) {
+      errors.lastName = t('bookingModal.validation.lastNameMin');
+    }
+    
+    // Email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!formData.email || !emailRegex.test(formData.email)) {
+      errors.email = t('bookingModal.validation.emailInvalid');
+    }
+    
+    // Phone validation using libphonenumber-js
+    if (!formData.phone) {
+      errors.phone = t('bookingModal.validation.phoneRequired');
+    } else {
+      try {
+        const phoneNumber = parsePhoneNumber(formData.phone);
+        if (!phoneNumber || !phoneNumber.isValid()) {
+          errors.phone = t('bookingModal.validation.phoneInvalid');
+        }
+      } catch {
+        errors.phone = t('bookingModal.validation.phoneInvalid');
+      }
+    }
+    
+    setFieldErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
   const handleConfirm = () => {
     if (!checkIn || !checkOut) {
       return;
     }
+    setShowConfirmDialog(true);
+  };
+
+  const handleFinalConfirm = () => {
+    setShowConfirmDialog(false);
     const totalPrice = (room.price * nights) + (selectedPackage?.price || 0);
     onConfirm({
       room,
@@ -101,9 +192,34 @@ export const BookingModal = ({ room, isOpen, onClose, onConfirm, user }: Booking
 
   const canProceedToNextStep = () => {
     if (step === 2) {
-      return checkIn && checkOut && formData.firstName && formData.lastName && formData.email;
+      // Validate phone using libphonenumber-js
+      let phoneValid = false;
+      if (formData.phone) {
+        try {
+          const phoneNumber = parsePhoneNumber(formData.phone);
+          phoneValid = phoneNumber && phoneNumber.isValid();
+        } catch {
+          phoneValid = false;
+        }
+      }
+      
+      return checkIn && checkOut && checkOut > checkIn && 
+             formData.firstName.trim().length >= 2 && 
+             formData.lastName.trim().length >= 2 && 
+             formData.email && 
+             phoneValid;
     }
     return true;
+  };
+
+  const handleNextStep = () => {
+    if (step === 2) {
+      if (validateStep2()) {
+        setStep(3);
+      }
+    } else {
+      setStep(step + 1);
+    }
   };
 
   return (
@@ -228,57 +344,70 @@ export const BookingModal = ({ room, isOpen, onClose, onConfirm, user }: Booking
                       <label className="text-xs font-bold uppercase text-muted-foreground">{t('hero.checkIn')}</label>
                       <input 
                         type="date" 
-                        className="w-full bg-input-background border-none rounded-lg px-4 py-2.5 text-sm focus:ring-2 focus:ring-primary"
+                        className={`w-full bg-input-background border rounded-lg px-4 py-2.5 text-sm focus:ring-2 focus:ring-primary ${fieldErrors.checkIn ? 'border-red-500' : 'border-transparent'}`}
                         value={checkIn}
-                        onChange={(e) => setCheckIn(e.target.value)}
-                        min={new Date().toISOString().split('T')[0]}
+                        onChange={(e) => {
+                          setCheckIn(e.target.value);
+                          setCheckOut('');
+                          setFieldErrors(prev => ({...prev, checkIn: '', checkOut: ''}));
+                        }}
+                        min={todayStr}
                       />
+                      {fieldErrors.checkIn && <p className="text-xs text-red-500">{fieldErrors.checkIn}</p>}
                     </div>
                     <div className="space-y-1">
                       <label className="text-xs font-bold uppercase text-muted-foreground">{t('hero.checkOut')}</label>
                       <input 
                         type="date" 
-                        className="w-full bg-input-background border-none rounded-lg px-4 py-2.5 text-sm focus:ring-2 focus:ring-primary"
+                        className={`w-full bg-input-background border rounded-lg px-4 py-2.5 text-sm focus:ring-2 focus:ring-primary ${fieldErrors.checkOut ? 'border-red-500' : 'border-transparent'}`}
                         value={checkOut}
-                        onChange={(e) => setCheckOut(e.target.value)}
-                        min={checkIn || new Date().toISOString().split('T')[0]}
+                        onChange={(e) => {
+                          setCheckOut(e.target.value);
+                          setFieldErrors(prev => ({...prev, checkOut: ''}));
+                        }}
+                        min={checkIn ? getMinCheckOut(checkIn, todayStr) : todayStr}
                       />
+                      {fieldErrors.checkOut && <p className="text-xs text-red-500">{fieldErrors.checkOut}</p>}
                     </div>
                     <div className="space-y-1">
                       <label className="text-xs font-bold uppercase text-muted-foreground">{t('bookingModal.firstName')}</label>
                       <input 
                         type="text" 
-                        className="w-full bg-input-background border-none rounded-lg px-4 py-2.5 text-sm focus:ring-2 focus:ring-primary"
+                        className={`w-full bg-input-background border rounded-lg px-4 py-2.5 text-sm focus:ring-2 focus:ring-primary ${fieldErrors.firstName ? 'border-red-500' : 'border-transparent'}`}
                         value={formData.firstName}
                         onChange={(e) => setFormData({...formData, firstName: e.target.value})}
                       />
+                      {fieldErrors.firstName && <p className="text-xs text-red-500">{fieldErrors.firstName}</p>}
                     </div>
                     <div className="space-y-1">
                       <label className="text-xs font-bold uppercase text-muted-foreground">{t('bookingModal.lastName')}</label>
                       <input 
                         type="text" 
-                        className="w-full bg-input-background border-none rounded-lg px-4 py-2.5 text-sm focus:ring-2 focus:ring-primary"
+                        className={`w-full bg-input-background border rounded-lg px-4 py-2.5 text-sm focus:ring-2 focus:ring-primary ${fieldErrors.lastName ? 'border-red-500' : 'border-transparent'}`}
                         value={formData.lastName}
                         onChange={(e) => setFormData({...formData, lastName: e.target.value})}
                       />
+                      {fieldErrors.lastName && <p className="text-xs text-red-500">{fieldErrors.lastName}</p>}
                     </div>
                     <div className="col-span-2 space-y-1">
                       <label className="text-xs font-bold uppercase text-muted-foreground">{t('bookingModal.emailAddress')}</label>
                       <input 
                         type="email" 
-                        className="w-full bg-input-background border-none rounded-lg px-4 py-2.5 text-sm focus:ring-2 focus:ring-primary"
+                        className={`w-full bg-input-background border rounded-lg px-4 py-2.5 text-sm focus:ring-2 focus:ring-primary ${fieldErrors.email ? 'border-red-500' : 'border-transparent'}`}
                         value={formData.email}
                         onChange={(e) => setFormData({...formData, email: e.target.value})}
                       />
+                      {fieldErrors.email && <p className="text-xs text-red-500">{fieldErrors.email}</p>}
                     </div>
                     <div className="col-span-2 space-y-1">
                       <label className="text-xs font-bold uppercase text-muted-foreground">{t('bookingModal.phoneNumber')}</label>
-                      <input 
-                        type="tel" 
-                        className="w-full bg-input-background border-none rounded-lg px-4 py-2.5 text-sm focus:ring-2 focus:ring-primary"
+                      <PhoneInput
                         value={formData.phone}
-                        onChange={(e) => setFormData({...formData, phone: e.target.value})}
+                        onChange={(value) => setFormData({...formData, phone: value || ''})}
+                        defaultCountry="HK"
+                        placeholder={t('bookingModal.phoneNumber')}
                       />
+                      {fieldErrors.phone && <p className="text-xs text-red-500">{fieldErrors.phone}</p>}
                     </div>
                     <div className="col-span-2 space-y-1">
                       <label className="text-xs font-bold uppercase text-muted-foreground">{t('bookingModal.specialRequests')}</label>
@@ -311,11 +440,11 @@ export const BookingModal = ({ room, isOpen, onClose, onConfirm, user }: Booking
                   <div className="bg-muted/50 rounded-xl p-6 text-left space-y-3">
                     <div className="flex justify-between text-sm">
                       <span>{t('hero.checkIn')}</span>
-                      <span className="font-bold">{checkIn}</span>
+                      <span className="font-bold">{formatDateForDisplay(checkIn, i18n.language)}</span>
                     </div>
                     <div className="flex justify-between text-sm">
                       <span>{t('hero.checkOut')}</span>
-                      <span className="font-bold">{checkOut}</span>
+                      <span className="font-bold">{formatDateForDisplay(checkOut, i18n.language)}</span>
                     </div>
                     <div className="flex justify-between text-sm border-t border-border pt-3">
                       <span>{t('bookingModal.step3.roomBasePrice')}</span>
@@ -351,7 +480,7 @@ export const BookingModal = ({ room, isOpen, onClose, onConfirm, user }: Booking
             )}
             
             <button 
-              onClick={() => step < 3 ? setStep(step + 1) : handleConfirm()}
+              onClick={() => step < 3 ? handleNextStep() : handleConfirm()}
               disabled={!canProceedToNextStep()}
               className="flex items-center gap-2 px-8 py-2.5 rounded-lg bg-primary text-primary-foreground font-bold hover:opacity-80 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
             >
@@ -360,6 +489,21 @@ export const BookingModal = ({ room, isOpen, onClose, onConfirm, user }: Booking
           </div>
         </div>
       </motion.div>
+
+      <ConfirmationDialog
+        isOpen={showConfirmDialog}
+        onClose={() => setShowConfirmDialog(false)}
+        onConfirm={handleFinalConfirm}
+        title={t('bookingModal.confirmDialog.title')}
+        description={t('bookingModal.confirmDialog.description', {
+          room: room.name,
+          checkIn: formatDateForDisplay(checkIn, i18n.language),
+          checkOut: formatDateForDisplay(checkOut, i18n.language),
+          total: (room.price * nights) + (selectedPackage?.price || 0)
+        })}
+        confirmText={t('bookingModal.confirmDialog.confirmText')}
+        cancelText={t('bookingModal.confirmDialog.cancelText')}
+      />
     </div>
   );
 };

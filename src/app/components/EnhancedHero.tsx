@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Search, Calendar, Users, ArrowRight, Sparkles } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useTranslation } from 'react-i18next';
@@ -12,8 +12,19 @@ interface EnhancedHeroProps {
   onViewFeatured?: () => void;
 }
 
+// Calculate min check-out date (must be strictly after check-in)
+const getMinCheckOut = (checkInDate: string) => {
+  if (checkInDate) {
+    const date = new Date(checkInDate + 'T00:00:00');
+    date.setDate(date.getDate() + 1);
+    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+  }
+  return '';
+};
+
 export const EnhancedHero = ({ onBookNow, onSearch, featuredRoom, onViewFeatured }: EnhancedHeroProps) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const [dateError, setDateError] = useState<string | null>(null);
   
   // Initialize dates dynamically: check-in = tomorrow, check-out = tomorrow + 2 days
   const getDefaultDates = () => {
@@ -43,14 +54,27 @@ export const EnhancedHero = ({ onBookNow, onSearch, featuredRoom, onViewFeatured
   });
 
   const handleSearch = () => {
+    // Validate dates
+    if (!searchParams.checkIn || !searchParams.checkOut) {
+      setDateError(t('hero.dateErrorRequired'));
+      return;
+    }
+    if (searchParams.checkOut <= searchParams.checkIn) {
+      setDateError(t('hero.dateErrorInvalid'));
+      return;
+    }
+    setDateError(null);
     onSearch(searchParams);
   };
 
   const handleCheckInChange = (value: string) => {
+    setDateError(null);
     setSearchParams(prev => {
-      const newCheckOut = value && prev.checkOut && value >= prev.checkOut
-        ? value
-        : prev.checkOut;
+      // If check-out is same as or before new check-in, auto-adjust check-out to check-in + 1 day
+      let newCheckOut = prev.checkOut;
+      if (value && (!prev.checkOut || prev.checkOut <= value)) {
+        newCheckOut = getMinCheckOut(value);
+      }
       return { ...prev, checkIn: value, checkOut: newCheckOut };
     });
   };
@@ -186,8 +210,11 @@ export const EnhancedHero = ({ onBookNow, onSearch, featuredRoom, onViewFeatured
                 type="date" 
                 className="w-full bg-input-background border-none rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-primary"
                 value={searchParams.checkOut}
-                onChange={(e) => setSearchParams({ ...searchParams, checkOut: e.target.value })}
-                min={searchParams.checkIn || new Date().toISOString().split('T')[0]}
+                onChange={(e) => {
+                  setSearchParams({ ...searchParams, checkOut: e.target.value });
+                  setDateError(null);
+                }}
+                min={searchParams.checkIn ? getMinCheckOut(searchParams.checkIn) : new Date().toISOString().split('T')[0]}
               />
             </div>
             <div className="space-y-1">
@@ -214,6 +241,15 @@ export const EnhancedHero = ({ onBookNow, onSearch, featuredRoom, onViewFeatured
             {t('hero.checkAvailability')}
           </button>
         </motion.div>
+        {dateError && (
+          <motion.div 
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mt-3 bg-red-50 border border-red-200 text-red-700 px-4 py-2 rounded-lg text-sm"
+          >
+            {dateError}
+          </motion.div>
+        )}
       </div>
     </div>
   );

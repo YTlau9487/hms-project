@@ -30,7 +30,9 @@
     "guestOption2": "1位成人",
     "guestOption3": "2位成人，1位儿童",
     "guestOption4": "2位成人，2位儿童",
-    "startingFrom": "每晚${{price}}起"
+    "startingFrom": "每晚${{price}}起",
+    "dateErrorRequired": "请选择入住和退房日期",
+    "dateErrorInvalid": "退房日期必须晚于入住日期"
   },
   "roomCard": {
     "featured": "精选",
@@ -105,6 +107,22 @@
         "name": "VIP体验",
         "desc": "早餐、机场接送和延迟退房。"
       }
+    },
+    "validation": {
+      "checkInRequired": "请选择入住日期",
+      "checkOutRequired": "请选择退房日期",
+      "checkOutAfterCheckIn": "退房日期必须晚于入住日期",
+      "firstNameMin": "名至少需要2个字符",
+      "lastNameMin": "姓至少需要2个字符",
+      "emailInvalid": "请输入有效的电子邮件地址",
+      "phoneRequired": "电话号码为必填项",
+      "phoneInvalid": "请输入有效的电话号码"
+    },
+    "confirmDialog": {
+      "title": "确认预订",
+      "description": "您确定要预订 {{room}}，从 {{checkIn}} 到 {{checkOut}} 吗？总计：${{total}}",
+      "confirmText": "是，立即预订",
+      "cancelText": "取消"
     }
   },
   "authModal": {
@@ -153,6 +171,7 @@
     "cancelDialogConfirm": "是，取消预订",
     "cancelDialogCancel": "保留预订",
     "receiptNotAvailable": "收据暂不可用",
+    "contactForChanges": "如需更改或取消，请联系接待处",
     "cancelSuccess": "预订取消成功",
     "cancelSuccessDesc": "您将很快收到确认电子邮件。",
     "cancelFailed": "取消预订失败"
@@ -286,7 +305,9 @@
   "notifications": {
     "title": "通知",
     "clearAll": "清除全部",
-    "noNotifications": "暂无新通知"
+    "noNotifications": "暂无新通知",
+    "justNow": "刚刚",
+    "loading": "加载通知中..."
   },
   "common": {
     "loading": "加载中...",
@@ -755,5 +776,40 @@
   "phoneInput": {
     "searchPlaceholder": "搜索国家或代码...",
     "noCountriesFound": "未找到国家"
+  },
+  "stayManagement": {
+    "checkInTitle": "入住管理",
+    "checkOutTitle": "退房管理",
+    "checkInSubtitle": "为已确认预订办理入住手续",
+    "checkOutSubtitle": "为活跃住宿办理退房手续",
+    "searchPlaceholder": "搜索预订...",
+    "bookingId": "预订编号",
+    "guest": "宾客",
+    "room": "客房",
+    "checkInDate": "入住日期",
+    "checkOutDate": "退房日期",
+    "status": "状态",
+    "stayStatus": "住宿状态",
+    "action": "操作",
+    "loadingBookings": "加载预订中...",
+    "loadingError": "无法加载预订数据",
+    "noCheckInBookings": "没有可办理入住的预订",
+    "noCheckOutBookings": "没有可办理退房的预订",
+    "confirmed": "已确认",
+    "pending": "待处理",
+    "cancelled": "已取消",
+    "checkedIn": "已入住",
+    "notCheckedIn": "未入住",
+    "checkedOut": "已退房",
+    "checkInBtn": "办理入住",
+    "checkOutBtn": "办理退房",
+    "confirmCheckInTitle": "确认入住",
+    "confirmCheckOutTitle": "确认退房",
+    "confirmCheckInDesc": "确定要为 {{guest}} 办理入住吗？",
+    "confirmCheckOutDesc": "确定要为 {{guest}} 办理退房吗？",
+    "goBack": "返回",
+    "checkInSuccess": "宾客入住成功",
+    "checkOutSuccess": "宾客退房成功",
+    "actionFailed": "处理住宿操作失败"
   }
 }
