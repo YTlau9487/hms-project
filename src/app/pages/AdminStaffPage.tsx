@@ -3,6 +3,8 @@ import { Users, Plus, Trash2, AlertCircle, X, Loader2, UserPlus } from 'lucide-r
 import { useNavigate } from 'react-router';
 import { useAuth } from '../context/AuthContext';
 import { adminAPI, StaffCreate, StaffMember } from '../services/api';
+import PhoneInput from '../components/PhoneInput';
+import { isValidPhoneNumber } from 'libphonenumber-js';
 import { ConfirmationDialog } from '../components/ConfirmationDialog';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
@@ -111,6 +113,12 @@ export const AdminStaffPage = () => {
   const handleCreateSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+
+    // Client-side validation
+    if (formData.phone && !isValidPhoneNumber(formData.phone)) {
+      setError(t('adminStaff.invalidPhone'));
+      return;
+    }
     
     // Show confirmation dialog
     setCreateConfirm({
@@ -120,6 +128,7 @@ export const AdminStaffPage = () => {
       phone: formData.phone || undefined,
     });
   };
+
 
   const confirmCreateStaff = async () => {
     if (!createConfirm) return;
@@ -250,13 +259,12 @@ export const AdminStaffPage = () => {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">{t('adminStaff.phone')}</label>
-                  <input
-                    type="tel"
+                  <PhoneInput
                     value={formData.phone}
-                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent outline-none"
+                    onChange={(value) => setFormData({ ...formData, phone: value || '' })}
                   />
                 </div>
+
               </div>
               <button
                 type="submit"

@@ -10,41 +10,15 @@ const ADMIN_WARNING_TIMEOUT = 4 * 60 * 1000; // 4 minutes (1 minute warning)
 export const AdminLayout = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { user, logout } = useAuth();
+  const { user, loading, logout } = useAuth();
   const { t, i18n } = useTranslation();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [showWarning, setShowWarning] = useState(false);
   const [warningTimeLeft, setWarningTimeLeft] = useState(60);
 
-  // Route guard: redirect to login if not authenticated or not admin
-  if (!user || user.role !== 'admin') {
-    return <Navigate to="/admin/login" replace />;
-  }
-
-  const sidebarItems = [
-    { path: '/admin/dashboard', label: t('adminLayout.dashboard'), icon: LayoutDashboard },
-    { path: '/admin/bookings', label: t('adminLayout.bookings'), icon: CalendarCheck },
-  ];
-
-  const managementItems = [
-    { path: '/admin/rooms', label: t('adminLayout.rooms'), icon: BedDouble },
-    { path: '/admin/staff', label: t('adminLayout.staff'), icon: Users },
-    { path: '/admin/notifications', label: t('adminLayout.notifications'), icon: Bell },
-  ];
-
-  const toggleLanguage = () => {
-    const langs = ['en', 'zh-TW', 'zh-CN'];
-    const currentIndex = langs.indexOf(i18n.language);
-    const nextIndex = (currentIndex + 1) % langs.length;
-    i18n.changeLanguage(langs[nextIndex]);
-  };
-
-  // Auto-logout timer for admin users
   const resetTimer = useCallback(() => {
     setShowWarning(false);
     setWarningTimeLeft(60);
-    // Refresh admin session timestamp on activity
-    localStorage.setItem('hms_admin_login_time', String(Date.now()));
   }, []);
 
   const handleLogout = useCallback(() => {
@@ -104,7 +78,44 @@ export const AdminLayout = () => {
     };
   }, [handleLogout, resetTimer]);
 
+  // Show loading state while AuthContext initializes
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-12 h-12 border-4 border-gray-300 border-t-gray-900 rounded-full animate-spin"></div>
+          <p className="text-gray-500 text-sm">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Route guard: redirect to login if not authenticated or not admin
+  if (!user || user.role !== 'admin') {
+    return <Navigate to="/admin/login" replace />;
+  }
+
+  // Prevent admins from accessing customer root page
+  if (user.role === 'admin' && location.pathname === '/') {
+    return <Navigate to="/admin/dashboard" replace />;
+  }
+
+  const managementItems = [
+    { path: '/admin/rooms', label: t('adminLayout.rooms'), icon: BedDouble },
+    { path: '/admin/staff', label: t('adminLayout.staff'), icon: Users },
+    { path: '/admin/notifications', label: t('adminLayout.notifications'), icon: Bell },
+  ];
+
+
+  const toggleLanguage = () => {
+    const langs = ['en', 'zh-TW', 'zh-CN'];
+    const currentIndex = langs.indexOf(i18n.language);
+    const nextIndex = (currentIndex + 1) % langs.length;
+    i18n.changeLanguage(langs[nextIndex]);
+  };
+
   return (
+
     <div className="min-h-screen flex flex-col font-sans selection:bg-primary/20 selection:text-primary bg-gray-50">
       {/* Admin Header - Unique design */}
       <header className="bg-gray-900 text-white px-4 py-3 flex items-center justify-between sticky top-0 z-50">
@@ -169,58 +180,35 @@ export const AdminLayout = () => {
             </button>
           </div>
           <nav className="space-y-2">
-            {sidebarItems.map((item) => {
-              const Icon = item.icon;
-              const isActive = location.pathname === item.path;
-              return (
-                <button
-                  key={item.path}
-                  onClick={() => {
-                    navigate(item.path);
-                    setIsSidebarOpen(false);
-                  }}
-                  className={`w-full flex items-center gap-3 px-4 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer whitespace-nowrap ${
-                    isActive 
-                      ? 'bg-gray-900 text-white' 
-                      : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
-                  }`}
-                >
-                  <Icon className="w-5 h-5 flex-shrink-0" />
-                  {item.label}
-                </button>
-              );
-            })}
-
-            {/* Management Section */}
-            <div className="pt-4 mt-4 border-t border-gray-200">
+            <div className="space-y-2">
               <p className="px-4 text-xs font-bold uppercase tracking-wider text-gray-500 mb-2">
                 {t('adminLayout.management')}
               </p>
-              <div className="space-y-2">
-                {managementItems.map((item) => {
-                  const Icon = item.icon;
-                  const isActive = location.pathname === item.path;
-                  return (
-                    <button
-                      key={item.path}
-                      onClick={() => {
-                        navigate(item.path);
-                        setIsSidebarOpen(false);
-                      }}
-                      className={`w-full flex items-center gap-3 px-4 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer whitespace-nowrap ${
-                        isActive 
-                          ? 'bg-gray-900 text-white' 
-                          : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
-                      }`}
-                    >
-                      <Icon className="w-5 h-5 flex-shrink-0" />
-                      {item.label}
-                    </button>
-                  );
-                })}
-              </div>
+              {managementItems.map((item) => {
+                const Icon = item.icon;
+                const isActive = location.pathname === item.path;
+                return (
+                  <button
+                    key={item.path}
+                    onClick={() => {
+                      navigate(item.path);
+                      setIsSidebarOpen(false);
+                    }}
+                    className={`w-full flex items-center gap-3 px-4 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer whitespace-nowrap ${
+                      isActive 
+                        ? 'bg-gray-900 text-white' 
+                        : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
+                    }`}
+                  >
+                    <Icon className="w-5 h-5 flex-shrink-0" />
+                    {item.label}
+                  </button>
+                );
+              })}
             </div>
           </nav>
+
+
 
           {/* Auto-logout warning */}
           {showWarning && (

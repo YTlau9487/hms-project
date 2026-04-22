@@ -7,7 +7,8 @@ import { useAuth } from '../context/AuthContext';
 export const AdminLoginPage = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { login } = useAuth();
+  const { adminLogin } = useAuth();
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -20,9 +21,10 @@ export const AdminLoginPage = () => {
     setIsLoading(true);
 
     try {
-      await login(email, password, true); // allowAdmin = true
+      await adminLogin(email, password);
       navigate('/admin/staff');
     } catch (err) {
+
       const message = err instanceof Error ? err.message : 'Login failed';
       if (message.includes('429')) {
         setError('Too many attempts. Please try again later.');
@@ -35,6 +37,7 @@ export const AdminLoginPage = () => {
       setIsLoading(false);
     }
   };
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 to-gray-800 flex items-center justify-center p-4">

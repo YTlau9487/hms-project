@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import { useAuth } from '../context/AuthContext';
+import { useNavigate } from 'react-router';
 import { CalendarCheck, Eye, X, Check } from 'lucide-react';
 import { adminAPI, getErrorMessage, Booking } from '../services/api';
 import { LoadingSpinner } from '../components/LoadingSpinner';
@@ -8,7 +10,16 @@ import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 
 export const AdminBookingsPage = () => {
+  const { user } = useAuth();
+  const navigate = useNavigate();
+
+  if (user?.role === 'admin') {
+    navigate('/admin/staff', { replace: true });
+    return null;
+  }
+
   const { t, i18n } = useTranslation();
+
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

@@ -52,7 +52,7 @@ function AppContent() {
   const [isBookingOpen, setIsBookingOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
 
   const handleBookingConfirm = async (details: any) => {
     try {
@@ -88,6 +88,26 @@ function AppContent() {
       setIsBookingOpen(true);
     }
   };
+
+  // Check for admin session and redirect if on non-admin page
+  useEffect(() => {
+    if (!authLoading && user?.role === 'admin' && location.pathname !== '/admin/login' && !location.pathname.startsWith('/admin')) {
+      navigate('/admin/staff');
+    }
+  }, [location.pathname, navigate, authLoading, user]);
+
+
+
+  if (authLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-12 h-12 border-4 border-gray-300 border-t-primary rounded-full animate-spin"></div>
+          <p className="text-muted-foreground text-sm">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <>
@@ -148,7 +168,7 @@ function AppContent() {
             />
           </Route>
 
-          {/* Account Routes - Protected */}
+          {/* Account Routes - Protected (Customer only) */}
           <Route element={<AccountLayout />}>
             <Route path="/account" element={<Navigate to="/account/profile" replace />} />
             <Route 
@@ -184,11 +204,7 @@ function AppContent() {
 
           {/* Admin Routes - Protected */}
           <Route element={<AdminLayout />}>
-            <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
-            <Route 
-              path="/admin/dashboard" 
-              element={<AdminDashboardPage />} 
-            />
+            <Route path="/admin" element={<Navigate to="/admin/staff" replace />} />
             <Route 
               path="/admin/rooms" 
               element={<AdminRoomsPage />} 
@@ -201,11 +217,8 @@ function AppContent() {
               path="/admin/notifications" 
               element={<AdminNotificationsPage />} 
             />
-            <Route 
-              path="/admin/bookings" 
-              element={<AdminBookingsPage />} 
-            />
           </Route>
+
 
           {/* Admin Login Route */}
           <Route 
@@ -228,6 +241,7 @@ function AppContent() {
     </>
   );
 }
+
 
 export default function App() {
   return (
