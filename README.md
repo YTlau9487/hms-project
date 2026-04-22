@@ -86,12 +86,21 @@ docker-compose up dev
 ## 🔐 Authentication & Authorization
 
 ### User Roles
-- **Customer**: Can view rooms, make bookings, view their bookings
-- **Staff**: Can manage rooms, view all bookings, access admin dashboard
+- **Customer**: View rooms, book, view bookings (/account/*)
+- **Staff**: Operational dashboard, bookings, rooms, stay management (/staff/*)
+- **Admin**: Oversight (staff management, rooms, notifications), separate login (/admin/*, 5-min timeout)
+
+### Test Credentials
+The system automatically seeds test accounts on startup:
+- **Customer**: `customer@test.com` / `password123`
+- **Staff**: `staff@test.com` / `password123`
+- **Admin**: `admin@test.com` / `password123` (use /admin/login)
 
 ### Protected Routes
-- `/account/*` - Requires customer role
-- `/admin/*` - Requires staff role
+- `/account/*` - Customer
+- `/staff/*` - Staff
+- `/admin/*` - Admin
+
 
 ### API Endpoints
 - `POST /api/auth/register` - Register new user
