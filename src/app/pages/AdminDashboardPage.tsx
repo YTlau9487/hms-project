@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import { useAuth } from '../context/AuthContext';
+import { useNavigate } from 'react-router';
 import { AdminPanel } from '../components/AdminPanel';
 import { Room, RoomPackage } from '../components/RoomCard';
 import { roomsAPI, adminAPI, getErrorMessage, Booking, DashboardStats } from '../services/api';
@@ -8,6 +10,14 @@ import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 
 export const AdminDashboardPage = () => {
+  const { user } = useAuth();
+  const navigate = useNavigate();
+
+  if (user?.role === 'admin') {
+    navigate('/admin/staff', { replace: true });
+    return null;
+  }
+
   const { t, i18n } = useTranslation();
   const [rooms, setRooms] = useState<Room[]>([]);
   const [bookings, setBookings] = useState<Booking[]>([]);
@@ -101,3 +111,4 @@ export const AdminDashboardPage = () => {
     />
   );
 };
+

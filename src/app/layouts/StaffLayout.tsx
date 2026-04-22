@@ -9,14 +9,32 @@ const STAFF_IDLE_TIMEOUT = 30 * 60 * 1000; // 30 minutes
 export const StaffLayout = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { user, logout } = useAuth();
+  const { user, loading, logout } = useAuth();
   const { t, i18n } = useTranslation();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+  const handleLogout = useCallback(() => {
+    logout();
+    window.location.href = '/login';
+  }, [logout]);
+
+  // Show loading state while AuthContext initializes
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-12 h-12 border-4 border-gray-300 border-t-primary rounded-full animate-spin"></div>
+          <p className="text-muted-foreground text-sm">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   // Route guard: redirect to login if not authenticated or not staff
   if (!user || user.role !== 'staff') {
     return <Navigate to="/login" replace />;
   }
+
 
   const sidebarItems = [
     { path: '/staff/dashboard', label: t('staffLayout.dashboard'), icon: LayoutDashboard },
@@ -37,19 +55,12 @@ export const StaffLayout = () => {
   };
 
   // Auto-logout timer for staff users
-  const handleLogout = useCallback(() => {
-    logout();
-    window.location.href = '/login';
-  }, [logout]);
-
   useEffect(() => {
     let idleTimer: ReturnType<typeof setTimeout>;
 
     const resetTimer = () => {
       clearTimeout(idleTimer);
       idleTimer = setTimeout(handleLogout, STAFF_IDLE_TIMEOUT);
-      // Refresh session timestamp on activity
-      localStorage.setItem('hms_admin_login_time', String(Date.now()));
     };
 
     resetTimer();
@@ -64,6 +75,7 @@ export const StaffLayout = () => {
       events.forEach(event => window.removeEventListener(event, handleActivity));
     };
   }, [handleLogout]);
+
 
   return (
     <div className="min-h-screen flex flex-col font-sans selection:bg-primary/20 selection:text-primary">

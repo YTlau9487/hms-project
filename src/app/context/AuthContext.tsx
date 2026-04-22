@@ -1,60 +1,76 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { authAPI, usersAPI, setAuthToken, User } from '../services/api';
 
-const ADMIN_SESSION_KEY = 'hms_admin_login_time';
-const ADMIN_SESSION_TIMEOUT = 5 * 60 * 1000; // 5 minutes
-
 interface AuthContextType {
   user: User | null;
   loading: boolean;
-  login: (email: string, password: string, allowAdmin?: boolean) => Promise<{ success: boolean; error?: string; user?: User }>;
+  tokenType: 'admin' | 'regular' | null;
+  login: (email: string, password: string) => Promise<{ success: boolean; error?: string; user?: User }>;
+  adminLogin: (email: string, password: string) => Promise<{ success: boolean; error?: string; user?: User }>;
   register: (data: { email: string; password: string; name: string; phone?: string }) => Promise<{ success: boolean; error?: string }>;
   logout: () => void;
   refreshUser: () => Promise<void>;
   updateUser: (data: { name: string; phone: string }) => Promise<{ success: boolean; error?: string }>;
 }
 
+
+
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [tokenType, setTokenType] = useState<'admin' | 'regular' | null>(null);
+
 
   // Try to restore session on mount
   useEffect(() => {
     const initAuth = async () => {
-      const token = localStorage.getItem('hms_token');
-      if (token) {
-        setAuthToken(token);
+      const adminToken = localStorage.getItem('hms_admin_token');
+      const regularToken = localStorage.getItem('hms_token');
+      
+      let tokenToUse: string | null = null;
+      let typeToUse: 'admin' | 'regular' | null = null;
+      
+      if (adminToken) {
+        tokenToUse = adminToken;
+        typeToUse = 'admin';
+        localStorage.removeItem('hms_token'); // Clear conflicting
+      } else if (regularToken) {
+        tokenToUse = regularToken;
+        typeToUse = 'regular';
+      }
+      
+      if (tokenToUse) {
+        setAuthToken(tokenToUse);
         try {
           const userData = await authAPI.me();
-          // Admin/staff: only restore session if within 5-minute window
-          if (userData.role === 'admin' || userData.role === 'staff') {
-            const adminLoginTime = localStorage.getItem(ADMIN_SESSION_KEY);
-            if (adminLoginTime && Date.now() - parseInt(adminLoginTime) < ADMIN_SESSION_TIMEOUT) {
-              setUser(userData);
-            } else {
-              // Session expired
-              localStorage.removeItem('hms_token');
-              localStorage.removeItem(ADMIN_SESSION_KEY);
-              setAuthToken(null);
-            }
-          } else {
-            setUser(userData);
+          
+          // Role verification
+          if (typeToUse === 'admin' && userData.role !== 'admin') {
+            throw new Error('Invalid admin token');
           }
+          if (typeToUse === 'regular' && userData.role === 'admin') {
+            throw new Error('Admin must use admin portal');
+          }
+          
+          setUser(userData);
+          setTokenType(typeToUse);
         } catch (error) {
-          // Token invalid or expired
+          localStorage.removeItem('hms_admin_token');
           localStorage.removeItem('hms_token');
-          localStorage.removeItem(ADMIN_SESSION_KEY);
           setAuthToken(null);
+          setTokenType(null);
         }
       }
+      
       setLoading(false);
     };
     initAuth();
   }, []);
 
-  const login = async (email: string, password: string, allowAdmin: boolean = false): Promise<{ success: boolean; error?: string; user?: User }> => {
+
+  const login = async (email: string, password: string): Promise<{ success: boolean; error?: string; user?: User }> => {
     try {
       const tokenData = await authAPI.login({ email, password });
       localStorage.setItem('hms_token', tokenData.access_token);
@@ -62,21 +78,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       
       const userData = await authAPI.me();
       
-      // Admin accounts should use the admin portal, not the customer interface
-      if (userData.role === 'admin' && !allowAdmin) {
+      // Admin accounts must use admin portal
+      if (userData.role === 'admin') {
         localStorage.removeItem('hms_token');
         setAuthToken(null);
         throw new Error('Admin accounts must use the admin portal at /admin/login');
       }
-
-      // Store admin/staff login timestamp for session persistence
-      if (userData.role === 'admin' || userData.role === 'staff') {
-        localStorage.setItem(ADMIN_SESSION_KEY, String(Date.now()));
-      }
       
       setUser(userData);
+      setTokenType('regular');
       
       return { success: true, user: userData };
+
     } catch (error) {
       let errorMessage = 'Login failed';
       if (error instanceof Error) {
@@ -90,6 +103,41 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       throw new Error(errorMessage);
     }
   };
+
+  const adminLogin = async (email: string, password: string): Promise<{ success: boolean; error?: string; user?: User }> => {
+    try {
+      const tokenData = await authAPI.login({ email, password });
+      localStorage.setItem('hms_admin_token', tokenData.access_token);  // Separate admin token
+      setAuthToken(tokenData.access_token);
+      
+      const userData = await authAPI.me();
+      
+      // Verify admin role
+      if (userData.role !== 'admin') {
+        localStorage.removeItem('hms_admin_token');
+        setAuthToken(null);
+        throw new Error('Admin access required');
+      }
+      
+      setUser(userData);
+      setTokenType('admin');
+      
+      return { success: true, user: userData };
+
+    } catch (error) {
+      let errorMessage = 'Admin login failed';
+      if (error instanceof Error) {
+        try {
+          const errorData = JSON.parse(error.message);
+          errorMessage = errorData.detail || error.message;
+        } catch {
+          errorMessage = error.message;
+        }
+      }
+      throw new Error(errorMessage);
+    }
+  };
+
 
   const register = async (data: { email: string; password: string; name: string; phone?: string }): Promise<{ success: boolean; error?: string }> => {
     try {
@@ -105,10 +153,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const logout = () => {
     setUser(null);
+    setTokenType(null);
     localStorage.removeItem('hms_token');
-    localStorage.removeItem(ADMIN_SESSION_KEY);
+    localStorage.removeItem('hms_admin_token');
     setAuthToken(null);
   };
+
 
   const refreshUser = async () => {
     try {
@@ -131,10 +181,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, logout, refreshUser, updateUser }}>
+    <AuthContext.Provider value={{ user, loading, tokenType, login, adminLogin, register, logout, refreshUser, updateUser }}>
       {children}
     </AuthContext.Provider>
   );
+
+
 };
 
 export const useAuth = () => {

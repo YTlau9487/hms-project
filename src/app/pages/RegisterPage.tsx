@@ -16,7 +16,8 @@ export const RegisterPage = () => {
   useEffect(() => {
     if (user) {
       if (user.role === 'staff') {
-        navigate('/admin/dashboard');
+        navigate('/admin/staff');
+
       } else {
         navigate('/');
       }
@@ -82,7 +83,8 @@ export const RegisterPage = () => {
         // After successful registration, user is auto-logged in via login() call in register()
         // The user state will be updated, so we can check user.role
         if (user?.role === 'staff') {
-          navigate('/admin/dashboard');
+          navigate('/admin/staff');
+
         } else {
           navigate('/');
         }

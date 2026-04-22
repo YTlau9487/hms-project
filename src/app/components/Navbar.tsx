@@ -31,7 +31,9 @@ export const Navbar = () => {
   };
 
   const handleRoomsClick = () => {
-    if (user?.role === 'staff') {
+    if (user?.role === 'admin') {
+      navigate('/admin/rooms');
+    } else if (user?.role === 'staff') {
       sessionStorage.setItem('interfaceContext', 'customer');
       navigate('/?view=customer');
     } else {
@@ -41,7 +43,10 @@ export const Navbar = () => {
   };
 
   const handleAmenitiesClick = () => {
-    if (location.pathname !== '/') {
+    if (user?.role === 'admin') {
+      navigate('/admin/staff');
+
+    } else if (location.pathname !== '/') {
       navigate('/');
       setTimeout(() => {
         const element = document.getElementById('amenities-section');
@@ -52,6 +57,7 @@ export const Navbar = () => {
       element?.scrollIntoView({ behavior: 'smooth' });
     }
   };
+
 
   return (
     <nav className="sticky top-0 z-50 w-full bg-background border-b border-border backdrop-blur-md bg-opacity-80">

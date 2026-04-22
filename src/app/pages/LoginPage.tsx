@@ -16,7 +16,8 @@ export const LoginPage = () => {
       if (user.role === 'staff') {
         navigate('/staff/dashboard');
       } else if (user.role === 'admin') {
-        navigate('/admin/dashboard');
+        navigate('/admin/staff');
+
       } else {
         navigate('/');
       }
@@ -40,7 +41,8 @@ export const LoginPage = () => {
         if (result.user?.role === 'staff') {
           navigate('/staff/dashboard');
         } else if (result.user?.role === 'admin') {
-          navigate('/admin/dashboard');
+          navigate('/admin/staff');
+
         } else {
           navigate('/');
         }

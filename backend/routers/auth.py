@@ -24,15 +24,25 @@ ph = PasswordHasher()
 # JWT settings
 SECRET_KEY = "your-secret-key-change-in-production"
 ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 1440  # 24 hours
+
+# Role-based token expiration times (in minutes)
+TOKEN_EXPIRE_ADMIN = 5       # 5 minutes for admin
+TOKEN_EXPIRE_STAFF = 30      # 30 minutes for staff
+TOKEN_EXPIRE_CUSTOMER = 240  # 4 hours for customer
 
 
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     to_encode = data.copy()
-    if expires_delta:
-        expire = datetime.utcnow() + expires_delta
-    else:
-        expire = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    
+    # Role-based token expiration
+    role = data.get("role")
+    if role == "admin":
+        expire = datetime.utcnow() + timedelta(minutes=TOKEN_EXPIRE_ADMIN)
+    elif role == "staff":
+        expire = datetime.utcnow() + timedelta(minutes=TOKEN_EXPIRE_STAFF)
+    else:  # customer or unknown role
+        expire = datetime.utcnow() + timedelta(minutes=TOKEN_EXPIRE_CUSTOMER)
+    
     to_encode.update({"exp": expire})
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
