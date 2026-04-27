@@ -198,22 +198,25 @@ export const EnhancedHero = ({ onBookNow, onSearch, featuredRoom, onViewFeatured
         >
           <div className="flex-1 grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="space-y-1">
-              <label className="text-xs uppercase font-bold text-muted-foreground flex items-center gap-1">
+              <label htmlFor="hero-checkin" className="text-xs uppercase font-bold text-muted-foreground flex items-center gap-1">
                 <Calendar className="w-3 h-3" /> {t('hero.checkIn')}
               </label>
               <input 
+                id="hero-checkin"
                 type="date" 
                 className="w-full bg-input-background border-none rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-primary"
                 value={searchParams.checkIn}
                 onChange={(e) => handleCheckInChange(e.target.value)}
                 min={new Date().toISOString().split('T')[0]}
+                aria-label={t('hero.checkInDate')}
               />
             </div>
             <div className="space-y-1">
-              <label className="text-xs uppercase font-bold text-muted-foreground flex items-center gap-1">
+              <label htmlFor="hero-checkout" className="text-xs uppercase font-bold text-muted-foreground flex items-center gap-1">
                 <Calendar className="w-3 h-3" /> {t('hero.checkOut')}
               </label>
               <input 
+                id="hero-checkout"
                 type="date" 
                 className="w-full bg-input-background border-none rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-primary"
                 value={searchParams.checkOut}
@@ -222,6 +225,7 @@ export const EnhancedHero = ({ onBookNow, onSearch, featuredRoom, onViewFeatured
                   setDateError(null);
                 }}
                 min={searchParams.checkIn ? getMinCheckOut(searchParams.checkIn) : new Date().toISOString().split('T')[0]}
+                aria-label={t('hero.checkOutDate')}
               />
             </div>
             <div className="space-y-1">

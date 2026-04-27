@@ -10,7 +10,9 @@
     "staffDashboard": "Staff Dashboard",
     "loginRegister": "Login / Register",
     "customer": "Customer",
-    "staff": "Staff"
+    "staff": "Staff",
+    "openMenu": "Open navigation menu",
+    "closeMenu": "Close navigation menu"
   },
   "hero": {
     "badge": "FEATURED LUXURY EXPERIENCE",
@@ -32,7 +34,9 @@
     "guestOption4": "2 Adults, 2 Children",
     "startingFrom": "Starting from ${{price}}/night",
     "dateErrorRequired": "Please select both check-in and check-out dates",
-    "dateErrorInvalid": "Check-out date must be after check-in date"
+    "dateErrorInvalid": "Check-out date must be after check-in date",
+    "checkInDate": "Check-in date",
+    "checkOutDate": "Check-out date"
   },
   "roomCard": {
     "featured": "Featured",
@@ -317,7 +321,10 @@
     "privacyPolicy": "Privacy Policy",
     "termsOfService": "Terms of Service",
     "cookiePolicy": "Cookie Policy",
-    "accessibility": "Accessibility"
+    "accessibility": "Accessibility",
+    "followInstagram": "Follow us on Instagram",
+    "followFacebook": "Follow us on Facebook",
+    "followTwitter": "Follow us on Twitter"
   },
   "notifications": {
     "title": "Notifications",

@@ -136,28 +136,32 @@ export const AvailabilityPage = () => {
           
           <form onSubmit={handleSearch} className="flex flex-wrap gap-4 items-end">
             <div className="flex-1 min-w-[200px]">
-              <label className="text-xs font-bold uppercase text-muted-foreground mb-1 block">{t('hero.checkIn')}</label>
+              <label htmlFor="avail-checkin" className="text-xs font-bold uppercase text-muted-foreground mb-1 block">{t('hero.checkIn')}</label>
               <div className="relative">
                 <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <input
+                  id="avail-checkin"
                   type="date"
                   name="check_in"
                   defaultValue={checkIn}
                   className="w-full bg-input-background border-none rounded-lg pl-10 pr-4 py-2.5 text-sm focus:ring-2 focus:ring-primary"
                   required
+                  aria-label={t('hero.checkInDate')}
                 />
               </div>
             </div>
             <div className="flex-1 min-w-[200px]">
-              <label className="text-xs font-bold uppercase text-muted-foreground mb-1 block">{t('hero.checkOut')}</label>
+              <label htmlFor="avail-checkout" className="text-xs font-bold uppercase text-muted-foreground mb-1 block">{t('hero.checkOut')}</label>
               <div className="relative">
                 <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <input
+                  id="avail-checkout"
                   type="date"
                   name="check_out"
                   defaultValue={checkOut}
                   className="w-full bg-input-background border-none rounded-lg pl-10 pr-4 py-2.5 text-sm focus:ring-2 focus:ring-primary"
                   required
+                  aria-label={t('hero.checkOutDate')}
                 />
               </div>
             </div>

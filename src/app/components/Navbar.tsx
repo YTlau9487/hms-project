@@ -181,6 +181,8 @@ export const Navbar = () => {
             <button 
               className="md:hidden p-2 text-muted-foreground hover:text-foreground cursor-pointer"
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              aria-label={isMobileMenuOpen ? t('navbar.closeMenu') : t('navbar.openMenu')}
+              aria-expanded={isMobileMenuOpen}
             >
               <Menu className="w-6 h-6" />
             </button>
