@@ -1,11 +1,12 @@
 from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlmodel import Session, select
-from typing import List
-from datetime import date, datetime
+from typing import List, Optional
+from datetime import date, datetime, timedelta
+import math
 
 from database import get_session
 from models import Booking, BookingStatus, Room, RoomStatus, NotificationType, User
-from schemas import BookingCreate, BookingResponse, BookingUpdate, CheckInOutResponse, UserResponse
+from schemas import BookingCreate, BookingResponse, BookingUpdate, CheckInOutResponse, UserResponse, PaginatedBookingResponse
 from routers.auth import get_current_user, get_current_staff
 from routers.rooms import build_localized_room
 from routers.notifications import create_notification
@@ -37,21 +38,77 @@ def build_booking_response(booking: Booking, lang: str, session: Session) -> Boo
     )
 
 
-@router.get("/my", response_model=List[BookingResponse])
+@router.get("/my", response_model=PaginatedBookingResponse)
 def get_my_bookings(
     lang: str = Query("en"),
+    page: int = Query(1, ge=1, description="Page number"),
+    page_size: int = Query(20, ge=1, le=50, description="Items per page"),
     current_user = Depends(get_current_user),
     session: Session = Depends(get_session)
 ):
-    """Get current user's bookings"""
+    """Get current user's bookings with pagination"""
+    # Get total count
+    total = session.exec(
+        select(Booking).where(Booking.user_id == current_user.id)
+    ).all()
+    total_count = len(total)
+    pages = math.ceil(total_count / page_size) if total_count > 0 else 1
+
+    # Get paginated bookings
     bookings = session.exec(
         select(Booking)
         .where(Booking.user_id == current_user.id)
         .order_by(Booking.created_at.desc())
+        .offset((page - 1) * page_size)
+        .limit(page_size)
     ).all()
 
-    # Load room and user data for each booking
-    return [build_booking_response(booking, lang, session) for booking in bookings]
+    # Batch load rooms and users to avoid N+1
+    room_ids = list(set(b.room_id for b in bookings))
+    user_ids = list(set(b.user_id for b in bookings))
+    
+    # Guard against empty IN() clauses which SQLite doesn't support
+    if room_ids:
+        rooms = {r.id: r for r in session.exec(select(Room).where(Room.id.in_(room_ids))).all()}
+    else:
+        rooms = {}
+    
+    if user_ids:
+        users = {u.id: u for u in session.exec(select(User).where(User.id.in_(user_ids))).all()}
+    else:
+        users = {}
+
+    # Build response with batch-loaded data
+    result = []
+    for booking in bookings:
+        room = rooms.get(booking.room_id)
+        user = users.get(booking.user_id)
+        room_data = build_localized_room(room, lang, session) if room else None
+        user_data = UserResponse.model_validate(user) if user else None
+        
+        result.append(BookingResponse(
+            id=booking.id,
+            user_id=booking.user_id,
+            room_id=booking.room_id,
+            check_in=booking.check_in,
+            check_out=booking.check_out,
+            status=booking.status,
+            total_price=booking.total_price,
+            package_name=booking.package_name,
+            checked_in_at=booking.checked_in_at,
+            checked_out_at=booking.checked_out_at,
+            created_at=booking.created_at,
+            room=room_data,
+            user=user_data,
+        ))
+
+    return PaginatedBookingResponse(
+        items=result,
+        total=total_count,
+        page=page,
+        page_size=page_size,
+        pages=pages,
+    )
 
 
 @router.post("/", response_model=BookingResponse, status_code=status.HTTP_201_CREATED)
@@ -87,6 +144,31 @@ def create_booking(
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Check-in date cannot be in the past"
+        )
+    
+    # Max 1 month stay
+    max_stay = booking_data.check_in + timedelta(days=31)
+    if booking_data.check_out > max_stay:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Maximum stay duration is 1 month"
+        )
+    
+    # Write-time availability check to prevent double-booking
+    # Re-check that no overlapping booking exists at the exact moment of creation
+    overlapping = session.exec(
+        select(Booking).where(
+            Booking.room_id == booking_data.room_id,
+            Booking.status != BookingStatus.CANCELLED,
+            Booking.check_in < booking_data.check_out,
+            Booking.check_out > booking_data.check_in,
+        )
+    ).first()
+    
+    if overlapping:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="This room is no longer available for the selected dates. Please try different dates."
         )
     
     # Calculate total price

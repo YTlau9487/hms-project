@@ -5,6 +5,14 @@ import { ImageWithFallback } from './ImageWithFallback';
 import { Room } from './RoomCard';
 import { useTranslation } from 'react-i18next';
 
+// Map room type enum to translation key
+const roomTypeLabels: Record<string, string> = {
+  luxury: 'roomDetails.luxury',
+  suite: 'roomDetails.suite',
+  business: 'roomDetails.business',
+  standard: 'roomDetails.standard',
+};
+
 interface RoomDetailsProps {
   room: Room;
   onBack: () => void;
@@ -62,9 +70,9 @@ export const RoomDetails = ({ room, onBack, onBookNow }: RoomDetailsProps) => {
                   className="rounded-xl overflow-hidden aspect-square shadow-md hover:opacity-80 transition-opacity cursor-pointer"
                   onClick={() => setSelectedImage(room.image_url || null)}
                 >
-                  <ImageWithFallback
+              <ImageWithFallback
                     src={room.image_url || ''}
-                    alt={`View ${i}`}
+                    alt={`${room.name} - Room view ${i}`}
                     className="w-full h-full object-cover"
                   />
                 </div>
@@ -77,7 +85,7 @@ export const RoomDetails = ({ room, onBack, onBookNow }: RoomDetailsProps) => {
             <div>
               <div className="flex items-center gap-2 mb-2">
                 <span className="bg-primary/10 text-primary text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">
-                  {room.featured ? t('roomDetails.featured') : t('roomDetails.standard')}
+                  {room.featured ? t('roomDetails.featured') : t(roomTypeLabels[room.room_type] || 'roomDetails.standard')}
                 </span>
                 <div className="flex items-center gap-1 text-primary">
                   {[1, 2, 3, 4, 5].map((s) => <Star key={s} className="w-3 h-3 fill-current" />)}
@@ -85,18 +93,19 @@ export const RoomDetails = ({ room, onBack, onBookNow }: RoomDetailsProps) => {
               </div>
               <h1 className="text-4xl md:text-5xl font-bold mb-4">{room.name}</h1>
               <div className="flex items-center gap-6 text-muted-foreground mb-6">
-                {room.size && (
+                {room.size_sqm && (
                   <div className="flex items-center gap-2">
                     <Maximize2 className="w-5 h-5" />
-                    <span>{t('roomCard.sizeLabel', { value: room.size.replace(/(\d+)\s*sq\.m/i, '$1') })}</span>
+                    <span>{t('roomCard.sizeLabel', { value: room.size_sqm })}</span>
                   </div>
                 )}
-                {room.occupancy && (
-                  <div className="flex items-center gap-2">
-                    <Users className="w-5 h-5" />
-                    <span>{t('roomCard.occupancyLabel', { count: parseInt(room.occupancy.replace(/(\d+)\s*Adult/i, '$1')) })}</span>
-                  </div>
-                )}
+                <div className="flex items-center gap-2">
+                  <Users className="w-5 h-5" />
+                  <span>
+                    {t('roomCard.adults', { count: room.adults })}
+                    {room.children > 0 && `, ${t('roomCard.children', { count: room.children })}`}
+                  </span>
+                </div>
               </div>
               <p className="text-lg text-muted-foreground leading-relaxed">
                 {room.description}
@@ -160,7 +169,7 @@ export const RoomDetails = ({ room, onBack, onBookNow }: RoomDetailsProps) => {
               exit={{ scale: 0.9, opacity: 0 }}
               className="relative max-w-5xl w-full aspect-video"
             >
-              <ImageWithFallback src={selectedImage} alt="Enlarged view" className="w-full h-full object-contain" />
+              <ImageWithFallback src={selectedImage} alt={`${room.name} - Enlarged view`} className="w-full h-full object-contain" />
               <button
                 className="absolute top-4 right-4 bg-white/10 hover:bg-white/20 text-white p-2 rounded-full transition-colors cursor-pointer hover:opacity-80"
                 onClick={() => setSelectedImage(null)}

@@ -1,6 +1,8 @@
 import React from 'react';
+import { Helmet } from 'react-helmet-async';
 import { StaticPageLayout } from '../components/StaticPageLayout';
 import { useTranslation } from 'react-i18next';
+import { PAGE_SEO } from '../utils/seo';
 
 export const AccessibilityPage = () => {
   const { t } = useTranslation();
@@ -35,10 +37,17 @@ export const AccessibilityPage = () => {
   ];
 
   return (
-    <StaticPageLayout 
+    <>
+      <Helmet>
+        <title>{PAGE_SEO.accessibility.title}</title>
+        <meta name="description" content={PAGE_SEO.accessibility.description} />
+        <link rel="canonical" href={PAGE_SEO.accessibility.canonical} />
+      </Helmet>
+      <StaticPageLayout 
       title={t('accessibilityPage.title')}
       sections={sections}
       lastUpdated="March 15, 2024"
     />
+    </>
   );
 };

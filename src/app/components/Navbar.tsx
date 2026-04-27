@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { useNavigate, useLocation } from 'react-router';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
+import { toast } from 'sonner';
 
 export const Navbar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
@@ -43,27 +44,15 @@ export const Navbar = () => {
   };
 
   const handleAmenitiesClick = () => {
-    if (user?.role === 'admin') {
-      navigate('/admin/staff');
-
-    } else if (location.pathname !== '/') {
-      navigate('/');
-      setTimeout(() => {
-        const element = document.getElementById('amenities-section');
-        element?.scrollIntoView({ behavior: 'smooth' });
-      }, 100);
-    } else {
-      const element = document.getElementById('amenities-section');
-      element?.scrollIntoView({ behavior: 'smooth' });
-    }
+    toast.info(t('common.comingSoon'));
   };
 
 
   return (
     <nav className="sticky top-0 z-50 w-full bg-background border-b border-border backdrop-blur-md bg-opacity-80">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
-          <div className="flex items-center gap-8">
+        <div className="flex justify-between items-center h-16 gap-2">
+          <div className="flex items-center gap-2 sm:gap-8 min-w-0">
             <div 
               className="flex-shrink-0 flex items-center gap-2 cursor-pointer group" 
               onClick={() => {
@@ -80,7 +69,7 @@ export const Navbar = () => {
               <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center transition-transform group-hover:scale-110">
                 <span className="text-primary-foreground font-bold">G</span>
               </div>
-              <span className="text-xl font-bold tracking-tight">{t('navbar.brand')}</span>
+              <span className="text-xl font-bold tracking-tight truncate">{t('navbar.brand')}</span>
             </div>
             
             <div className="hidden md:flex items-center space-x-4">
@@ -119,11 +108,11 @@ export const Navbar = () => {
             </div>
           </div>
 
-          <div className="flex items-center gap-2 sm:gap-4">
+          <div className="flex items-center gap-2 sm:gap-4 flex-shrink-0">
             {/* Language Switcher */}
             <button
               onClick={toggleLanguage}
-              className="flex items-center gap-1.5 px-2 sm:px-3 py-1.5 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-colors cursor-pointer"
+              className="flex items-center gap-1.5 px-2 sm:px-3 py-1.5 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-colors cursor-pointer whitespace-nowrap"
               title={i18n.language === 'en' ? '切換至繁體中文' : i18n.language === 'zh-TW' ? '切換至简体中文' : 'Switch to English'}
             >
               <Languages className="w-4 h-4" />

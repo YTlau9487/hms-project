@@ -1,0 +1,28 @@
+# robots.txt for Golden Mile Hotel
+# https://hotel.ytlau.net
+
+# Allow all well-behaved crawlers
+User-agent: *
+Allow: /
+Allow: /rooms-and-suites
+Allow: /rooms/
+Allow: /dining
+Allow: /about
+Allow: /meetings-events
+Allow: /privacy
+Allow: /terms
+Allow: /cookies
+Allow: /accessibility
+
+# Disallow internal and admin pages
+Disallow: /admin
+Disallow: /admin/
+Disallow: /staff
+Disallow: /staff/
+Disallow: /account
+Disallow: /account/
+Disallow: /login
+Disallow: /register
+
+# Sitemap location
+Sitemap: https://hotel.ytlau.net/sitemap.xml

@@ -8,7 +8,8 @@ from models import UserRole, BookingStatus, RoomStatus, RoomType, NotificationTy
 class UserRegister(BaseModel):
     email: EmailStr
     password: str
-    name: str
+    first_name: str
+    last_name: str
     phone: str
 
 
@@ -26,6 +27,8 @@ class UserResponse(BaseModel):
     id: int
     email: str
     name: str
+    first_name: Optional[str]
+    last_name: Optional[str]
     phone: Optional[str]
     role: UserRole
     created_at: datetime
@@ -36,6 +39,8 @@ class UserResponse(BaseModel):
 
 class UserUpdate(BaseModel):
     name: Optional[str] = None
+    first_name: Optional[str] = None
+    last_name: Optional[str] = None
     phone: Optional[str] = None
 
 
@@ -242,7 +247,8 @@ class AvailabilityResponse(BaseModel):
 class StaffCreate(BaseModel):
     email: EmailStr
     password: str
-    name: str
+    first_name: str
+    last_name: str
     phone: Optional[str] = None
 
 
@@ -250,9 +256,23 @@ class StaffResponse(BaseModel):
     id: int
     email: str
     name: str
+    first_name: Optional[str]
+    last_name: Optional[str]
     phone: Optional[str]
     role: UserRole
     created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
+# Pagination schemas
+class PaginatedBookingResponse(BaseModel):
+    items: List[BookingResponse]
+    total: int
+    page: int
+    page_size: int
+    pages: int
 
     class Config:
         from_attributes = True

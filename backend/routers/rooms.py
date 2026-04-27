@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlmodel import Session, select
 from typing import List, Optional
-from datetime import date
+from datetime import date, timedelta
 
 from database import get_session
 from models import (
@@ -120,33 +120,53 @@ def list_rooms(
 def check_availability(
     check_in: date = Query(..., description="Check-in date (YYYY-MM-DD)"),
     check_out: date = Query(..., description="Check-out date (YYYY-MM-DD)"),
+    guests: Optional[int] = Query(None, ge=1, description="Minimum guest capacity"),
     lang: str = Query("en"),
     session: Session = Depends(get_session)
 ):
-    """Check room availability for given dates"""
+    """Check room availability for given dates (public endpoint)"""
+    today = date.today()
+    
     # Validate dates
     if check_out <= check_in:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Check-out date must be after check-in date"
         )
-
-    # Get all rooms
-    rooms = session.exec(select(Room).order_by(Room.id.asc())).all()
-
-    # Find rooms with overlapping active bookings
-    # A room is unavailable if there exists a booking where:
-    # NOT (requested_check_out <= existing_check_in OR requested_check_in >= existing_check_out)
-    overlapping_bookings = session.exec(
-        select(Booking.room_id).where(
-            Booking.status != BookingStatus.CANCELLED,
-            Booking.check_in < check_out,
-            Booking.check_out > check_in,
+    
+    if check_in < today:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Check-in date cannot be in the past"
         )
-    ).all()
+    
+    # Max 1 month stay
+    max_date = check_in + timedelta(days=31)
+    if check_out > max_date:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Maximum stay duration is 1 month"
+        )
 
-    unavailable_room_ids = set(overlapping_bookings)
-    available_rooms = [room for room in rooms if room.id not in unavailable_room_ids]
+    # Build query for available rooms using SQL overlap predicate
+    # A room is unavailable if there exists a non-cancelled booking where:
+    # existing.check_in < requested.check_out AND existing.check_out > requested.check_in
+    query = select(Room).where(
+        Room.id.not_in(
+            select(Booking.room_id).where(
+                Booking.status != BookingStatus.CANCELLED,
+                Booking.check_in < check_out,
+                Booking.check_out > check_in,
+            )
+        )
+    )
+    
+    # Filter by guest capacity if specified
+    if guests is not None:
+        query = query.where(Room.adults >= guests)
+    
+    query = query.order_by(Room.id.asc())
+    available_rooms = session.exec(query).all()
 
     return AvailabilityResponse(
         rooms=[build_localized_room(room, lang, session) for room in available_rooms],

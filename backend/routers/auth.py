@@ -6,12 +6,29 @@ from datetime import datetime, timedelta
 from jose import JWTError, jwt
 from typing import Optional
 from collections import defaultdict
+import re
 
 from database import get_session
 from models import User, UserRole
 from schemas import UserRegister, UserLogin, Token, UserResponse, UserUpdate
 
 router = APIRouter(prefix="/api/auth", tags=["auth"])
+
+# Password validation: min 8 chars, at least one English letter, at least one digit
+# Only allow ASCII letters (A-Z, a-z), digits (0-9), and common symbols
+PASSWORD_REGEX = re.compile(r'^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d!@#$%^&*()_+\-=\[\]{};:\'",.<>?/\\|`~]{8,}$')
+
+def validate_password(password: str) -> Optional[str]:
+    """Validate password strength. Returns error message or None if valid."""
+    if len(password) < 8:
+        return "Password must be at least 8 characters long"
+    # Check for non-ASCII characters (Chinese, Japanese, Korean, accented chars, etc.)
+    if not all(ord(c) < 128 for c in password):
+        return "Password must only contain English letters, digits, and symbols"
+    # Check pattern: at least one letter, at least one digit, allowed chars only
+    if not PASSWORD_REGEX.match(password):
+        return "Password must contain at least one English letter and one digit"
+    return None
 
 # Rate limiting storage
 login_attempts = defaultdict(list)
@@ -119,6 +136,14 @@ def record_login_attempt(client_ip: str):
 @router.post("/register", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
 def register(user_data: UserRegister, session: Session = Depends(get_session)):
     """Register a new user"""
+    # Validate password strength
+    password_error = validate_password(user_data.password)
+    if password_error:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=password_error
+        )
+    
     # Check if email already exists
     existing_user = session.exec(select(User).where(User.email == user_data.email)).first()
     if existing_user:
@@ -130,11 +155,16 @@ def register(user_data: UserRegister, session: Session = Depends(get_session)):
     # Hash password with Argon2
     hashed_password = ph.hash(user_data.password)
     
+    # Combine first and last name for backward compatibility
+    full_name = f"{user_data.first_name} {user_data.last_name}".strip()
+    
     # Create user
     user = User(
         email=user_data.email,
         hashed_password=hashed_password,
-        name=user_data.name,
+        name=full_name,
+        first_name=user_data.first_name,
+        last_name=user_data.last_name,
         phone=user_data.phone,
         role=UserRole.CUSTOMER
     )
@@ -203,6 +233,15 @@ def update_current_user(
 ):
     """Update current user information"""
     # Update only provided fields
+    if user_data.first_name is not None:
+        current_user.first_name = user_data.first_name
+    if user_data.last_name is not None:
+        current_user.last_name = user_data.last_name
+    # Update combined name for backward compatibility
+    if user_data.first_name is not None or user_data.last_name is not None:
+        fn = current_user.first_name or ""
+        ln = current_user.last_name or ""
+        current_user.name = f"{fn} {ln}".strip()
     if user_data.name is not None:
         current_user.name = user_data.name
     if user_data.phone is not None:

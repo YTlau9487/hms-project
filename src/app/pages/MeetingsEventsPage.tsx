@@ -1,6 +1,8 @@
 import React from 'react';
+import { Helmet } from 'react-helmet-async';
 import { StaticPageLayout } from '../components/StaticPageLayout';
 import { useTranslation } from 'react-i18next';
+import { PAGE_SEO } from '../utils/seo';
 
 export const MeetingsEventsPage = () => {
   const { t } = useTranslation();
@@ -53,10 +55,26 @@ export const MeetingsEventsPage = () => {
   ];
 
   return (
-    <StaticPageLayout 
+    <>
+      <Helmet>
+        <title>{PAGE_SEO.meetingsEvents.title}</title>
+        <meta name="description" content={PAGE_SEO.meetingsEvents.description} />
+        <link rel="canonical" href={PAGE_SEO.meetingsEvents.canonical} />
+        <meta property="og:title" content={PAGE_SEO.meetingsEvents.title} />
+        <meta property="og:description" content={PAGE_SEO.meetingsEvents.description} />
+        <meta property="og:type" content={PAGE_SEO.meetingsEvents.ogType} />
+        <meta property="og:url" content={PAGE_SEO.meetingsEvents.canonical} />
+        <meta property="og:image" content={PAGE_SEO.meetingsEvents.ogImage} />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={PAGE_SEO.meetingsEvents.title} />
+        <meta name="twitter:description" content={PAGE_SEO.meetingsEvents.description} />
+        <meta name="twitter:image" content={PAGE_SEO.meetingsEvents.ogImage} />
+      </Helmet>
+      <StaticPageLayout 
       title={t('meetingsEventsPage.title')}
       sections={sections}
       lastUpdated="March 15, 2024"
     />
+    </>
   );
 };

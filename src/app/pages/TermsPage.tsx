@@ -1,6 +1,8 @@
 import React from 'react';
+import { Helmet } from 'react-helmet-async';
 import { StaticPageLayout } from '../components/StaticPageLayout';
 import { useTranslation } from 'react-i18next';
+import { PAGE_SEO } from '../utils/seo';
 
 export const TermsPage = () => {
   const { t } = useTranslation();
@@ -46,10 +48,17 @@ export const TermsPage = () => {
   ];
 
   return (
-    <StaticPageLayout 
+    <>
+      <Helmet>
+        <title>{PAGE_SEO.terms.title}</title>
+        <meta name="description" content={PAGE_SEO.terms.description} />
+        <link rel="canonical" href={PAGE_SEO.terms.canonical} />
+      </Helmet>
+      <StaticPageLayout 
       title={t('termsPage.title')}
       sections={sections}
       lastUpdated="March 15, 2024"
     />
+    </>
   );
 };

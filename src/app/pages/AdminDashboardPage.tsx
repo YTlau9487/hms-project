@@ -27,6 +27,9 @@ export const AdminDashboardPage = () => {
 
   useEffect(() => {
     fetchData();
+    // Poll stats every 30 seconds for real-time updates
+    const interval = setInterval(fetchData, 30000);
+    return () => clearInterval(interval);
   }, [i18n.language]);
 
   const fetchData = async () => {
@@ -35,11 +38,11 @@ export const AdminDashboardPage = () => {
       setError(null);
       const [roomsData, bookingsData, statsData] = await Promise.all([
         roomsAPI.list({ lang: i18n.language }),
-        adminAPI.bookings(i18n.language),
+        adminAPI.bookings(i18n.language, 1, 10),
         adminAPI.stats(),
       ]);
       setRooms(roomsData);
-      setBookings(bookingsData);
+      setBookings(bookingsData.items);
       setStats(statsData);
     } catch (err) {
       const errorMessage = err instanceof Error ? getErrorMessage(err) : t('common.error');

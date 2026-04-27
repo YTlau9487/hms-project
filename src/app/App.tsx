@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense, lazy } from 'react';
 import { Routes, Route, Navigate, useNavigate, useLocation } from 'react-router';
+import { HelmetProvider } from 'react-helmet-async';
 import { BookingModal } from './components/BookingModal';
 import { Toaster, toast } from 'sonner';
 import { AnimatePresence } from 'motion/react';
@@ -23,29 +24,43 @@ import { AccountLayout } from './layouts/AccountLayout';
 import { AdminLayout } from './layouts/AdminLayout';
 import { StaffLayout } from './layouts/StaffLayout';
 
-// Pages
+// Pages - eagerly loaded (critical path)
 import { HomePage } from './pages/HomePage';
-import { RoomDetailsPage } from './pages/RoomDetailsPage';
 import { LoginPage } from './pages/LoginPage';
 import { RegisterPage } from './pages/RegisterPage';
-import { AccountProfilePage } from './pages/AccountProfilePage';
-import { AccountBookingsPage } from './pages/AccountBookingsPage';
-import { AdminDashboardPage } from './pages/AdminDashboardPage';
-import { AdminRoomsPage } from './pages/AdminRoomsPage';
-import { AdminBookingsPage } from './pages/AdminBookingsPage';
-import { AdminNotificationsPage } from './pages/AdminNotificationsPage';
-import { StayManagementPage } from './pages/StayManagementPage';
-import { PrivacyPage } from './pages/PrivacyPage';
-import { TermsPage } from './pages/TermsPage';
-import { CookiesPage } from './pages/CookiesPage';
-import { AccessibilityPage } from './pages/AccessibilityPage';
-import { AboutPage } from './pages/AboutPage';
-import { RoomsAndSuitesPage } from './pages/RoomsAndSuitesPage';
-import { DiningPage } from './pages/DiningPage';
-import { MeetingsEventsPage } from './pages/MeetingsEventsPage';
 import { AdminLoginPage } from './pages/AdminLoginPage';
-import { AdminStaffPage } from './pages/AdminStaffPage';
-import { StaffRoomsPage } from './pages/StaffRoomsPage';
+
+// Pages - lazy loaded (non-critical)
+const RoomDetailsPage = lazy(() => import('./pages/RoomDetailsPage').then(m => ({ default: m.RoomDetailsPage })));
+const AccountProfilePage = lazy(() => import('./pages/AccountProfilePage').then(m => ({ default: m.AccountProfilePage })));
+const AccountBookingsPage = lazy(() => import('./pages/AccountBookingsPage').then(m => ({ default: m.AccountBookingsPage })));
+const AdminDashboardPage = lazy(() => import('./pages/AdminDashboardPage').then(m => ({ default: m.AdminDashboardPage })));
+const AdminRoomsPage = lazy(() => import('./pages/AdminRoomsPage').then(m => ({ default: m.AdminRoomsPage })));
+const AdminBookingsPage = lazy(() => import('./pages/AdminBookingsPage').then(m => ({ default: m.AdminBookingsPage })));
+const AdminNotificationsPage = lazy(() => import('./pages/AdminNotificationsPage').then(m => ({ default: m.AdminNotificationsPage })));
+const StayManagementPage = lazy(() => import('./pages/StayManagementPage').then(m => ({ default: m.StayManagementPage })));
+const PrivacyPage = lazy(() => import('./pages/PrivacyPage').then(m => ({ default: m.PrivacyPage })));
+const TermsPage = lazy(() => import('./pages/TermsPage').then(m => ({ default: m.TermsPage })));
+const CookiesPage = lazy(() => import('./pages/CookiesPage').then(m => ({ default: m.CookiesPage })));
+const AccessibilityPage = lazy(() => import('./pages/AccessibilityPage').then(m => ({ default: m.AccessibilityPage })));
+const AboutPage = lazy(() => import('./pages/AboutPage').then(m => ({ default: m.AboutPage })));
+const RoomsAndSuitesPage = lazy(() => import('./pages/RoomsAndSuitesPage').then(m => ({ default: m.RoomsAndSuitesPage })));
+const DiningPage = lazy(() => import('./pages/DiningPage').then(m => ({ default: m.DiningPage })));
+const MeetingsEventsPage = lazy(() => import('./pages/MeetingsEventsPage').then(m => ({ default: m.MeetingsEventsPage })));
+const AdminStaffPage = lazy(() => import('./pages/AdminStaffPage').then(m => ({ default: m.AdminStaffPage })));
+const StaffRoomsPage = lazy(() => import('./pages/StaffRoomsPage').then(m => ({ default: m.StaffRoomsPage })));
+const AvailabilityPage = lazy(() => import('./pages/AvailabilityPage').then(m => ({ default: m.AvailabilityPage })));
+const NotFoundPage = lazy(() => import('./pages/NotFoundPage').then(m => ({ default: m.NotFoundPage })));
+
+// Loading fallback for lazy pages
+const PageLoader = () => (
+  <div className="min-h-[50vh] flex items-center justify-center">
+    <div className="flex flex-col items-center gap-4">
+      <div className="w-10 h-10 border-4 border-gray-300 border-t-primary rounded-full animate-spin"></div>
+      <p className="text-muted-foreground text-sm">Loading page...</p>
+    </div>
+  </div>
+);
 
 function AppContent() {
   const [selectedRoomForBooking, setSelectedRoomForBooking] = useState<Room | null>(null);
@@ -124,7 +139,7 @@ function AppContent() {
             />
             <Route 
               path="/rooms/:roomId" 
-              element={<RoomDetailsPage onBookNow={handleBookNow} />} 
+              element={<Suspense fallback={<PageLoader />}><RoomDetailsPage onBookNow={handleBookNow} /></Suspense>} 
             />
             <Route 
               path="/login" 
@@ -136,35 +151,39 @@ function AppContent() {
             />
             <Route 
               path="/privacy" 
-              element={<PrivacyPage />} 
+              element={<Suspense fallback={<PageLoader />}><PrivacyPage /></Suspense>} 
             />
             <Route 
               path="/terms" 
-              element={<TermsPage />} 
+              element={<Suspense fallback={<PageLoader />}><TermsPage /></Suspense>} 
             />
             <Route 
               path="/cookies" 
-              element={<CookiesPage />} 
+              element={<Suspense fallback={<PageLoader />}><CookiesPage /></Suspense>} 
             />
             <Route 
               path="/accessibility" 
-              element={<AccessibilityPage />} 
+              element={<Suspense fallback={<PageLoader />}><AccessibilityPage /></Suspense>} 
             />
             <Route 
               path="/about" 
-              element={<AboutPage />} 
+              element={<Suspense fallback={<PageLoader />}><AboutPage /></Suspense>} 
             />
             <Route 
               path="/rooms-and-suites" 
-              element={<RoomsAndSuitesPage />} 
+              element={<Suspense fallback={<PageLoader />}><RoomsAndSuitesPage /></Suspense>} 
             />
             <Route 
               path="/dining" 
-              element={<DiningPage />} 
+              element={<Suspense fallback={<PageLoader />}><DiningPage /></Suspense>} 
             />
             <Route 
               path="/meetings-events" 
-              element={<MeetingsEventsPage />} 
+              element={<Suspense fallback={<PageLoader />}><MeetingsEventsPage /></Suspense>} 
+            />
+            <Route 
+              path="/rooms/availability" 
+              element={<Suspense fallback={<PageLoader />}><AvailabilityPage /></Suspense>} 
             />
           </Route>
 
@@ -173,11 +192,11 @@ function AppContent() {
             <Route path="/account" element={<Navigate to="/account/profile" replace />} />
             <Route 
               path="/account/profile" 
-              element={<AccountProfilePage />} 
+              element={<Suspense fallback={<PageLoader />}><AccountProfilePage /></Suspense>} 
             />
             <Route 
               path="/account/bookings" 
-              element={<AccountBookingsPage />} 
+              element={<Suspense fallback={<PageLoader />}><AccountBookingsPage /></Suspense>} 
             />
           </Route>
 
@@ -186,19 +205,19 @@ function AppContent() {
             <Route path="/staff" element={<Navigate to="/staff/dashboard" replace />} />
             <Route 
               path="/staff/dashboard" 
-              element={<AdminDashboardPage />} 
+              element={<Suspense fallback={<PageLoader />}><AdminDashboardPage /></Suspense>} 
             />
             <Route 
               path="/staff/rooms" 
-              element={<StaffRoomsPage />} 
+              element={<Suspense fallback={<PageLoader />}><StaffRoomsPage /></Suspense>} 
             />
             <Route 
               path="/staff/bookings" 
-              element={<AdminBookingsPage />} 
+              element={<Suspense fallback={<PageLoader />}><AdminBookingsPage /></Suspense>} 
             />
             <Route 
               path="/staff/stay-management/:action" 
-              element={<StayManagementPage />} 
+              element={<Suspense fallback={<PageLoader />}><StayManagementPage /></Suspense>} 
             />
           </Route>
 
@@ -207,15 +226,15 @@ function AppContent() {
             <Route path="/admin" element={<Navigate to="/admin/staff" replace />} />
             <Route 
               path="/admin/rooms" 
-              element={<AdminRoomsPage />} 
+              element={<Suspense fallback={<PageLoader />}><AdminRoomsPage /></Suspense>} 
             />
             <Route 
               path="/admin/staff" 
-              element={<AdminStaffPage />} 
+              element={<Suspense fallback={<PageLoader />}><AdminStaffPage /></Suspense>} 
             />
             <Route 
               path="/admin/notifications" 
-              element={<AdminNotificationsPage />} 
+              element={<Suspense fallback={<PageLoader />}><AdminNotificationsPage /></Suspense>} 
             />
           </Route>
 
@@ -224,6 +243,12 @@ function AppContent() {
           <Route 
             path="/admin/login" 
             element={<AdminLoginPage />} 
+          />
+
+          {/* 404 Catch-All Route - must be last */}
+          <Route 
+            path="*" 
+            element={<Suspense fallback={<PageLoader />}><NotFoundPage /></Suspense>} 
           />
         </Routes>
       </AnimatePresence>
@@ -245,8 +270,10 @@ function AppContent() {
 
 export default function App() {
   return (
-    <AuthProvider>
-      <AppContent />
-    </AuthProvider>
+    <HelmetProvider>
+      <AuthProvider>
+        <AppContent />
+      </AuthProvider>
+    </HelmetProvider>
   );
 }

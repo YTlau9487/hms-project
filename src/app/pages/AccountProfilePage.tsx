@@ -12,7 +12,7 @@ export const AccountProfilePage = () => {
   const { user, updateUser } = useAuth();
   const [isUpdating, setIsUpdating] = useState(false);
 
-  const handleUpdateProfile = async (userData: { name: string; phone: string }) => {
+  const handleUpdateProfile = async (userData: { first_name: string; last_name: string; phone: string }) => {
     setIsUpdating(true);
     try {
       const result = await updateUser(userData);

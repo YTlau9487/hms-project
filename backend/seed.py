@@ -92,6 +92,8 @@ def seed_database():
             email="customer@test.com",
             hashed_password=ph.hash("password123"),
             name="Test Customer",
+            first_name="Test",
+            last_name="Customer",
             phone="+85298765432",
             role=UserRole.CUSTOMER
         )
@@ -102,6 +104,8 @@ def seed_database():
             email="staff@test.com",
             hashed_password=ph.hash("password123"),
             name="Test Staff",
+            first_name="Test",
+            last_name="Staff",
             phone="+85223456789",
             role=UserRole.STAFF
         )
@@ -112,10 +116,17 @@ def seed_database():
         admin_password = os.environ.get("ADMIN_PASSWORD", "admin123")
         admin_name = os.environ.get("ADMIN_NAME", "System Admin")
         
+        # Split admin name into first/last if it contains a space
+        admin_name_parts = admin_name.split(" ", 1)
+        admin_first = admin_name_parts[0] if len(admin_name_parts) > 0 else admin_name
+        admin_last = admin_name_parts[1] if len(admin_name_parts) > 1 else ""
+        
         admin = User(
             email=admin_email,
             hashed_password=ph.hash(admin_password),
             name=admin_name,
+            first_name=admin_first,
+            last_name=admin_last,
             phone="+85211111111",
             role=UserRole.ADMIN
         )

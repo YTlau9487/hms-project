@@ -1,6 +1,8 @@
 import React from 'react';
+import { Helmet } from 'react-helmet-async';
 import { StaticPageLayout } from '../components/StaticPageLayout';
 import { useTranslation } from 'react-i18next';
+import { PAGE_SEO } from '../utils/seo';
 
 export const PrivacyPage = () => {
   const { t } = useTranslation();
@@ -48,10 +50,17 @@ export const PrivacyPage = () => {
   ];
 
   return (
-    <StaticPageLayout 
+    <>
+      <Helmet>
+        <title>{PAGE_SEO.privacy.title}</title>
+        <meta name="description" content={PAGE_SEO.privacy.description} />
+        <link rel="canonical" href={PAGE_SEO.privacy.canonical} />
+      </Helmet>
+      <StaticPageLayout 
       title={t('privacyPage.title')}
       sections={sections}
       lastUpdated="March 15, 2024"
     />
+    </>
   );
 };

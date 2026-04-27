@@ -224,7 +224,7 @@ export const AdminPanel = ({
                         <tr key={booking.id} className="text-sm hover:bg-muted/30 transition-colors">
                           <td className="px-6 py-4 font-mono text-xs font-bold">BK-{booking.id}</td>
                           <td className="px-6 py-4 font-medium">{getGuestName(booking)}</td>
-                           <td className="px-6 py-4 text-muted-foreground">{booking.room?.name || t('adminPanel.unknownRoom')}</td>
+                           <td className="px-6 py-4 text-muted-foreground">{booking.room?.room_type ? t(`staffRooms.roomTypes.${booking.room.room_type}`, { defaultValue: booking.room.room_type }) : t('adminPanel.unknownRoom')}</td>
                           <td className="px-6 py-4">
                             <div className="flex flex-col">
                               <span>{booking.check_in}</span>
@@ -241,35 +241,9 @@ export const AdminPanel = ({
                             </span>
                           </td>
                           <td className="px-6 py-4 font-semibold">${booking.total_price}</td>
-                          <td className="px-6 py-4">
-                            <div className="flex gap-2">
-                              {booking.status === 'pending' && (
-                                <button 
-                                  onClick={() => setConfirmDialog({ isOpen: true, bookingId: booking.id, action: 'confirm' })}
-                                  className="p-2 rounded-lg hover:bg-green-50 transition-colors cursor-pointer"
-                                  title={t('adminPanel.confirmBooking')}
-                                >
-                                  <CheckCircle className="w-4 h-4 text-green-600" />
-                                </button>
-                              )}
-                              {canCancel(booking) && (
-                                <button 
-                                  onClick={() => setConfirmDialog({ isOpen: true, bookingId: booking.id, action: 'cancel' })}
-                                  className="p-2 rounded-lg hover:bg-destructive/10 transition-colors cursor-pointer"
-                                  title={t('adminPanel.cancelBooking')}
-                                >
-                                  <XCircle className="w-4 h-4 text-destructive" />
-                                </button>
-                              )}
-                              <button 
-                                onClick={() => toast.info(t('common.comingSoon'))}
-                                className="p-2 rounded-lg hover:bg-muted transition-colors cursor-pointer" 
-                                title={t('adminPanel.viewDetails')}
-                              >
-                                <MoreVertical className="w-4 h-4 text-muted-foreground" />
-                              </button>
-                            </div>
-                          </td>
+                           <td className="px-6 py-4">
+                             <span className="text-xs text-muted-foreground italic">{t('adminPanel.manageOnBookingsPage')}</span>
+                           </td>
                         </tr>
                       ))
                     )}
@@ -300,33 +274,16 @@ export const AdminPanel = ({
                         </span>
                       </div>
                       <div className="text-sm font-medium">{getGuestName(booking)}</div>
-                       <div className="text-sm text-muted-foreground">{booking.room?.name || t('adminPanel.unknownRoom')}</div>
+                       <div className="text-sm text-muted-foreground">{booking.room?.room_type ? t(`staffRooms.roomTypes.${booking.room.room_type}`, { defaultValue: booking.room.room_type }) : t('adminPanel.unknownRoom')}</div>
                       <div className="flex justify-between items-center text-sm">
                         <div className="text-muted-foreground">
                           {booking.check_in} – {booking.check_out}
                         </div>
                         <div className="font-semibold">${booking.total_price}</div>
                       </div>
-                      <div className="flex items-center gap-2 pt-3 border-t border-border">
-                        {booking.status === 'pending' && (
-                          <button 
-                            onClick={() => setConfirmDialog({ isOpen: true, bookingId: booking.id, action: 'confirm' })}
-                            className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-green-50 hover:bg-green-100 text-green-700 rounded-lg transition-colors cursor-pointer text-sm font-medium"
-                          >
-                            <CheckCircle className="w-4 h-4" />
-                            {t('adminPanel.confirm')}
-                          </button>
-                        )}
-                        {canCancel(booking) && (
-                          <button 
-                            onClick={() => setConfirmDialog({ isOpen: true, bookingId: booking.id, action: 'cancel' })}
-                            className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-destructive/10 hover:bg-destructive/20 text-destructive rounded-lg transition-colors cursor-pointer text-sm font-medium"
-                          >
-                            <XCircle className="w-4 h-4" />
-                            {t('adminPanel.cancel')}
-                          </button>
-                        )}
-                      </div>
+                       <div className="pt-3 border-t border-border">
+                         <span className="text-xs text-muted-foreground italic">{t('adminPanel.manageOnBookingsPage')}</span>
+                       </div>
                     </div>
                   ))
                 )}

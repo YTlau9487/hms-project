@@ -1,14 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router';
+import { Helmet } from 'react-helmet-async';
 import { motion } from 'motion/react';
 import { EnhancedHero } from '../components/EnhancedHero';
 import { RoomCard, Room } from '../components/RoomCard';
+import { SkeletonCard, SkeletonHero } from '../components/SkeletonLoader';
 import { toast } from 'sonner';
 import { roomsAPI, availabilityAPI, getErrorMessage } from '../services/api';
 import { LoadingSpinner } from '../components/LoadingSpinner';
 import { ErrorMessage } from '../components/ErrorMessage';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
+import { PAGE_SEO, generateHotelJsonLd } from '../utils/seo';
 
 interface HomePageProps {
   onBookNow: (room: Room) => void;
@@ -66,6 +69,7 @@ export const HomePage = ({ onBookNow }: HomePageProps) => {
     // Map filter labels to room types
     const filterToRoomType: Record<string, string> = {
       [t('homePage.luxury')]: 'luxury',
+      [t('homePage.standard')]: 'standard',
       [t('homePage.suite')]: 'suite',
       [t('homePage.business')]: 'business',
     };
@@ -107,7 +111,18 @@ export const HomePage = ({ onBookNow }: HomePageProps) => {
   };
 
   if (isLoading) {
-    return <LoadingSpinner message={t('homePage.loadingRooms')} />;
+    return (
+      <>
+        <SkeletonHero />
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <SkeletonCard key={i} />
+            ))}
+          </div>
+        </div>
+      </>
+    );
   }
 
   if (error) {
@@ -116,6 +131,23 @@ export const HomePage = ({ onBookNow }: HomePageProps) => {
 
   return (
     <>
+      <Helmet>
+        <title>{PAGE_SEO.home.title}</title>
+        <meta name="description" content={PAGE_SEO.home.description} />
+        <link rel="canonical" href={PAGE_SEO.home.canonical} />
+        <meta property="og:title" content={PAGE_SEO.home.title} />
+        <meta property="og:description" content={PAGE_SEO.home.description} />
+        <meta property="og:type" content={PAGE_SEO.home.ogType} />
+        <meta property="og:url" content={PAGE_SEO.home.canonical} />
+        <meta property="og:image" content={PAGE_SEO.home.ogImage} />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={PAGE_SEO.home.title} />
+        <meta name="twitter:description" content={PAGE_SEO.home.description} />
+        <meta name="twitter:image" content={PAGE_SEO.home.ogImage} />
+        <script type="application/ld+json">
+          {JSON.stringify(generateHotelJsonLd())}
+        </script>
+      </Helmet>
       <EnhancedHero 
         onBookNow={() => {
           const element = document.getElementById('rooms-section');
@@ -135,7 +167,7 @@ export const HomePage = ({ onBookNow }: HomePageProps) => {
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
-            {[t('homePage.allRooms'), t('homePage.luxury'), t('homePage.suite'), t('homePage.business')].map((filter) => (
+            {[t('homePage.allRooms'), t('homePage.luxury'), t('homePage.standard'), t('homePage.suite'), t('homePage.business')].map((filter) => (
               <button 
                 key={filter} 
                 onClick={() => setActiveFilter(filter)}
@@ -186,30 +218,33 @@ export const HomePage = ({ onBookNow }: HomePageProps) => {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div 
-              className="group relative h-80 rounded-2xl overflow-hidden shadow-lg cursor-pointer"
+              className="group relative rounded-2xl overflow-hidden shadow-lg cursor-pointer"
+              style={{ aspectRatio: '16/10' }}
               onClick={() => toast.info(t('homePage.facilityComingSoon'))}
             >
-              <img src="https://images.unsplash.com/photo-1769638913569-40fc740b44f5?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxob3RlbCUyMGJyZWFrZmFzdCUyMGJ1ZmZldCUyMHNlbGVjdGlvbiUyMGZyZXNoJTIwZm9vZHxlbnwxfHx8fDE3NzA4NTMyOTh8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" alt="Dining" />
+              <img src="https://images.unsplash.com/photo-1769638913569-40fc740b44f5?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxob3RlbCUyMGJyZWFrZmFzdCUyMGJ1ZmZldCUyMHNlbGVjdGlvbiUyMGZyZXNoJTIwZm9vZHxlbnwxfHx8fDE3NzA4NTMyOTh8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" alt="Golden Mile Hotel exquisite dining restaurant" loading="lazy" />
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent flex flex-col justify-end p-8 text-white">
                 <h3 className="text-xl font-bold mb-2">{t('homePage.exquisiteDining')}</h3>
                 <p className="text-sm opacity-80">{t('homePage.exquisiteDiningDesc')}</p>
               </div>
             </div>
             <div 
-              className="group relative h-80 rounded-2xl overflow-hidden shadow-lg cursor-pointer"
+              className="group relative rounded-2xl overflow-hidden shadow-lg cursor-pointer"
+              style={{ aspectRatio: '16/10' }}
               onClick={() => toast.info(t('homePage.facilityComingSoon'))}
             >
-              <img src="https://images.unsplash.com/photo-1761049862641-16616dea7b32?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxsdXh1cnklMjBob3RlbCUyMHNwYSUyMHdlbGxuZXNzJTIwY2VudGVyJTIwcG9vbHxlbnwxfHx8fDE3NzA4NTMyOTh8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" alt="Spa" />
+              <img src="https://images.unsplash.com/photo-1761049862641-16616dea7b32?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxsdXh1cnklMjBob3RlbCUyMHNwYSUyMHdlbGxuZXNzJTIwY2VudGVyJTIwcG9vbHxlbnwxfHx8fDE3NzA4NTMyOTh8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" alt="Golden Mile Hotel wellness and spa center" loading="lazy" />
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent flex flex-col justify-end p-8 text-white">
                 <h3 className="text-xl font-bold mb-2">{t('homePage.wellnessAndSpa')}</h3>
                 <p className="text-sm opacity-80">{t('homePage.wellnessAndSpaDesc')}</p>
               </div>
             </div>
             <div 
-              className="group relative h-80 rounded-2xl overflow-hidden shadow-lg cursor-pointer"
+              className="group relative rounded-2xl overflow-hidden shadow-lg cursor-pointer"
+              style={{ aspectRatio: '16/10' }}
               onClick={() => toast.info(t('homePage.facilityComingSoon'))}
             >
-              <img src="https://images.unsplash.com/photo-1742844552193-2fd3425cd26d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxsdXh1cnklMjBob3RlbCUyMGxvYmJ5JTIwaW50ZXJpb3IlMjBoaWdoJTIwcmVzb2x1dGlvbnxlbnwxfHx8fDE3NzA4NTMyOTh8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" alt="Lobby" />
+              <img src="https://images.unsplash.com/photo-1742844552193-2fd3425cd26d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxsdXh1cnklMjBob3RlbCUyMGxvYmJ5JTIwaW50ZXJpb3IlMjBoaWdoJTIwcmVzb2x1dGlvbnxlbnwxfHx8fDE3NzA4NTMyOTh8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" alt="Golden Mile Hotel luxury lounge lobby" loading="lazy" />
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent flex flex-col justify-end p-8 text-white">
                 <h3 className="text-xl font-bold mb-2">{t('homePage.luxuryLounge')}</h3>
                 <p className="text-sm opacity-80">{t('homePage.luxuryLoungeDesc')}</p>
