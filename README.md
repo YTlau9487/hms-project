@@ -31,7 +31,7 @@ The Docker setup provides a complete development environment with both frontend 
 The system automatically seeds test accounts on startup:
 - **Customer**: `customer@test.com` / `password123`
 - **Staff**: `staff@test.com` / `password123`
-- **Admin**: `admin@test.com` / `password123` (use /admin/login)
+- **Admin**: `admin@test.com` / `admin123` (use /admin/login)
 
 #### Docker Commands
 ```bash
