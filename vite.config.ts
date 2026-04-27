@@ -20,12 +20,29 @@ export default defineConfig({
   // File types to support raw imports. Never add .css, .tsx, or .ts files to this.
   assetsInclude: ['**/*.svg', '**/*.csv'],
 
-  // API proxy to backend
+  // API proxy to support backend
   server: {
     proxy: {
       '/api': {
         target: process.env.DOCKER_ENV ? 'http://backend:8000' : 'http://localhost:8000',
         changeOrigin: true,
+      },
+    },
+  },
+
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          // Separate large vendor libraries for better caching and parallel loading
+          'react-vendor': ['react', 'react-dom', 'react-router'],
+          'ui-vendor': ['lucide-react', '@radix-ui/react-accordion', '@radix-ui/react-alert-dialog', '@radix-ui/react-dialog', '@radix-ui/react-dropdown-menu', '@radix-ui/react-select', '@radix-ui/react-tabs', '@radix-ui/react-tooltip'],
+          'motion-vendor': ['motion/react'],
+          'chart-vendor': ['recharts'],
+          'mui-vendor': ['@mui/material', '@mui/icons-material', '@emotion/react', '@emotion/styled'],
+          'i18n-vendor': ['i18next', 'react-i18next'],
+          'form-vendor': ['react-hook-form'],
+        },
       },
     },
   },

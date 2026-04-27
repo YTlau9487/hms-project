@@ -31,8 +31,9 @@ export const StayManagementPage = () => {
     try {
       setIsLoading(true);
       setError(null);
-      const data = await adminAPI.bookings(i18n.language);
-      setBookings(data);
+      // Fetch all bookings with max allowed page size for stay management (backend max is 50)
+      const data = await adminAPI.bookings(i18n.language, 1, 50);
+      setBookings(data.items);
     } catch (err) {
       const errorMessage = err instanceof Error ? getErrorMessage(err) : t('stayManagement.loadingError');
       setError(errorMessage);
@@ -160,7 +161,7 @@ export const StayManagementPage = () => {
                   <tr key={booking.id} className="text-sm hover:bg-muted/30 transition-colors">
                     <td className="px-6 py-4 font-medium">BK-{booking.id}</td>
                     <td className="px-6 py-4">{getGuestName(booking)}</td>
-                    <td className="px-6 py-4">{booking.room?.name || t('stayManagement.unknownRoom')}</td>
+                    <td className="px-6 py-4">{booking.room?.room_type ? t(`staffRooms.roomTypes.${booking.room.room_type}`, { defaultValue: booking.room.room_type }) : t('stayManagement.unknownRoom')}</td>
                     <td className="px-6 py-4">{booking.check_in}</td>
                     <td className="px-6 py-4">{booking.check_out}</td>
                     <td className="px-6 py-4">
@@ -238,7 +239,7 @@ export const StayManagementPage = () => {
                 </div>
                 <div className="space-y-2 mb-4">
                   <div className="text-sm font-medium">{getGuestName(booking)}</div>
-                  <div className="text-sm text-muted-foreground">{booking.room?.name || t('stayManagement.unknownRoom')}</div>
+                  <div className="text-sm text-muted-foreground">{booking.room?.room_type ? t(`staffRooms.roomTypes.${booking.room.room_type}`, { defaultValue: booking.room.room_type }) : t('stayManagement.unknownRoom')}</div>
                   <div className="text-sm">{booking.check_in} – {booking.check_out}</div>
                 </div>
                 <button

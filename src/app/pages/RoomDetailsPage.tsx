@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router';
+import { Helmet } from 'react-helmet-async';
 import { motion } from 'motion/react';
 import { RoomDetails } from '../components/RoomDetails';
 import { Room } from '../components/RoomCard';
@@ -78,7 +79,24 @@ export const RoomDetailsPage = ({ onBookNow }: RoomDetailsPageProps) => {
   }
 
   return (
-    <motion.div
+    <>
+      {room && (
+        <Helmet>
+          <title>{room.name} — Golden Mile Hotel</title>
+          <meta name="description" content={room.description} />
+          <link rel="canonical" href={`https://hotel.ytlau.net/rooms/${room.id}`} />
+          <meta property="og:title" content={`${room.name} — Golden Mile Hotel`} />
+          <meta property="og:description" content={room.description} />
+          <meta property="og:type" content="article" />
+          <meta property="og:url" content={`https://hotel.ytlau.net/rooms/${room.id}`} />
+          <meta property="og:image" content={room.image_url || 'https://images.unsplash.com/photo-1742844552193-2fd3425cd26d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxsdXh1cnklMjBob3RlbCUyMGxvYmJ5JTIwaW50ZXJpb3IlMjBoaWdoJTIwcmVzb2x1dGlvbnxlbnwxfHx8fDE3NzA4NTMyOTh8MA&ixlib=rb-4.1.0&q=80&w=1080'} />
+          <meta name="twitter:card" content="summary_large_image" />
+          <meta name="twitter:title" content={`${room.name} — Golden Mile Hotel`} />
+          <meta name="twitter:description" content={room.description} />
+          <meta name="twitter:image" content={room.image_url || 'https://images.unsplash.com/photo-1742844552193-2fd3425cd26d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxsdXh1cnklMjBob3RlbCUyMGxvYmJ5JTIwaW50ZXJpb3IlMjBoaWdoJTIwcmVzb2x1dGlvbnxlbnwxfHx8fDE3NzA4NTMyOTh8MA&ixlib=rb-4.1.0&q=80&w=1080'} />
+        </Helmet>
+      )}
+      <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.3 }}
@@ -89,5 +107,6 @@ export const RoomDetailsPage = ({ onBookNow }: RoomDetailsPageProps) => {
         onBookNow={onBookNow}
       />
     </motion.div>
+    </>
   );
 };

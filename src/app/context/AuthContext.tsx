@@ -7,10 +7,10 @@ interface AuthContextType {
   tokenType: 'admin' | 'regular' | null;
   login: (email: string, password: string) => Promise<{ success: boolean; error?: string; user?: User }>;
   adminLogin: (email: string, password: string) => Promise<{ success: boolean; error?: string; user?: User }>;
-  register: (data: { email: string; password: string; name: string; phone?: string }) => Promise<{ success: boolean; error?: string }>;
+  register: (data: { email: string; password: string; first_name: string; last_name: string; phone?: string }) => Promise<{ success: boolean; error?: string }>;
   logout: () => void;
   refreshUser: () => Promise<void>;
-  updateUser: (data: { name: string; phone: string }) => Promise<{ success: boolean; error?: string }>;
+  updateUser: (data: { name?: string; first_name?: string; last_name?: string; phone?: string }) => Promise<{ success: boolean; error?: string }>;
 }
 
 
@@ -139,7 +139,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
 
-  const register = async (data: { email: string; password: string; name: string; phone?: string }): Promise<{ success: boolean; error?: string }> => {
+  const register = async (data: { email: string; password: string; first_name: string; last_name: string; phone?: string }): Promise<{ success: boolean; error?: string }> => {
     try {
       await authAPI.register(data);
       // Auto-login after registration
@@ -169,7 +169,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  const updateUser = async (data: { name: string; phone: string }): Promise<{ success: boolean; error?: string }> => {
+  const updateUser = async (data: { name?: string; first_name?: string; last_name?: string; phone?: string }): Promise<{ success: boolean; error?: string }> => {
     try {
       const updatedUser = await usersAPI.updateProfile(data);
       setUser(updatedUser);

@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router';
+import { Helmet } from 'react-helmet-async';
 import { Mail, Lock, User } from 'lucide-react';
+import { PAGE_SEO } from '../utils/seo';
 import { toast } from 'sonner';
 import { useAuth } from '../context/AuthContext';
 import { getErrorMessage } from '../services/api';
@@ -27,10 +29,12 @@ export const RegisterPage = () => {
   const [hasError, setHasError] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [formData, setFormData] = useState({
-    name: '',
+    first_name: '',
+    last_name: '',
     email: '',
     phone: '',
-    password: ''
+    password: '',
+    confirm_password: ''
   });
 
   const validateEmail = (email: string): boolean => {
@@ -44,9 +48,15 @@ export const RegisterPage = () => {
     setErrorMessage('');
     
     // Frontend validation
-    if (!formData.name.trim() || formData.name.trim().length < 2) {
+    if (!formData.first_name.trim() || formData.first_name.trim().length < 2) {
       setHasError(true);
-      setErrorMessage(t('registerPage.nameMinLength'));
+      setErrorMessage(t('registerPage.firstNameMinLength'));
+      return;
+    }
+    
+    if (!formData.last_name.trim() || formData.last_name.trim().length < 2) {
+      setHasError(true);
+      setErrorMessage(t('registerPage.lastNameMinLength'));
       return;
     }
     
@@ -56,9 +66,15 @@ export const RegisterPage = () => {
       return;
     }
     
-    if (!formData.password || formData.password.length < 6) {
+    if (!formData.password || formData.password.length < 8) {
       setHasError(true);
       setErrorMessage(t('registerPage.passwordMinLength'));
+      return;
+    }
+
+    if (formData.password !== formData.confirm_password) {
+      setHasError(true);
+      setErrorMessage(t('registerPage.passwordMismatch'));
       return;
     }
     
@@ -72,7 +88,8 @@ export const RegisterPage = () => {
     
     try {
       const result = await register({
-        name: formData.name,
+        first_name: formData.first_name,
+        last_name: formData.last_name,
         email: formData.email,
         phone: formData.phone || undefined,
         password: formData.password
@@ -102,7 +119,13 @@ export const RegisterPage = () => {
   };
 
   return (
-    <div className="max-w-md mx-auto px-4 py-24">
+    <>
+      <Helmet>
+        <title>{PAGE_SEO.register.title}</title>
+        <meta name="description" content={PAGE_SEO.register.description} />
+        <meta name="robots" content="noindex, nofollow" />
+      </Helmet>
+      <div className="max-w-md mx-auto px-4 py-24">
       <div className="bg-background rounded-2xl shadow-2xl p-8 border border-border">
         <div className="mb-8">
           <h2 className="text-2xl font-bold mb-2">{t('registerPage.createAccount')}</h2>
@@ -110,18 +133,34 @@ export const RegisterPage = () => {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-1">
-            <label className="text-sm font-medium">{t('registerPage.fullName')}</label>
-            <div className="relative">
-              <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-              <input 
-                type="text" 
-                required
-                placeholder={t('registerPage.fullNamePlaceholder')}
-                className="w-full bg-input-background border-none rounded-lg pl-10 pr-4 py-2.5 text-sm focus:ring-2 focus:ring-primary transition-all"
-                value={formData.name}
-                onChange={(e) => setFormData({...formData, name: e.target.value})}
-              />
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1">
+              <label className="text-sm font-medium">{t('registerPage.firstName')}</label>
+              <div className="relative">
+                <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <input 
+                  type="text" 
+                  required
+                  placeholder={t('registerPage.firstNamePlaceholder')}
+                  className="w-full bg-input-background border-none rounded-lg pl-10 pr-4 py-2.5 text-sm focus:ring-2 focus:ring-primary transition-all"
+                  value={formData.first_name}
+                  onChange={(e) => setFormData({...formData, first_name: e.target.value})}
+                />
+              </div>
+            </div>
+            <div className="space-y-1">
+              <label className="text-sm font-medium">{t('registerPage.lastName')}</label>
+              <div className="relative">
+                <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <input 
+                  type="text" 
+                  required
+                  placeholder={t('registerPage.lastNamePlaceholder')}
+                  className="w-full bg-input-background border-none rounded-lg pl-10 pr-4 py-2.5 text-sm focus:ring-2 focus:ring-primary transition-all"
+                  value={formData.last_name}
+                  onChange={(e) => setFormData({...formData, last_name: e.target.value})}
+                />
+              </div>
             </div>
           </div>
 
@@ -164,6 +203,21 @@ export const RegisterPage = () => {
             </div>
           </div>
 
+          <div className="space-y-1">
+            <label className="text-sm font-medium">{t('registerPage.confirmPassword')}</label>
+            <div className="relative">
+              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <input 
+                type="password" 
+                required
+                placeholder="••••••••"
+                className="w-full bg-input-background border-none rounded-lg pl-10 pr-4 py-2.5 text-sm focus:ring-2 focus:ring-primary transition-all"
+                value={formData.confirm_password}
+                onChange={(e) => setFormData({...formData, confirm_password: e.target.value})}
+              />
+            </div>
+          </div>
+
           {hasError && (
             <div className="p-3 bg-destructive/10 border border-destructive/20 rounded-lg text-destructive text-sm">
               {errorMessage}
@@ -192,5 +246,6 @@ export const RegisterPage = () => {
         </div>
       </div>
     </div>
+    </>
   );
 };

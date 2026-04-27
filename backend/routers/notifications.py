@@ -51,7 +51,14 @@ def get_notifications(
     current_user=Depends(get_current_staff),
     session: Session = Depends(get_session),
 ):
-    """Get all notifications for staff users."""
+    """Get all notifications for the current staff user.
+
+    NOTE: This endpoint is intentionally restricted to staff/admin users only.
+    Customer users will receive a 403 Forbidden response. This is by design -
+    notifications are used for staff operational awareness (new bookings,
+    check-ins, check-outs, cancellations). Customers do not have a notification
+    inbox; they see booking status updates via the /api/bookings/my endpoint.
+    """
     notifications = session.exec(
         select(Notification)
         .where(Notification.user_id == current_user.id)

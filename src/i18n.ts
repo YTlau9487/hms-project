@@ -17,6 +17,9 @@ i18n
     interpolation: {
       escapeValue: false,
     },
+    // Non-blocking initialization: i18n initializes asynchronously
+    // so it doesn't block the initial page render
+    initImmediate: true,
   });
 
 export default i18n;

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Search, Calendar, Users, ArrowRight, Sparkles, Minus, Plus } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useTranslation } from 'react-i18next';
+import { toast } from 'sonner';
 import { ImageWithFallback } from './ImageWithFallback';
 import { Room } from './RoomCard';
 
@@ -66,7 +67,8 @@ export const EnhancedHero = ({ onBookNow, onSearch, featuredRoom, onViewFeatured
       return;
     }
     setDateError(null);
-    onSearch(searchParams);
+    // Feature not yet implemented - show toast
+    toast.info(t('common.comingSoon'));
   };
 
   const handleCheckInChange = (value: string) => {
@@ -92,6 +94,8 @@ export const EnhancedHero = ({ onBookNow, onSearch, featuredRoom, onViewFeatured
           src={heroImage}
           alt={featuredRoom ? featuredRoom.name : "Luxury Hotel"}
           className="w-full h-full object-cover"
+          loading="eager"
+          fetchPriority="high"
         />
         <div className="absolute inset-0 bg-gradient-to-br from-black/70 via-black/50 to-black/30" />
       </div>

@@ -25,11 +25,12 @@ export const RoomCard = ({ room, onViewDetails, onBookNow }: RoomCardProps) => {
   const { t } = useTranslation();
   return (
     <div className="group bg-card border border-border rounded-xl overflow-hidden hover:shadow-xl transition-all duration-300">
-      <div className="relative h-64 overflow-hidden cursor-pointer" onClick={() => onViewDetails(room)}>
+      <div className="relative overflow-hidden cursor-pointer" style={{ aspectRatio: '16/10' }} onClick={() => onViewDetails(room)}>
         <ImageWithFallback
           src={room.image_url || ''}
           alt={room.name}
           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+          loading="lazy"
         />
           {room.featured && (
           <div className="absolute top-4 right-4 bg-primary text-primary-foreground px-3 py-1 rounded-full text-xs font-bold shadow-sm">

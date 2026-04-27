@@ -1,11 +1,13 @@
 from fastapi import APIRouter, Depends, HTTPException, status, Query
-from sqlmodel import Session, select
-from typing import List
+from sqlmodel import Session, select, func
+from typing import List, Optional
 from argon2 import PasswordHasher
+import math
+import time
 
 from database import get_session
 from models import User, Booking, BookingStatus, Room, UserRole
-from schemas import BookingResponse, BookingUpdate, UserResponse, StaffCreate, StaffResponse
+from schemas import BookingResponse, BookingUpdate, UserResponse, StaffCreate, StaffResponse, PaginatedBookingResponse
 from routers.auth import get_current_staff, get_current_admin
 from routers.rooms import build_localized_room
 
@@ -37,25 +39,79 @@ def build_booking_response(booking: Booking, lang: str, session: Session) -> Boo
         user=user_data,
     )
 
+
+# Simple in-memory cache for stats
+_stats_cache = {"data": None, "timestamp": 0}
+_STATS_CACHE_TTL = 30  # seconds
+
 router = APIRouter(prefix="/api/admin", tags=["admin"])
 
 
-@router.get("/bookings", response_model=List[BookingResponse])
+@router.get("/bookings", response_model=PaginatedBookingResponse)
 def list_all_bookings(
     lang: str = Query("en"),
+    page: int = Query(1, ge=1, description="Page number"),
+    page_size: int = Query(20, ge=1, le=50, description="Items per page"),
     current_user = Depends(get_current_staff),
     session: Session = Depends(get_session)
 ):
-    """List all bookings (staff only)"""
+    """List all bookings with pagination (staff only)"""
+    # Get total count
+    total_count = session.exec(select(func.count()).select_from(Booking)).one()
+    pages = math.ceil(total_count / page_size) if total_count > 0 else 1
+
+    # Get paginated bookings
     bookings = session.exec(
         select(Booking).order_by(Booking.created_at.desc())
+        .offset((page - 1) * page_size)
+        .limit(page_size)
     ).all()
+
+    # Batch load rooms and users to avoid N+1
+    room_ids = list(set(b.room_id for b in bookings))
+    user_ids = list(set(b.user_id for b in bookings))
+    
+    # Guard against empty IN() clauses which SQLite doesn't support
+    if room_ids:
+        rooms = {r.id: r for r in session.exec(select(Room).where(Room.id.in_(room_ids))).all()}
+    else:
+        rooms = {}
+    
+    if user_ids:
+        users = {u.id: u for u in session.exec(select(User).where(User.id.in_(user_ids))).all()}
+    else:
+        users = {}
 
     result = []
     for booking in bookings:
-        result.append(build_booking_response(booking, lang, session))
+        room = rooms.get(booking.room_id)
+        user = users.get(booking.user_id)
+        room_data = build_localized_room(room, lang, session) if room else None
+        user_data = UserResponse.model_validate(user) if user else None
+        
+        result.append(BookingResponse(
+            id=booking.id,
+            user_id=booking.user_id,
+            room_id=booking.room_id,
+            check_in=booking.check_in,
+            check_out=booking.check_out,
+            status=booking.status,
+            total_price=booking.total_price,
+            package_name=booking.package_name,
+            checked_in_at=booking.checked_in_at,
+            checked_out_at=booking.checked_out_at,
+            created_at=booking.created_at,
+            room=room_data,
+            user=user_data,
+        ))
 
-    return result
+    return PaginatedBookingResponse(
+        items=result,
+        total=total_count,
+        page=page,
+        page_size=page_size,
+        pages=pages,
+    )
 
 
 @router.put("/bookings/{booking_id}", response_model=BookingResponse)
@@ -99,44 +155,43 @@ def get_dashboard_stats(
     current_user = Depends(get_current_staff),
     session: Session = Depends(get_session)
 ):
-    """Get dashboard statistics (staff only)"""
-    # Count total bookings
-    total_bookings = len(session.exec(select(Booking)).all())
+    """Get dashboard statistics (staff only) - cached for 30 seconds"""
+    global _stats_cache
     
-    # Count active bookings (confirmed)
-    active_bookings = len(
-        session.exec(
-            select(Booking).where(Booking.status == BookingStatus.CONFIRMED)
-        ).all()
-    )
+    # Check cache
+    now = time.time()
+    if _stats_cache["data"] and (now - _stats_cache["timestamp"]) < _STATS_CACHE_TTL:
+        return _stats_cache["data"]
     
-    # Count pending bookings
-    pending_bookings = len(
-        session.exec(
-            select(Booking).where(Booking.status == BookingStatus.PENDING)
-        ).all()
-    )
+    # Use COUNT queries instead of loading all rows
+    total_bookings = session.exec(select(func.count()).select_from(Booking)).one()
+    active_bookings = session.exec(
+        select(func.count()).select_from(Booking).where(Booking.status == BookingStatus.CONFIRMED)
+    ).one()
+    pending_bookings = session.exec(
+        select(func.count()).select_from(Booking).where(Booking.status == BookingStatus.PENDING)
+    ).one()
+    total_users = session.exec(select(func.count()).select_from(User)).one()
+    total_rooms = session.exec(select(func.count()).select_from(Room)).one()
     
-    # Count total users
-    total_users = len(session.exec(select(User)).all())
+    # Revenue: use SUM aggregate instead of loading all rows
+    total_revenue_result = session.exec(
+        select(func.coalesce(func.sum(Booking.total_price), 0)).where(Booking.status == BookingStatus.CONFIRMED)
+    ).one()
     
-    # Count total rooms
-    total_rooms = len(session.exec(select(Room)).all())
-    
-    # Calculate total revenue from confirmed bookings
-    confirmed_bookings = session.exec(
-        select(Booking).where(Booking.status == BookingStatus.CONFIRMED)
-    ).all()
-    total_revenue = sum(booking.total_price for booking in confirmed_bookings)
-    
-    return {
+    result = {
         "total_bookings": total_bookings,
         "active_bookings": active_bookings,
         "pending_bookings": pending_bookings,
         "total_users": total_users,
         "total_rooms": total_rooms,
-        "total_revenue": total_revenue
+        "total_revenue": total_revenue_result
     }
+    
+    # Cache the result
+    _stats_cache = {"data": result, "timestamp": now}
+    
+    return result
 
 
 # Staff management endpoints (admin only)
@@ -158,11 +213,16 @@ def create_staff_account(
     # Hash password
     hashed_password = ph.hash(staff_data.password)
     
+    # Combine first and last name for backward compatibility
+    full_name = f"{staff_data.first_name} {staff_data.last_name}".strip()
+    
     # Create staff user
     staff = User(
         email=staff_data.email,
         hashed_password=hashed_password,
-        name=staff_data.name,
+        name=full_name,
+        first_name=staff_data.first_name,
+        last_name=staff_data.last_name,
         phone=staff_data.phone,
         role=UserRole.STAFF
     )

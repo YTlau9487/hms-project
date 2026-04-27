@@ -85,6 +85,8 @@ export interface User {
   id: number;
   email: string;
   name: string;
+  first_name: string | null;
+  last_name: string | null;
   phone: string | null;
   role: 'customer' | 'staff' | 'admin';
   created_at: string;
@@ -93,7 +95,8 @@ export interface User {
 export interface StaffCreate {
   email: string;
   password: string;
-  name: string;
+  first_name: string;
+  last_name: string;
   phone?: string;
 }
 
@@ -101,6 +104,8 @@ export interface StaffMember {
   id: number;
   email: string;
   name: string;
+  first_name: string | null;
+  last_name: string | null;
   phone: string | null;
   role: string;
   created_at: string;
@@ -130,6 +135,8 @@ export interface BookingUser {
   id: number;
   email: string;
   name: string;
+  first_name: string | null;
+  last_name: string | null;
   phone: string | null;
   role: 'customer' | 'staff' | 'admin';
   created_at: string;
@@ -243,7 +250,7 @@ export interface RoomUpdatePayload {
 
 // Users API
 export const usersAPI = {
-  updateProfile: (data: { name: string; phone: string }) =>
+  updateProfile: (data: { name?: string; first_name?: string; last_name?: string; phone?: string }) =>
     fetchAPI<User>('/auth/me', {
       method: 'PUT',
       body: JSON.stringify(data),
@@ -252,7 +259,7 @@ export const usersAPI = {
 
 // Auth API
 export const authAPI = {
-  register: (data: { email: string; password: string; name: string; phone?: string }) =>
+  register: (data: { email: string; password: string; first_name: string; last_name: string; phone?: string }) =>
     fetchAPI<User>('/auth/register', {
       method: 'POST',
       body: JSON.stringify(data),
@@ -303,11 +310,23 @@ export const roomsAPI = {
     }),
 };
 
+// Pagination types
+export interface PaginatedResponse<T> {
+  items: T[];
+  total: number;
+  page: number;
+  page_size: number;
+  pages: number;
+}
+
 // Bookings API
 export const bookingsAPI = {
-  my: (lang?: string) => {
-    const query = lang ? `?lang=${lang}` : '';
-    return fetchAPI<Booking[]>(`/bookings/my${query}`);
+  my: (lang?: string, page: number = 1, page_size: number = 20) => {
+    const params = new URLSearchParams();
+    if (lang) params.append('lang', lang);
+    params.append('page', String(page));
+    params.append('page_size', String(page_size));
+    return fetchAPI<PaginatedResponse<Booking>>(`/bookings/my?${params.toString()}`);
   },
 
   create: (data: { room_id: number; check_in: string; check_out: string; package_name?: string }, lang?: string) => {
@@ -381,9 +400,12 @@ export const notificationsAPI = {
 export const adminAPI = {
   stats: () => fetchAPI<DashboardStats>('/admin/stats'),
 
-  bookings: (lang?: string) => {
-    const query = lang ? `?lang=${lang}` : '';
-    return fetchAPI<Booking[]>(`/admin/bookings${query}`);
+  bookings: (lang?: string, page: number = 1, page_size: number = 20) => {
+    const params = new URLSearchParams();
+    if (lang) params.append('lang', lang);
+    params.append('page', String(page));
+    params.append('page_size', String(page_size));
+    return fetchAPI<PaginatedResponse<Booking>>(`/admin/bookings?${params.toString()}`);
   },
 
   updateBooking: (id: number, data: { status: string }, lang?: string) => {

@@ -46,6 +46,16 @@ const getMinCheckOut = (checkInDate: string, todayStr: string) => {
   return todayStr;
 };
 
+// Calculate max check-out date (1 month from check-in)
+const getMaxCheckOut = (checkInDate: string) => {
+  if (checkInDate) {
+    const date = new Date(checkInDate + 'T00:00:00');
+    date.setMonth(date.getMonth() + 1);
+    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+  }
+  return '';
+};
+
 interface BookingModalProps {
   room: Room | null;
   isOpen: boolean;
@@ -133,6 +143,9 @@ export const BookingModal = ({ room, isOpen, onClose, onConfirm, user }: Booking
     }
     if (checkIn && checkOut && checkOut <= checkIn) {
       errors.checkOut = t('bookingModal.validation.checkOutAfterCheckIn');
+    }
+    if (checkIn && checkOut && checkOut > getMaxCheckOut(checkIn)) {
+      errors.checkOut = t('bookingModal.validation.checkOutMaxDate');
     }
     
     // Name validation
@@ -357,16 +370,17 @@ export const BookingModal = ({ room, isOpen, onClose, onConfirm, user }: Booking
                     </div>
                     <div className="space-y-1">
                       <label className="text-xs font-bold uppercase text-muted-foreground">{t('hero.checkOut')}</label>
-                      <input 
-                        type="date" 
-                        className={`w-full bg-input-background border rounded-lg px-4 py-2.5 text-sm focus:ring-2 focus:ring-primary ${fieldErrors.checkOut ? 'border-red-500' : 'border-transparent'}`}
-                        value={checkOut}
-                        onChange={(e) => {
-                          setCheckOut(e.target.value);
-                          setFieldErrors(prev => ({...prev, checkOut: ''}));
-                        }}
-                        min={checkIn ? getMinCheckOut(checkIn, todayStr) : todayStr}
-                      />
+                       <input 
+                         type="date" 
+                         className={`w-full bg-input-background border rounded-lg px-4 py-2.5 text-sm focus:ring-2 focus:ring-primary ${fieldErrors.checkOut ? 'border-red-500' : 'border-transparent'}`}
+                         value={checkOut}
+                         onChange={(e) => {
+                           setCheckOut(e.target.value);
+                           setFieldErrors(prev => ({...prev, checkOut: ''}));
+                         }}
+                         min={checkIn ? getMinCheckOut(checkIn, todayStr) : todayStr}
+                         max={checkIn ? getMaxCheckOut(checkIn) : undefined}
+                       />
                       {fieldErrors.checkOut && <p className="text-xs text-red-500">{fieldErrors.checkOut}</p>}
                     </div>
                     <div className="space-y-1">

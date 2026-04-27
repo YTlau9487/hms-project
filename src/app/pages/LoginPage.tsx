@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router';
+import { Helmet } from 'react-helmet-async';
 import { Mail, Lock } from 'lucide-react';
+import { PAGE_SEO } from '../utils/seo';
 import { toast } from 'sonner';
 import { useAuth } from '../context/AuthContext';
 import { useTranslation } from 'react-i18next';
@@ -61,7 +63,13 @@ export const LoginPage = () => {
   };
 
   return (
-    <div className="max-w-md mx-auto px-4 py-24">
+    <>
+      <Helmet>
+        <title>{PAGE_SEO.login.title}</title>
+        <meta name="description" content={PAGE_SEO.login.description} />
+        <meta name="robots" content="noindex, nofollow" />
+      </Helmet>
+      <div className="max-w-md mx-auto px-4 py-24">
       <div className="bg-background rounded-2xl shadow-2xl p-8 border border-border">
         <div className="mb-8">
           <h2 className="text-2xl font-bold mb-2">{t('loginPage.welcomeBack')}</h2>
@@ -130,5 +138,6 @@ export const LoginPage = () => {
         </div>
       </div>
     </div>
+    </>
   );
 };

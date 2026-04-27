@@ -52,6 +52,9 @@
     "backToRooms": "Back to Rooms",
     "featured": "Featured",
     "standard": "Standard",
+    "luxury": "Luxury",
+    "suite": "Suite",
+    "business": "Business",
     "stars": "5 Stars",
     "whatThisRoomOffers": "What this room offers",
     "roomFeatures": "Room Features",
@@ -116,6 +119,7 @@
       "checkInRequired": "Check-in date is required",
       "checkOutRequired": "Check-out date is required",
       "checkOutAfterCheckIn": "Check-out date must be after check-in date",
+      "checkOutMaxDate": "Maximum stay is 1 month",
       "firstNameMin": "First name must be at least 2 characters",
       "lastNameMin": "Last name must be at least 2 characters",
       "emailInvalid": "Please enter a valid email address",
@@ -189,18 +193,24 @@
     "editProfile": "Edit Profile",
     "cancel": "Cancel",
     "saveChanges": "Save Changes",
-    "fullName": "Full Name",
-    "fullNamePlaceholder": "Enter your full name",
+    "firstName": "First Name",
+    "firstNamePlaceholder": "Enter your first name",
+    "lastName": "Last Name",
+    "lastNamePlaceholder": "Enter your last name",
     "emailAddress": "Email Address (Login ID)",
     "emailNote": "Email cannot be changed as it is used for login",
     "phoneNumber": "Phone Number",
     "phonePlaceholder": "Enter your phone number",
     "notSet": "Not set",
     "infoBox": "Your personal information is securely stored and used only for booking confirmations and communication regarding your stay. We take your privacy seriously.",
-    "nameMinLength": "Name must be at least 2 characters",
+    "firstNameMinLength": "First name must be at least 2 characters",
+    "lastNameMinLength": "Last name must be at least 2 characters",
     "phoneInvalid": "Please enter a valid phone number",
     "profileUpdated": "Profile updated successfully!",
-    "updateFailed": "Failed to update profile"
+    "updateFailed": "Failed to update profile",
+    "confirmSaveTitle": "Confirm Save",
+    "confirmSaveDesc": "Are you sure you want to save these profile changes?",
+    "confirmSave": "Save"
   },
   "manageRooms": {
     "title": "Manage Rooms",
@@ -282,7 +292,8 @@
     "customerDatabase": "Customer Database",
     "customerDatabaseDesc": "Customer information and history will be displayed here.",
     "viewDetails": "View Details",
-    "unknownRoom": "Unknown"
+    "unknownRoom": "Unknown",
+    "manageOnBookingsPage": "Manage on Bookings page"
   },
   "footer": {
     "brand": "GOLDEN MILE",
@@ -376,22 +387,27 @@
   "registerPage": {
     "createAccount": "Create Account",
     "subtitle": "Join our membership for exclusive benefits",
-    "fullName": "Full Name",
-    "fullNamePlaceholder": "John Doe",
+    "firstName": "First Name",
+    "firstNamePlaceholder": "John",
+    "lastName": "Last Name",
+    "lastNamePlaceholder": "Doe",
     "emailAddress": "Email Address",
     "emailPlaceholder": "name@example.com",
     "phoneNumber": "Phone Number",
     "phonePlaceholder": "Phone number",
     "password": "Password",
+    "confirmPassword": "Confirm Password",
     "createAccountBtn": "Create Account",
     "creating": "Creating...",
     "registerSuccess": "Registration successful! Welcome!",
     "registerFailed": "Registration failed",
     "alreadyAccount": "Already have an account?",
     "login": "Login",
-    "nameMinLength": "Name must be at least 2 characters",
+    "firstNameMinLength": "First name must be at least 2 characters",
+    "lastNameMinLength": "Last name must be at least 2 characters",
     "invalidEmail": "Invalid email format",
-    "passwordMinLength": "Password must be at least 6 characters",
+    "passwordMinLength": "Password must be at least 8 characters",
+    "passwordMismatch": "Passwords do not match",
     "phoneRequired": "Phone number is required"
   },
   "homePage": {
@@ -399,6 +415,7 @@
     "roomsSubtitle": "Each room is meticulously designed to provide a haven of tranquility amidst the vibrant pulse of Hong Kong.",
     "allRooms": "All Rooms",
     "luxury": "Luxury",
+    "standard": "Standard",
     "suite": "Suite",
     "business": "Business",
     "noRoomsFound": "No rooms found matching this category.",
@@ -543,7 +560,7 @@
     },
     "contactUs": {
       "heading": "Contact Us",
-      "content": "If you have any questions about this Privacy Policy, please contact us at privacy@goldenmile.com or call +852 2369 3111."
+      "content": "If you have any questions about this Privacy Policy, please contact us at reservations@goldenmile.com or call +852 2369 3111."
     }
   },
   "termsPage": {
@@ -631,7 +648,7 @@
     },
     "assistiveTechnologies": {
       "heading": "Assistive Technologies",
-      "content": "Our website is designed to be compatible with assistive technologies including screen readers, magnification software, and voice recognition software."
+      "content": "Our website is designed to be compatible with assistive technologies, including screen readers, magnification software, and voice recognition software."
     },
     "feedback": {
       "heading": "Feedback",
@@ -834,7 +851,13 @@
     "perNight": "/ night",
     "amenities": "Amenities",
     "available": "Available",
-    "unavailable": "Unavailable"
+    "unavailable": "Unavailable",
+    "roomTypes": {
+      "standard": "Standard",
+      "luxury": "Luxury",
+      "suite": "Suite",
+      "business": "Business"
+    }
   },
   "adminStaff": {
     "title": "Staff Management",
