@@ -10,7 +10,9 @@
     "staffDashboard": "員工儀表板",
     "loginRegister": "登入 / 註冊",
     "customer": "客戶",
-    "staff": "員工"
+    "staff": "員工",
+    "openMenu": "開啟導覽選單",
+    "closeMenu": "關閉導覽選單"
   },
   "hero": {
     "badge": "精選奢華體驗",
@@ -32,7 +34,9 @@
     "guestOption4": "2位成人，2位兒童",
     "startingFrom": "每晚${{price}}起",
     "dateErrorRequired": "請選擇入住和退房日期",
-    "dateErrorInvalid": "退房日期必須晚於入住日期"
+    "dateErrorInvalid": "退房日期必須晚於入住日期",
+    "checkInDate": "入住日期",
+    "checkOutDate": "退房日期"
   },
   "roomCard": {
     "featured": "精選",
@@ -310,7 +314,10 @@
     "privacyPolicy": "私隱政策",
     "termsOfService": "服務條款",
     "cookiePolicy": "Cookie政策",
-    "accessibility": "無障礙"
+    "accessibility": "無障礙",
+    "followInstagram": "在Instagram上關注我們",
+    "followFacebook": "在Facebook上關注我們",
+    "followTwitter": "在Twitter上關注我們"
   },
   "notifications": {
     "title": "通知",

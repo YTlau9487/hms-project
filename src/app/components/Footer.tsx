@@ -40,13 +40,13 @@ export const Footer = () => {
               {t('footer.brandDescription')}
             </p>
             <div className="flex gap-4">
-              <button className="w-8 h-8 rounded-full bg-primary-foreground/10 flex items-center justify-center hover:bg-primary-foreground/20 transition-colors cursor-pointer">
+              <button className="w-8 h-8 rounded-full bg-primary-foreground/10 flex items-center justify-center hover:bg-primary-foreground/20 transition-colors cursor-pointer" aria-label={t('footer.followInstagram')}>
                 <Instagram className="w-4 h-4" />
               </button>
-              <button className="w-8 h-8 rounded-full bg-primary-foreground/10 flex items-center justify-center hover:bg-primary-foreground/20 transition-colors cursor-pointer">
+              <button className="w-8 h-8 rounded-full bg-primary-foreground/10 flex items-center justify-center hover:bg-primary-foreground/20 transition-colors cursor-pointer" aria-label={t('footer.followFacebook')}>
                 <Facebook className="w-4 h-4" />
               </button>
-              <button className="w-8 h-8 rounded-full bg-primary-foreground/10 flex items-center justify-center hover:bg-primary-foreground/20 transition-colors cursor-pointer">
+              <button className="w-8 h-8 rounded-full bg-primary-foreground/10 flex items-center justify-center hover:bg-primary-foreground/20 transition-colors cursor-pointer" aria-label={t('footer.followTwitter')}>
                 <Twitter className="w-4 h-4" />
               </button>
             </div>
