@@ -473,7 +473,7 @@
     "amenitiesPlaceholder": "WiFi、早餐、泳池（逗號分隔）",
     "amenitiesNote": "用逗號分隔設施",
     "description": "描述",
-    "descriptionPlaceholder": "描述客房特色和亮點...",
+    "descriptionMainPlaceholder": "描述客房特色和亮點...",
     "saveChanges": "儲存變更",
     "createRoom": "創建客房",
     "saving": "儲存中...",
