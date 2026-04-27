@@ -481,7 +481,7 @@
     "amenitiesPlaceholder": "WiFi, Breakfast, Pool Access (comma-separated)",
     "amenitiesNote": "Separate amenities with commas",
     "description": "Description",
-    "descriptionPlaceholder": "Describe the room features and highlights...",
+    "descriptionMainPlaceholder": "Describe the room features and highlights...",
     "saveChanges": "Save Changes",
     "createRoom": "Create Room",
     "saving": "Saving...",
