@@ -139,7 +139,7 @@ export const AdminBookingsPage = () => {
                 <tr key={booking.id} className="text-sm hover:bg-muted/30 transition-colors">
                   <td className="px-6 py-4 font-medium">BK-{booking.id}</td>
                   <td className="px-6 py-4">{getGuestName(booking)}</td>
-                  <td className="px-6 py-4">{booking.room ? getRoomTypeLabel(booking.room.room_type) : t('adminBookings.unknownRoom')}</td>
+                  <td className="px-6 py-4">{booking.room?.name || t('adminBookings.unknownRoom')}</td>
                   <td className="px-6 py-4">{booking.check_in}</td>
                   <td className="px-6 py-4">{booking.check_out}</td>
                   <td className="px-6 py-4">
@@ -224,8 +224,8 @@ export const AdminBookingsPage = () => {
                     <CalendarCheck className="w-4 h-4 text-muted-foreground flex-shrink-0" />
                     <span className="text-sm font-medium">{getGuestName(booking)}</span>
                   </div>
-                  <div className="text-sm text-muted-foreground pl-6">
-                    {booking.room ? getRoomTypeLabel(booking.room.room_type) : t('adminBookings.unknownRoom')}
+                    <div className="text-sm text-muted-foreground pl-6">
+                    {booking.room?.name || t('adminBookings.unknownRoom')}
                   </div>
                   <div className="grid grid-cols-2 gap-3 pl-6 text-sm">
                     <div>
@@ -330,7 +330,10 @@ export const AdminBookingsPage = () => {
                 <div className="space-y-4">
                   <h3 className="text-sm font-bold uppercase text-muted-foreground">{t('adminBookings.room')}</h3>
                   <div className="space-y-2">
-                    <div className="font-medium">{viewDetailsBooking.room ? getRoomTypeLabel(viewDetailsBooking.room.room_type) : t('adminBookings.unknownRoom')}</div>
+                    <div className="font-medium">{viewDetailsBooking.room?.name || t('adminBookings.unknownRoom')}</div>
+                    {viewDetailsBooking.room?.room_type && (
+                      <div className="text-xs text-muted-foreground">{getRoomTypeLabel(viewDetailsBooking.room.room_type)}</div>
+                    )}
                   </div>
                 </div>
                 <div className="space-y-4">
@@ -374,7 +377,7 @@ export const AdminBookingsPage = () => {
                 </div>
                 <div className="md:col-span-2 space-y-4">
                   <h3 className="text-sm font-bold uppercase text-muted-foreground">{t('bookingModal.specialRequests')}</h3>
-                  <p className="text-sm text-muted-foreground">{t('adminBookings.noSpecialRequests', { defaultValue: 'No special requests' })}</p>
+                  <p className="text-sm text-muted-foreground">{viewDetailsBooking.special_requests || t('adminBookings.noSpecialRequests', { defaultValue: 'No special requests' })}</p>
                 </div>
               </div>
             </div>

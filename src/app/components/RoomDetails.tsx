@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { ArrowLeft, Check, Wifi, Coffee, Tv, Shield, Waves, Wind, Car, Utensils, Star, Maximize2, Users } from 'lucide-react';
+import { ArrowLeft, Check, Wifi, Coffee, Tv, Shield, Waves, Wind, Car, Utensils, Star, Maximize2, Users, X, ChevronLeft, ChevronRight } from 'lucide-react';
 import { ImageWithFallback } from './ImageWithFallback';
 import { Room } from './RoomCard';
 import { useTranslation } from 'react-i18next';
@@ -33,6 +33,37 @@ const amenityIcons: Record<string, React.ComponentType<{ className?: string }>> 
 export const RoomDetails = ({ room, onBack, onBookNow }: RoomDetailsProps) => {
   const { t } = useTranslation();
   const [selectedImage, setSelectedImage] = React.useState<string | null>(null);
+  const [currentImageIndex, setCurrentImageIndex] = React.useState(0);
+
+  // Build image array: use images from API if available, fallback to single image_url
+  const images = room.images && room.images.length > 0
+    ? room.images
+    : room.image_url
+      ? [room.image_url]
+      : [];
+
+  const hasMultipleImages = images.length > 1;
+
+  // Preload adjacent images for instant switching
+  React.useEffect(() => {
+    if (images.length <= 1) return;
+    const indicesToPreload = [
+      (currentImageIndex + 1) % images.length,
+      (currentImageIndex - 1 + images.length) % images.length,
+    ];
+    indicesToPreload.forEach((idx) => {
+      const img = new Image();
+      img.src = images[idx];
+    });
+  }, [currentImageIndex, images]);
+
+  const handlePrevImage = () => {
+    setCurrentImageIndex(prev => (prev === 0 ? images.length - 1 : prev - 1));
+  };
+
+  const handleNextImage = () => {
+    setCurrentImageIndex(prev => (prev === images.length - 1 ? 0 : prev + 1));
+  };
 
   const displayAmenities = room.amenities && room.amenities.length > 0
     ? room.amenities
@@ -57,26 +88,51 @@ export const RoomDetails = ({ room, onBack, onBookNow }: RoomDetailsProps) => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
           {/* Gallery Section */}
           <div className="space-y-4">
-            <div
-              className="rounded-2xl overflow-hidden aspect-[4/3] shadow-lg cursor-pointer hover:opacity-95 transition-opacity"
-              onClick={() => setSelectedImage(room.image_url)}
-            >
-              <ImageWithFallback src={room.image_url || ''} alt={room.name} className="w-full h-full object-cover" />
-            </div>
-            <div className="grid grid-cols-3 gap-4">
-              {[1, 2, 3].map((i) => (
-                <div
-                  key={i}
-                  className="rounded-xl overflow-hidden aspect-square shadow-md hover:opacity-80 transition-opacity cursor-pointer"
-                  onClick={() => setSelectedImage(room.image_url || null)}
-                >
-              <ImageWithFallback
-                    src={room.image_url || ''}
-                    alt={`${room.name} - Room view ${i}`}
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-              ))}
+            <div className="relative rounded-2xl overflow-hidden aspect-[4/3] shadow-lg">
+              {/* Main image */}
+              <div
+                className="cursor-pointer h-full hover:opacity-95 transition-opacity"
+                onClick={() => setSelectedImage(images[currentImageIndex] || null)}
+              >
+                <ImageWithFallback
+                  src={images[currentImageIndex] || ''}
+                  alt={room.name}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+
+              {/* Navigation arrows - only show when multiple images */}
+              {hasMultipleImages && (
+                <>
+                  <button
+                    type="button"
+                    aria-label={t('roomDetails.previousImage')}
+                    className="absolute left-3 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full transition-colors cursor-pointer"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handlePrevImage();
+                    }}
+                  >
+                    <ChevronLeft className="w-5 h-5" />
+                  </button>
+                  <button
+                    type="button"
+                    aria-label={t('roomDetails.nextImage')}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full transition-colors cursor-pointer"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleNextImage();
+                    }}
+                  >
+                    <ChevronRight className="w-5 h-5" />
+                  </button>
+
+                  {/* Image counter */}
+                  <div className="absolute bottom-3 right-3 bg-black/50 text-white text-xs px-2 py-1 rounded-full">
+                    {currentImageIndex + 1} / {images.length}
+                  </div>
+                </>
+              )}
             </div>
           </div>
 
@@ -85,8 +141,13 @@ export const RoomDetails = ({ room, onBack, onBookNow }: RoomDetailsProps) => {
             <div>
               <div className="flex items-center gap-2 mb-2">
                 <span className="bg-primary/10 text-primary text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">
-                  {room.featured ? t('roomDetails.featured') : t(roomTypeLabels[room.room_type] || 'roomDetails.standard')}
+                  {t(roomTypeLabels[room.room_type] || 'roomDetails.standard')}
                 </span>
+                {room.featured && (
+                  <span className="bg-amber-100 text-amber-700 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">
+                    {t('roomDetails.featured')}
+                  </span>
+                )}
                 <div className="flex items-center gap-1 text-primary">
                   {[1, 2, 3, 4, 5].map((s) => <Star key={s} className="w-3 h-3 fill-current" />)}
                 </div>
@@ -163,18 +224,19 @@ export const RoomDetails = ({ room, onBack, onBookNow }: RoomDetailsProps) => {
             className="fixed inset-0 z-[200] bg-black/90 backdrop-blur-sm flex items-center justify-center p-4 cursor-pointer"
             onClick={() => setSelectedImage(null)}
           >
-            <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              className="relative max-w-5xl w-full aspect-video"
-            >
-              <ImageWithFallback src={selectedImage} alt={`${room.name} - Enlarged view`} className="w-full h-full object-contain" />
+              <motion.div
+                initial={{ scale: 0.9, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.9, opacity: 0 }}
+                className="relative max-w-5xl w-full max-h-[90vh] flex items-center justify-center"
+              >
+              <ImageWithFallback src={selectedImage} alt={`${room.name} - Enlarged view`} className="max-w-full max-h-[90vh] w-auto h-auto object-contain" />
               <button
                 className="absolute top-4 right-4 bg-white/10 hover:bg-white/20 text-white p-2 rounded-full transition-colors cursor-pointer hover:opacity-80"
                 onClick={() => setSelectedImage(null)}
+                aria-label={t('roomDetails.closeImage')}
               >
-                <ArrowLeft className="w-6 h-6 rotate-90" />
+                <X className="w-6 h-6" />
               </button>
             </motion.div>
           </motion.div>

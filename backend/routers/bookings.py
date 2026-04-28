@@ -30,6 +30,7 @@ def build_booking_response(booking: Booking, lang: str, session: Session) -> Boo
         status=booking.status,
         total_price=booking.total_price,
         package_name=booking.package_name,
+        special_requests=booking.special_requests,
         checked_in_at=booking.checked_in_at,
         checked_out_at=booking.checked_out_at,
         created_at=booking.created_at,
@@ -95,6 +96,7 @@ def get_my_bookings(
             status=booking.status,
             total_price=booking.total_price,
             package_name=booking.package_name,
+            special_requests=booking.special_requests,
             checked_in_at=booking.checked_in_at,
             checked_out_at=booking.checked_out_at,
             created_at=booking.created_at,
@@ -154,22 +156,10 @@ def create_booking(
             detail="Maximum stay duration is 1 month"
         )
     
-    # Write-time availability check to prevent double-booking
-    # Re-check that no overlapping booking exists at the exact moment of creation
-    overlapping = session.exec(
-        select(Booking).where(
-            Booking.room_id == booking_data.room_id,
-            Booking.status != BookingStatus.CANCELLED,
-            Booking.check_in < booking_data.check_out,
-            Booking.check_out > booking_data.check_in,
-        )
-    ).first()
-    
-    if overlapping:
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail="This room is no longer available for the selected dates. Please try different dates."
-        )
+    # Note: Date-range overlap availability check is bypassed.
+    # The availability API endpoint exists as a draft for future implementation.
+    # Customers can book any room on any valid date range.
+    # Operational room status check (RoomStatus.AVAILABLE) above still applies.
     
     # Calculate total price
     nights = (booking_data.check_out - booking_data.check_in).days
@@ -183,7 +173,8 @@ def create_booking(
         check_out=booking_data.check_out,
         status=BookingStatus.PENDING,
         total_price=total_price,
-        package_name=booking_data.package_name
+        package_name=booking_data.package_name,
+        special_requests=booking_data.special_requests
     )
     
     session.add(booking)

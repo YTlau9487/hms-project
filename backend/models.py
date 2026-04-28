@@ -56,6 +56,16 @@ class RoomAmenity(SQLModel, table=True):
     amenity_id: int = Field(foreign_key="amenity.id", primary_key=True)
 
 
+class RoomImage(SQLModel, table=True):
+    id: Optional[int] = Field(default=None, primary_key=True)
+    room_id: int = Field(foreign_key="room.id", index=True)
+    image_url: str
+    order: int = Field(default=0)
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+
+    room: Optional["Room"] = Relationship(back_populates="images")
+
+
 class Room(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
     price: float
@@ -70,6 +80,7 @@ class Room(SQLModel, table=True):
     bookings: List["Booking"] = Relationship(back_populates="room", cascade_delete=True)
     translations: List["RoomTranslation"] = Relationship(back_populates="room", cascade_delete=True)
     amenities: List["Amenity"] = Relationship(back_populates="rooms", link_model=RoomAmenity)
+    images: List["RoomImage"] = Relationship(back_populates="room", cascade_delete=True)
 
 
 class RoomTranslation(SQLModel, table=True):
@@ -107,6 +118,7 @@ class Booking(SQLModel, table=True):
     status: BookingStatus = Field(default=BookingStatus.PENDING)
     total_price: float
     package_name: Optional[str] = None
+    special_requests: Optional[str] = Field(default=None, max_length=100)
     checked_in_at: Optional[datetime] = Field(default=None)
     checked_out_at: Optional[datetime] = Field(default=None)
     created_at: datetime = Field(default_factory=datetime.utcnow)

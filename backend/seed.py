@@ -9,7 +9,7 @@ from sqlmodel import Session, select
 from database import engine, init_db
 from models import (
     User, Room, Booking, UserRole, RoomStatus, BookingStatus, RoomType,
-    RoomTranslation, Amenity, AmenityTranslation, RoomAmenity
+    RoomTranslation, Amenity, AmenityTranslation, RoomAmenity, RoomImage
 )
 from argon2 import PasswordHasher
 from datetime import date, datetime, timedelta
@@ -70,10 +70,61 @@ ROOM_AMENITY_MAP = {
     3: [14, 15, 16, 8, 17],   # Harbor Exec: Lounge Access, Harbor View, Nespresso, Work Desk, High-Speed WiFi
 }
 
+# Room images: room index -> list of image URLs (ordered, first is primary)
+# Using Pexels CDN which is accessible in Hong Kong region
+# All images are 1920px wide (1080p+) and room/hotel related
+ROOM_IMAGES = {
+    0: [  # Premier King Room (Luxury) - luxury hotel rooms with king beds
+        "https://images.pexels.com/photos/271618/pexels-photo-271618.jpeg?auto=compress&cs=tinysrgb&w=1920",
+        "https://images.pexels.com/photos/164558/pexels-photo-164558.jpeg?auto=compress&cs=tinysrgb&w=1920",
+        "https://images.pexels.com/photos/279746/pexels-photo-279746.jpeg?auto=compress&cs=tinysrgb&w=1920",
+        "https://images.pexels.com/photos/250698/pexels-photo-250698.jpeg?auto=compress&cs=tinysrgb&w=1920",
+    ],
+    1: [  # Deluxe Twin Room (Standard) - clean standard hotel rooms
+        "https://images.pexels.com/photos/276528/pexels-photo-276528.jpeg?auto=compress&cs=tinysrgb&w=1920",
+        "https://images.pexels.com/photos/1134176/pexels-photo-1134176.jpeg?auto=compress&cs=tinysrgb&w=1920",
+        "https://images.pexels.com/photos/276552/pexels-photo-276552.jpeg?auto=compress&cs=tinysrgb&w=1920",
+        "https://images.pexels.com/photos/261102/pexels-photo-261102.jpeg?auto=compress&cs=tinysrgb&w=1920",
+    ],
+    2: [  # Presidential Suite (Suite) - luxury suites and living areas
+        "https://images.pexels.com/photos/1838640/pexels-photo-1838640.jpeg?auto=compress&cs=tinysrgb&w=1920",
+        "https://images.pexels.com/photos/2343468/pexels-photo-2343468.jpeg?auto=compress&cs=tinysrgb&w=1920",
+    ],
+    3: [  # Harbor View Executive (Business) - modern business hotel rooms
+        "https://images.pexels.com/photos/271619/pexels-photo-271619.jpeg?auto=compress&cs=tinysrgb&w=1920",
+        "https://images.pexels.com/photos/276724/pexels-photo-276724.jpeg?auto=compress&cs=tinysrgb&w=1920",
+        "https://images.pexels.com/photos/276517/pexels-photo-276517.jpeg?auto=compress&cs=tinysrgb&w=1920",
+        "https://images.pexels.com/photos/271612/pexels-photo-271612.jpeg?auto=compress&cs=tinysrgb&w=1920",
+    ],
+}
+
+
+def add_special_requests_column():
+    """Add special_requests column to booking table if it doesn't exist."""
+    import sqlite3
+    db_path = "hotel.db"
+    if not os.path.exists(db_path):
+        print("Database not found. Skipping migration.")
+        return
+    conn = sqlite3.connect(db_path)
+    cursor = conn.cursor()
+    cursor.execute("PRAGMA table_info(booking)")
+    columns = [row[1] for row in cursor.fetchall()]
+    if "special_requests" not in columns:
+        cursor.execute("ALTER TABLE booking ADD COLUMN special_requests VARCHAR(100)")
+        conn.commit()
+        print("✅ Added special_requests column to booking table.")
+    else:
+        print("✅ special_requests column already exists.")
+    conn.close()
+
 
 def seed_database():
     """Seed database with test data"""
     print("🌱 Starting database seeding...")
+
+    # Run migration for existing databases
+    add_special_requests_column()
 
     # Initialize database tables
     init_db()
@@ -170,7 +221,7 @@ def seed_database():
         rooms_data = [
             {
                 "price": 280.0,
-                "image_url": "https://images.unsplash.com/photo-1590490359854-dfba19688d70?w=800",
+                "image_url": "https://images.pexels.com/photos/271618/pexels-photo-271618.jpeg?auto=compress&cs=tinysrgb&w=1920",
                 "size_sqm": 38,
                 "adults": 2,
                 "children": 0,
@@ -180,7 +231,7 @@ def seed_database():
             },
             {
                 "price": 240.0,
-                "image_url": "https://images.unsplash.com/photo-1566665797739-1674de7a421a?w=800",
+                "image_url": "https://images.pexels.com/photos/276528/pexels-photo-276528.jpeg?auto=compress&cs=tinysrgb&w=1920",
                 "size_sqm": 35,
                 "adults": 2,
                 "children": 0,
@@ -190,7 +241,7 @@ def seed_database():
             },
             {
                 "price": 850.0,
-                "image_url": "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=800",
+                "image_url": "https://images.pexels.com/photos/1838640/pexels-photo-1838640.jpeg?auto=compress&cs=tinysrgb&w=1920",
                 "size_sqm": 120,
                 "adults": 4,
                 "children": 2,
@@ -200,7 +251,7 @@ def seed_database():
             },
             {
                 "price": 420.0,
-                "image_url": "https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=800",
+                "image_url": "https://images.pexels.com/photos/271619/pexels-photo-271619.jpeg?auto=compress&cs=tinysrgb&w=1920",
                 "size_sqm": 45,
                 "adults": 2,
                 "children": 1,
@@ -234,6 +285,15 @@ def seed_database():
                     amenity_id=amenity_objects[amenity_idx].id
                 )
                 session.add(link)
+
+            # Add room images
+            for order, image_url in enumerate(ROOM_IMAGES[i]):
+                room_image = RoomImage(
+                    room_id=room.id,
+                    image_url=image_url,
+                    order=order
+                )
+                session.add(room_image)
 
             session.commit()
             created_rooms.append(room)

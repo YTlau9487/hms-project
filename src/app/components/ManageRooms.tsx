@@ -3,7 +3,6 @@ import {
   Edit2,
   Plus,
   X,
-  Upload,
   Save,
   Image as ImageIcon,
   DollarSign,
@@ -13,6 +12,7 @@ import {
   CheckCircle,
   Globe,
   Trash2,
+  GripVertical,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { ImageWithFallback } from './ImageWithFallback';
@@ -58,13 +58,24 @@ export const ManageRooms = ({ rooms, onUpdateRoom, onAddPackage, onRemovePackage
     }
   };
 
+  const [newImageUrl, setNewImageUrl] = useState('');
+  const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
+  const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
+
   const handleSaveRoom = async () => {
     if (!editingRoom || !roomAdminData) return;
+
+    // Validate at least one image
+    if (roomAdminData.images.length === 0) {
+      toast.error(t('manageRooms.imageRequiredError'));
+      return;
+    }
 
     try {
       await roomsAPI.update(editingRoom.id, {
         price: editFormData.price,
-        image_url: editFormData.image_url || undefined,
+        image_url: roomAdminData.images[0] || undefined,
+        images: roomAdminData.images,
         size_sqm: editFormData.size_sqm ? parseInt(String(editFormData.size_sqm)) : undefined,
         adults: editFormData.adults ? parseInt(String(editFormData.adults)) : 2,
         children: editFormData.children ? parseInt(String(editFormData.children)) : 0,
@@ -83,6 +94,56 @@ export const ManageRooms = ({ rooms, onUpdateRoom, onAddPackage, onRemovePackage
       const errorMessage = err instanceof Error ? getErrorMessage(err) : t('common.updateFailed');
       toast.error(errorMessage);
     }
+  };
+
+  const handleAddImage = () => {
+    if (!newImageUrl.trim() || !roomAdminData) return;
+    setRoomAdminData({
+      ...roomAdminData,
+      images: [...roomAdminData.images, newImageUrl.trim()],
+    });
+    setNewImageUrl('');
+  };
+
+  const handleRemoveImage = (index: number) => {
+    if (!roomAdminData || roomAdminData.images.length <= 1) return;
+    setRoomAdminData({
+      ...roomAdminData,
+      images: roomAdminData.images.filter((_, i) => i !== index),
+    });
+  };
+
+  const handleDragStart = (index: number) => {
+    setDraggedIndex(index);
+  };
+
+  const handleDragOver = (e: React.DragEvent, index: number) => {
+    e.preventDefault();
+    if (draggedIndex === null || draggedIndex === index) return;
+    setDragOverIndex(index);
+  };
+
+  const handleDrop = (e: React.DragEvent, targetIndex: number) => {
+    e.preventDefault();
+    if (!roomAdminData || draggedIndex === null || draggedIndex === targetIndex) {
+      setDraggedIndex(null);
+      setDragOverIndex(null);
+      return;
+    }
+    const newImages = [...roomAdminData.images];
+    const [draggedItem] = newImages.splice(draggedIndex, 1);
+    newImages.splice(targetIndex, 0, draggedItem);
+    setRoomAdminData({
+      ...roomAdminData,
+      images: newImages,
+    });
+    setDraggedIndex(null);
+    setDragOverIndex(null);
+  };
+
+  const handleDragEnd = () => {
+    setDraggedIndex(null);
+    setDragOverIndex(null);
   };
 
   const updateTranslation = (lang: string, field: 'name' | 'description', value: string) => {
@@ -222,33 +283,109 @@ export const ManageRooms = ({ rooms, onUpdateRoom, onAddPackage, onRemovePackage
                   <div className="text-center py-12 text-muted-foreground">{t('manageRooms.loadingTranslations')}</div>
                 ) : (
                   <>
-                    {/* Image Section */}
-                    <div>
-                      <label className="flex items-center gap-2 text-sm font-bold mb-3">
-                        <ImageIcon className="w-4 h-4" /> {t('manageRooms.roomPhoto')}
-                      </label>
-                      <div className="relative h-64 rounded-xl overflow-hidden border-2 border-dashed border-border bg-muted/30 group cursor-pointer" onClick={() => {
-                        const mockImages = [
-                          'https://images.unsplash.com/photo-1590490359854-dfba19688d70?w=1080',
-                          'https://images.unsplash.com/photo-1759221793465-4795ba2eaafc?w=1080',
-                        ];
-                        const randomImage = mockImages[Math.floor(Math.random() * mockImages.length)];
-                        setEditFormData({ ...editFormData, image_url: randomImage });
-                        toast.success(t('manageRooms.roomUpdated'));
-                      }}>
-                        <ImageWithFallback
-                          src={editFormData.image_url || editingRoom.image_url || ''}
-                          alt="Room preview"
-                          className="w-full h-full object-cover"
-                        />
-                        <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                          <div className="text-center text-white">
-                            <Upload className="w-12 h-12 mx-auto mb-2" />
-                            <p className="font-bold">{t('manageRooms.clickToUpload')}</p>
-                          </div>
+                    {/* Multi-Image Management Section */}
+                    {roomAdminData && (
+                      <div>
+                        <div className="flex items-center gap-2 mb-2">
+                          <ImageIcon className="w-4 h-4" />
+                          <h4 className="font-bold text-lg">{t('manageRooms.roomImages')}</h4>
                         </div>
+                        <p className="text-sm text-muted-foreground mb-4">{t('manageRooms.roomImagesSubtitle')}</p>
+
+                        {/* Add new image input */}
+                        <div className="flex flex-col sm:flex-row gap-2 mb-4">
+                          <input
+                            type="text"
+                            value={newImageUrl}
+                            onChange={(e) => setNewImageUrl(e.target.value)}
+                            onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleAddImage(); } }}
+                            placeholder={t('manageRooms.imageUrlPlaceholder')}
+                            className="flex-1 px-3 py-2 bg-input-background border border-border rounded-lg text-sm focus:ring-2 focus:ring-primary"
+                          />
+                          <button
+                            type="button"
+                            onClick={handleAddImage}
+                            disabled={!newImageUrl.trim()}
+                            className="px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-bold hover:opacity-80 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer flex items-center justify-center gap-1 whitespace-nowrap"
+                          >
+                            <Plus className="w-4 h-4" /> {t('manageRooms.addImage')}
+                          </button>
+                        </div>
+
+                        {/* Image list */}
+                        <div className="space-y-2 max-h-64 overflow-y-auto">
+                          {roomAdminData.images.length === 0 ? (
+                            <div className="text-center py-6 text-muted-foreground border-2 border-dashed border-border rounded-lg">
+                              <ImageIcon className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                              <p className="text-sm">{t('manageRooms.noImagesAdded')}</p>
+                            </div>
+                          ) : (
+                            roomAdminData.images.map((imgUrl, idx) => (
+                              <div
+                                key={idx}
+                                draggable
+                                onDragStart={() => handleDragStart(idx)}
+                                onDragOver={(e) => handleDragOver(e, idx)}
+                                onDrop={(e) => handleDrop(e, idx)}
+                                onDragEnd={handleDragEnd}
+                                className={`flex items-center gap-3 p-2 rounded-lg border transition-all cursor-grab active:cursor-grabbing ${
+                                  dragOverIndex === idx
+                                    ? 'border-primary bg-primary/5 ring-2 ring-primary/20'
+                                    : draggedIndex === idx
+                                    ? 'opacity-50 border-dashed border-primary'
+                                    : 'bg-muted/30 border-border'
+                                }`}
+                              >
+                                {/* Drag handle icon */}
+                                <GripVertical className="w-4 h-4 text-muted-foreground flex-shrink-0 mt-1 sm:mt-0" />
+
+                                {/* Thumbnail */}
+                                <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-md overflow-hidden flex-shrink-0 bg-muted">
+                                  <ImageWithFallback
+                                    src={imgUrl}
+                                    alt={`Room image ${idx + 1}`}
+                                    className="w-full h-full object-cover"
+                                  />
+                                </div>
+
+                                {/* URL and badge */}
+                                <div className="flex-1 min-w-0">
+                                  <div className="flex items-center gap-2 mb-1">
+                                    {idx === 0 && (
+                                      <span className="text-xs font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-full">
+                                        {t('manageRooms.primaryImage')}
+                                      </span>
+                                    )}
+                                  </div>
+                                  <p className="text-xs text-muted-foreground truncate" title={imgUrl}>
+                                    {imgUrl}
+                                  </p>
+                                </div>
+
+                                {/* Remove button */}
+                                <button
+                                  type="button"
+                                  onClick={() => handleRemoveImage(idx)}
+                                  disabled={roomAdminData.images.length <= 1}
+                                  className="p-1.5 text-red-500 hover:bg-red-50 rounded-md transition-colors disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer flex-shrink-0"
+                                  title={roomAdminData.images.length <= 1 ? t('manageRooms.atLeastOneImageRequired') : t('manageRooms.removeImage')}
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </button>
+                              </div>
+                            ))
+                          )}
+                        </div>
+
+                        {/* Validation warning */}
+                        {roomAdminData.images.length === 0 && (
+                          <p className="text-xs text-destructive mt-2 flex items-center gap-1">
+                            <X className="w-3 h-3" />
+                            {t('manageRooms.atLeastOneImageRequired')}
+                          </p>
+                        )}
                       </div>
-                    </div>
+                    )}
 
                     {/* Basic Info */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

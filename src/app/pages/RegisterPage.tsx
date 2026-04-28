@@ -8,6 +8,7 @@ import { useAuth } from '../context/AuthContext';
 import { getErrorMessage } from '../services/api';
 import { useTranslation } from 'react-i18next';
 import PhoneInput from '../components/PhoneInput';
+import { parsePhoneNumber } from 'libphonenumber-js';
 
 export const RegisterPage = () => {
   const { t } = useTranslation();
@@ -48,13 +49,13 @@ export const RegisterPage = () => {
     setErrorMessage('');
     
     // Frontend validation
-    if (!formData.first_name.trim() || formData.first_name.trim().length < 2) {
+    if (!formData.first_name.trim() || formData.first_name.trim().length < 1) {
       setHasError(true);
       setErrorMessage(t('registerPage.firstNameMinLength'));
       return;
     }
     
-    if (!formData.last_name.trim() || formData.last_name.trim().length < 2) {
+    if (!formData.last_name.trim() || formData.last_name.trim().length < 1) {
       setHasError(true);
       setErrorMessage(t('registerPage.lastNameMinLength'));
       return;
@@ -78,9 +79,23 @@ export const RegisterPage = () => {
       return;
     }
     
-    if (!formData.phone || formData.phone.trim().length < 6) {
+    // Validate phone number using libphonenumber-js
+    if (!formData.phone || formData.phone.trim().length === 0) {
       setHasError(true);
       setErrorMessage(t('registerPage.phoneRequired'));
+      return;
+    }
+    
+    try {
+      const parsedPhone = parsePhoneNumber(formData.phone);
+      if (!parsedPhone || !parsedPhone.isValid()) {
+        setHasError(true);
+        setErrorMessage(t('registerPage.phoneInvalid'));
+        return;
+      }
+    } catch {
+      setHasError(true);
+      setErrorMessage(t('registerPage.phoneInvalid'));
       return;
     }
     
@@ -201,6 +216,7 @@ export const RegisterPage = () => {
                 onChange={(e) => setFormData({...formData, password: e.target.value})}
               />
             </div>
+            <p className="text-xs text-muted-foreground">{t('registerPage.passwordHint')}</p>
           </div>
 
           <div className="space-y-1">

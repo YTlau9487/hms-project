@@ -121,18 +121,25 @@
 
 @layer base {
   * {
-    @apply border-border outline-ring/50;
+    @apply border-border;
   }
-
   body {
     @apply bg-background text-foreground;
   }
+}
 
-  ::selection {
-    background-color: rgba(0, 0, 0, 0.15);
-    color: #000000;
-  }
+/* Suppress browser-native password reveal buttons across all password inputs */
+input[type="password"]::-ms-reveal,
+input[type="password"]::-ms-clear,
+input[type="password"]::-webkit-credentials-auto-fill-button,
+input[type="password"]::-webkit-outer-spin-button,
+input[type="password"]::-webkit-inner-spin-button {
+  display: none !important;
+  -webkit-appearance: none !important;
+  appearance: none !important;
+}
 
+@layer base {
   /**
   * Default typography styles for HTML elements (h1-h4, p, label, button, input).
   * These are in @layer base, so Tailwind utility classes (like text-sm, text-lg) automatically override them.
@@ -206,4 +213,9 @@
     outline: 2px solid var(--ring);
     outline-offset: 0;
   }
+}
+
+::selection {
+  background-color: #3b82f6 !important;
+  color: inherit !important;
 }

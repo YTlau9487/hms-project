@@ -51,6 +51,7 @@ class RoomLocalizedResponse(BaseModel):
     description: str
     price: float
     image_url: Optional[str]
+    images: List[str] = []
     size_sqm: Optional[int]
     adults: int
     children: int
@@ -113,6 +114,7 @@ class RoomCreate(BaseModel):
 class RoomUpdate(BaseModel):
     price: Optional[float] = None
     image_url: Optional[str] = None
+    images: Optional[List[str]] = None
     size_sqm: Optional[int] = None
     adults: Optional[int] = None
     children: Optional[int] = None
@@ -153,6 +155,7 @@ class RoomAdminResponse(BaseModel):
     id: int
     price: float
     image_url: Optional[str]
+    images: List[str] = []
     size_sqm: Optional[int]
     adults: int
     children: int
@@ -172,6 +175,7 @@ class BookingCreate(BaseModel):
     check_in: date
     check_out: date
     package_name: Optional[str] = None
+    special_requests: Optional[str] = None
 
 
 class BookingResponse(BaseModel):
@@ -183,6 +187,7 @@ class BookingResponse(BaseModel):
     status: BookingStatus
     total_price: float
     package_name: Optional[str]
+    special_requests: Optional[str]
     checked_in_at: Optional[datetime]
     checked_out_at: Optional[datetime]
     created_at: datetime

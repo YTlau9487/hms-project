@@ -108,6 +108,7 @@ export const LoginPage = () => {
                 onChange={(e) => setPassword(e.target.value)}
               />
             </div>
+            <p className="text-xs text-muted-foreground">{t('loginPage.passwordHint')}</p>
           </div>
 
           {hasError && (
