@@ -1,5 +1,5 @@
 import React from 'react';
-import { Star, Wifi, Coffee, Maximize2, Users, ArrowRight } from 'lucide-react';
+import { Star, Wifi, Coffee, Maximize2, Users, ArrowRight, Check } from 'lucide-react';
 import { motion } from 'motion/react';
 import { ImageWithFallback } from './ImageWithFallback';
 import { Room as APIRoom } from '../services/api';
@@ -52,6 +52,23 @@ export const RoomCard = ({ room, onViewDetails, onBookNow }: RoomCardProps) => {
           {room.description}
         </p>
 
+        {/* Room amenities from database */}
+        {room.amenities && room.amenities.length > 0 && (
+          <div className="mb-6">
+            <div className="flex flex-wrap gap-2">
+              {room.amenities.slice(0, 3).map((amenity, idx) => (
+                <span key={idx} className="inline-flex items-center gap-1 text-xs text-muted-foreground bg-muted/50 px-2 py-1 rounded-full">
+                  <Check className="w-3 h-3 text-primary" />
+                  {amenity}
+                </span>
+              ))}
+              {room.amenities.length > 3 && (
+                <span className="text-xs text-muted-foreground">+{room.amenities.length - 3}</span>
+              )}
+            </div>
+          </div>
+        )}
+
         <div className="grid grid-cols-2 gap-4 mb-6">
           {room.size_sqm && (
             <div className="flex items-center gap-2 text-muted-foreground">
@@ -67,14 +84,6 @@ export const RoomCard = ({ room, onViewDetails, onBookNow }: RoomCardProps) => {
               {t('roomCard.adults', { count: room.adults })}
               {room.children > 0 && `, ${t('roomCard.children', { count: room.children })}`}
             </span>
-          </div>
-          <div className="flex items-center gap-2 text-muted-foreground">
-            <Wifi className="w-4 h-4" />
-            <span className="text-xs">{t('roomCard.freeWifi')}</span>
-          </div>
-          <div className="flex items-center gap-2 text-muted-foreground">
-            <Coffee className="w-4 h-4" />
-            <span className="text-xs">{t('roomCard.breakfastIncluded')}</span>
           </div>
         </div>
 

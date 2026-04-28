@@ -21,18 +21,28 @@ interface MyBookingsProps {
   onBack: () => void;
 }
 
+// Map package names to translation keys
+function getPackageTranslationKey(packageName: string | null): string {
+  if (!packageName) return 'myBookings.packageRoomOnly';
+  
+  const lower = packageName.toLowerCase();
+  if (lower.includes('breakfast')) return 'myBookings.packageBreakfastIncluded';
+  if (lower.includes('vip') || lower.includes('ultimate')) return 'myBookings.packageUltimateVip';
+  return 'myBookings.packageRoomOnly';
+}
+
 export const MyBookings = ({ bookings, onBack }: MyBookingsProps) => {
   const { t } = useTranslation();
   // Map API bookings to component format
   const mappedBookings: Booking[] = bookings.map(b => ({
     id: b.id.toString(),
-    roomName: b.room?.name || 'Unknown Room',
+    roomName: b.room?.name || t('myBookings.unknownRoom'),
     roomImage: b.room?.image_url || '',
     checkIn: b.check_in,
     checkOut: b.check_out,
     total: b.total_price,
     status: b.status,
-    package: b.package_name || 'Room Only'
+    package: t(getPackageTranslationKey(b.package_name))
   }));
 
   return (

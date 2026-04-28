@@ -6,7 +6,7 @@ from datetime import date, timedelta
 from database import get_session
 from models import (
     Room, RoomStatus, RoomTranslation, Amenity, AmenityTranslation, RoomAmenity,
-    Booking, BookingStatus
+    Booking, BookingStatus, RoomImage
 )
 from schemas import (
     RoomLocalizedResponse, RoomCreate, RoomUpdate,
@@ -79,12 +79,19 @@ def build_localized_room(room: Room, lang: str, session: Session) -> dict:
         if name:
             amenity_names.append(name)
 
+    # Get ordered image URLs
+    room_images = session.exec(
+        select(RoomImage).where(RoomImage.room_id == room.id).order_by(RoomImage.order.asc())
+    ).all()
+    images = [img.image_url for img in room_images]
+
     return {
         "id": room.id,
         "name": trans_data["name"],
         "description": trans_data["description"],
         "price": room.price,
         "image_url": room.image_url,
+        "images": images,
         "size_sqm": int(room.size_sqm) if room.size_sqm is not None else None,
         "adults": int(room.adults) if room.adults is not None else 2,
         "children": int(room.children) if room.children is not None else 0,
@@ -249,10 +256,17 @@ def get_room_admin(
             translations=amenity_translations
         ))
 
+    # Get ordered image URLs
+    room_images = session.exec(
+        select(RoomImage).where(RoomImage.room_id == room_id).order_by(RoomImage.order.asc())
+    ).all()
+    images = [img.image_url for img in room_images]
+
     return RoomAdminResponse(
         id=room.id,
         price=room.price,
         image_url=room.image_url,
+        images=images,
         size_sqm=room.size_sqm,
         adults=room.adults,
         children=room.children,
@@ -338,12 +352,31 @@ def update_room(
             detail="Room not found"
         )
 
-    # Update room fields
-    update_data = room_data.dict(exclude_unset=True, exclude={"translations", "amenities"})
+    # Update room fields (exclude translations, amenities, and images - handled separately)
+    update_data = room_data.dict(exclude_unset=True, exclude={"translations", "amenities", "images"})
     for key, value in update_data.items():
         setattr(room, key, value)
 
     session.add(room)
+
+    # Update image set if provided
+    if room_data.images is not None:
+        # Delete existing images
+        existing_images = session.exec(
+            select(RoomImage).where(RoomImage.room_id == room_id)
+        ).all()
+        for img in existing_images:
+            session.delete(img)
+
+        # Create new images
+        for order, image_url in enumerate(room_data.images):
+            if image_url and image_url.strip():
+                room_image = RoomImage(
+                    room_id=room_id,
+                    image_url=image_url.strip(),
+                    order=order
+                )
+                session.add(room_image)
 
     # Update translations if provided
     if room_data.translations is not None:

@@ -26,7 +26,7 @@ export const HomePage = ({ onBookNow }: HomePageProps) => {
   // Redirect staff users to admin dashboard (unless they explicitly chose customer view)
   useEffect(() => {
     if (user?.role === 'staff' && searchParams.get('view') !== 'customer') {
-      navigate('/admin/staff');
+      navigate('/staff/dashboard');
 
     }
   }, [user, navigate, searchParams]);

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Mail, Phone, MapPin, Instagram, Facebook, Twitter } from 'lucide-react';
+import { Mail, Phone, MapPin, Instagram, Facebook, X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
 import { toast } from 'sonner';
@@ -40,14 +40,19 @@ export const Footer = () => {
               {t('footer.brandDescription')}
             </p>
             <div className="flex gap-4">
-              <button className="w-8 h-8 rounded-full bg-primary-foreground/10 flex items-center justify-center hover:bg-primary-foreground/20 transition-colors cursor-pointer" aria-label={t('footer.followInstagram')}>
+              <button 
+                className="w-8 h-8 rounded-full bg-primary-foreground/10 flex items-center justify-center hover:bg-primary-foreground/20 transition-colors cursor-pointer" 
+                aria-label={t('footer.followInstagram')}
+                onClick={() => toast.info(t('common.comingSoon'))}
+              >
                 <Instagram className="w-4 h-4" />
               </button>
-              <button className="w-8 h-8 rounded-full bg-primary-foreground/10 flex items-center justify-center hover:bg-primary-foreground/20 transition-colors cursor-pointer" aria-label={t('footer.followFacebook')}>
+              <button 
+                className="w-8 h-8 rounded-full bg-primary-foreground/10 flex items-center justify-center hover:bg-primary-foreground/20 transition-colors cursor-pointer" 
+                aria-label={t('footer.followFacebook')}
+                onClick={() => toast.info(t('common.comingSoon'))}
+              >
                 <Facebook className="w-4 h-4" />
-              </button>
-              <button className="w-8 h-8 rounded-full bg-primary-foreground/10 flex items-center justify-center hover:bg-primary-foreground/20 transition-colors cursor-pointer" aria-label={t('footer.followTwitter')}>
-                <Twitter className="w-4 h-4" />
               </button>
             </div>
           </div>

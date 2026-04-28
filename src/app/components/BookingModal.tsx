@@ -149,10 +149,10 @@ export const BookingModal = ({ room, isOpen, onClose, onConfirm, user }: Booking
     }
     
     // Name validation
-    if (!formData.firstName || formData.firstName.trim().length < 2) {
+    if (!formData.firstName || formData.firstName.trim().length < 1) {
       errors.firstName = t('bookingModal.validation.firstNameMin');
     }
-    if (!formData.lastName || formData.lastName.trim().length < 2) {
+    if (!formData.lastName || formData.lastName.trim().length < 1) {
       errors.lastName = t('bookingModal.validation.lastNameMin');
     }
     
@@ -217,8 +217,8 @@ export const BookingModal = ({ room, isOpen, onClose, onConfirm, user }: Booking
       }
       
       return checkIn && checkOut && checkOut > checkIn && 
-             formData.firstName.trim().length >= 2 && 
-             formData.lastName.trim().length >= 2 && 
+             formData.firstName.trim().length >= 1 && 
+             formData.lastName.trim().length >= 1 && 
              formData.email && 
              phoneValid;
     }
@@ -430,11 +430,15 @@ export const BookingModal = ({ room, isOpen, onClose, onConfirm, user }: Booking
                     <div className="col-span-2 space-y-1">
                       <label className="text-xs font-bold uppercase text-muted-foreground">{t('bookingModal.specialRequests')}</label>
                       <textarea 
-                        className="w-full bg-input-background border-none rounded-lg px-4 py-2.5 text-sm focus:ring-2 focus:ring-primary min-h-[80px]"
+                        className="w-full bg-input-background border-none rounded-lg px-4 py-2.5 text-sm focus:ring-2 focus:ring-primary min-h-[80px] resize-none"
                         placeholder={t('bookingModal.specialRequestsPlaceholder')}
                         value={formData.specialRequests}
+                        maxLength={100}
                         onChange={(e) => setFormData({...formData, specialRequests: e.target.value})}
                       />
+                      <p className={`text-xs text-right ${formData.specialRequests.length >= 100 ? 'text-red-500' : 'text-muted-foreground'}`}>
+                        {formData.specialRequests.length}/100
+                      </p>
                     </div>
                   </div>
                 </motion.div>

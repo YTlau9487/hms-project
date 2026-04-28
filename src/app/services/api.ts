@@ -122,6 +122,7 @@ export interface Room {
   description: string;
   price: number;
   image_url: string | null;
+  images: string[];
   size_sqm: number | null;
   adults: number;
   children: number;
@@ -151,6 +152,7 @@ export interface Booking {
   status: 'pending' | 'confirmed' | 'cancelled';
   total_price: number;
   package_name: string | null;
+  special_requests: string | null;
   checked_in_at: string | null;
   checked_out_at: string | null;
   created_at: string;
@@ -212,6 +214,7 @@ export interface RoomAdminData {
   id: number;
   price: number;
   image_url: string | null;
+  images: string[];
   size_sqm: number | null;
   adults: number;
   children: number;
@@ -238,6 +241,7 @@ export interface RoomCreatePayload {
 export interface RoomUpdatePayload {
   price?: number;
   image_url?: string;
+  images?: string[];
   size_sqm?: number;
   adults?: number;
   children?: number;
@@ -329,7 +333,7 @@ export const bookingsAPI = {
     return fetchAPI<PaginatedResponse<Booking>>(`/bookings/my?${params.toString()}`);
   },
 
-  create: (data: { room_id: number; check_in: string; check_out: string; package_name?: string }, lang?: string) => {
+  create: (data: { room_id: number; check_in: string; check_out: string; package_name?: string; special_requests?: string }, lang?: string) => {
     const query = lang ? `?lang=${lang}` : '';
     return fetchAPI<Booking>(`/bookings/${query}`, {
       method: 'POST',

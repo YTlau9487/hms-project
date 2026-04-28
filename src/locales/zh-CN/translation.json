@@ -54,6 +54,9 @@
     "backToRooms": "返回客房列表",
     "featured": "精选",
     "standard": "标准",
+    "luxury": "豪华",
+    "suite": "套房",
+    "business": "商务",
     "stars": "5星",
     "whatThisRoomOffers": "此客房提供",
     "roomFeatures": "客房特色",
@@ -67,8 +70,11 @@
     "valetParking": "代客泊车",
     "roomService": "24小时客房服务",
     "perNight": "/ 晚",
-    "inclusiveTaxes": "含所有税费及服务费",
-    "reserveNow": "立即预订"
+    "inclusiveTaxes": "含所有税项及服务费",
+    "reserveNow": "立即预订",
+    "previousImage": "上一张图片",
+    "nextImage": "下一张图片",
+    "closeImage": "关闭图片"
   },
   "bookingModal": {
     "step1": {
@@ -181,7 +187,10 @@
     "cancelSuccess": "预订取消成功",
     "cancelSuccessDesc": "您将很快收到确认电子邮件。",
     "cancelFailed": "取消预订失败",
-    "unknownRoom": "未知客房"
+    "unknownRoom": "未知客房",
+    "packageRoomOnly": "仅客房",
+    "packageBreakfastIncluded": "早餐套餐",
+    "packageUltimateVip": "终极VIP体验"
   },
   "userProfile": {
     "back": "返回",
@@ -255,7 +264,18 @@
     "amenities": "设施",
     "addAmenity": "添加设施",
     "noAmenities": "尚未添加设施。点击「添加设施」来添加。",
-    "loadingTranslations": "加载翻译中..."
+    "loadingTranslations": "加载翻译中...",
+    "roomImages": "房间图片",
+    "roomImagesSubtitle": "管理房间照片。第一张图片为主要缩略图。",
+    "addImageUrl": "添加图片网址",
+    "imageUrlPlaceholder": "https://example.com/room-image.jpg",
+    "addImage": "添加",
+    "removeImage": "移除图片",
+    "primaryImage": "主要",
+    "atLeastOneImageRequired": "至少需要一张图片",
+    "imageRequiredError": "保存前请至少添加一张图片",
+    "noImagesAdded": "尚未添加图片",
+    "dragToReorder": "拖拽重新排序（即将推出）"
   },
   "adminPanel": {
     "title": "员工管理仪表板",
@@ -374,6 +394,7 @@
     "emailAddress": "电子邮件地址",
     "emailPlaceholder": "name@example.com",
     "password": "密码",
+    "passwordHint": "8个或以上字符，需要英文字母和数字，不可包含空格",
     "forgotPassword": "忘记密码？",
     "forgotPasswordMsg": "请联系接待处重置密码",
     "signIn": "登录",
@@ -396,6 +417,7 @@
     "phoneNumber": "电话号码",
     "phonePlaceholder": "电话号码",
     "password": "密码",
+    "passwordHint": "8个或以上字符，需要英文字母和数字，不可包含空格",
     "confirmPassword": "确认密码",
     "createAccountBtn": "创建账户",
     "creating": "创建中...",
@@ -403,12 +425,14 @@
     "registerFailed": "注册失败",
     "alreadyAccount": "已有账户？",
     "login": "登录",
-    "firstNameMinLength": "名必须至少为 2 个字符",
-    "lastNameMinLength": "姓必须至少为 2 个字符",
+    "firstNameMinLength": "名必须至少为 1 个字符",
+    "lastNameMinLength": "姓必须至少为 1 个字符",
     "invalidEmail": "电子邮件格式无效",
     "passwordMinLength": "密码必须至少为 8 个字符",
+    "passwordNoSpaces": "密码不可包含空格",
     "passwordMismatch": "密码不匹配",
-    "phoneRequired": "电话号码为必填项"
+    "phoneRequired": "电话号码为必填项",
+    "phoneInvalid": "请输入有效的电话号码"
   },
   "homePage": {
     "ourCuratedRooms": "精选客房",

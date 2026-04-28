@@ -73,7 +73,10 @@
     "roomService": "24/7 Room Service",
     "perNight": "/ night",
     "inclusiveTaxes": "Inclusive of all taxes and service charges",
-    "reserveNow": "Reserve Now"
+    "reserveNow": "Reserve Now",
+    "previousImage": "Previous image",
+    "nextImage": "Next image",
+    "closeImage": "Close image"
   },
   "bookingModal": {
     "step1": {
@@ -187,7 +190,10 @@
     "cancelSuccess": "Booking cancelled successfully",
     "cancelSuccessDesc": "You will receive a confirmation email shortly.",
     "cancelFailed": "Failed to cancel booking",
-    "unknownRoom": "Unknown Room"
+    "unknownRoom": "Unknown Room",
+    "packageRoomOnly": "Room Only",
+    "packageBreakfastIncluded": "Breakfast Included",
+    "packageUltimateVip": "Ultimate VIP"
   },
   "userProfile": {
     "back": "Back",
@@ -261,7 +267,18 @@
     "amenities": "Amenities",
     "addAmenity": "Add Amenity",
     "noAmenities": "No amenities added yet. Click \"Add Amenity\" to add one.",
-    "loadingTranslations": "Loading translations..."
+    "loadingTranslations": "Loading translations...",
+    "roomImages": "Room Images",
+    "roomImagesSubtitle": "Manage room photos. The first image is the primary thumbnail.",
+    "addImageUrl": "Add Image URL",
+    "imageUrlPlaceholder": "https://example.com/room-image.jpg",
+    "addImage": "Add",
+    "removeImage": "Remove image",
+    "primaryImage": "Primary",
+    "atLeastOneImageRequired": "At least one image is required",
+    "imageRequiredError": "Please add at least one image before saving",
+    "noImagesAdded": "No images added yet",
+    "dragToReorder": "Drag to reorder (coming soon)"
   },
   "adminPanel": {
     "title": "Staff Management Dashboard",
@@ -381,6 +398,7 @@
     "emailAddress": "Email Address",
     "emailPlaceholder": "name@example.com",
     "password": "Password",
+    "passwordHint": "8+ characters, English letters and numbers required, no spaces",
     "forgotPassword": "Forgot password?",
     "forgotPasswordMsg": "Please contact reception to reset your password",
     "signIn": "Sign In",
@@ -403,6 +421,7 @@
     "phoneNumber": "Phone Number",
     "phonePlaceholder": "Phone number",
     "password": "Password",
+    "passwordHint": "8+ characters, English letters and numbers required, no spaces",
     "confirmPassword": "Confirm Password",
     "createAccountBtn": "Create Account",
     "creating": "Creating...",
@@ -410,12 +429,14 @@
     "registerFailed": "Registration failed",
     "alreadyAccount": "Already have an account?",
     "login": "Login",
-    "firstNameMinLength": "First name must be at least 2 characters",
-    "lastNameMinLength": "Last name must be at least 2 characters",
+    "firstNameMinLength": "First name must be at least 1 character",
+    "lastNameMinLength": "Last name must be at least 1 character",
     "invalidEmail": "Invalid email format",
     "passwordMinLength": "Password must be at least 8 characters",
+    "passwordNoSpaces": "Password must not contain spaces",
     "passwordMismatch": "Passwords do not match",
-    "phoneRequired": "Phone number is required"
+    "phoneRequired": "Phone number is required",
+    "phoneInvalid": "Please enter a valid phone number"
   },
   "homePage": {
     "ourCuratedRooms": "Our Curated Rooms",

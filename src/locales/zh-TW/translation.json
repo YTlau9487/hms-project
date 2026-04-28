@@ -54,6 +54,9 @@
     "backToRooms": "返回客房列表",
     "featured": "精選",
     "standard": "標準",
+    "luxury": "豪華",
+    "suite": "套房",
+    "business": "商務",
     "stars": "5星",
     "whatThisRoomOffers": "此客房提供",
     "roomFeatures": "客房特色",
@@ -67,8 +70,11 @@
     "valetParking": "代客泊車",
     "roomService": "24小時客房服務",
     "perNight": "/ 晚",
-    "inclusiveTaxes": "含所有稅費及服務費",
-    "reserveNow": "立即預訂"
+    "inclusiveTaxes": "含所有稅項及服務費",
+    "reserveNow": "立即預訂",
+    "previousImage": "上一張圖片",
+    "nextImage": "下一張圖片",
+    "closeImage": "關閉圖片"
   },
   "bookingModal": {
     "step1": {
@@ -181,7 +187,10 @@
     "cancelSuccess": "預訂取消成功",
     "cancelSuccessDesc": "您將很快收到確認電子郵件。",
     "cancelFailed": "取消預訂失敗",
-    "unknownRoom": "未知客房"
+    "unknownRoom": "未知客房",
+    "packageRoomOnly": "僅客房",
+    "packageBreakfastIncluded": "早餐套餐",
+    "packageUltimateVip": "終極VIP體驗"
   },
   "userProfile": {
     "back": "返回",
@@ -255,7 +264,18 @@
     "amenities": "設施",
     "addAmenity": "添加設施",
     "noAmenities": "尚未添加設施。點擊「添加設施」來添加。",
-    "loadingTranslations": "載入翻譯中..."
+    "loadingTranslations": "載入翻譯中...",
+    "roomImages": "房間圖片",
+    "roomImagesSubtitle": "管理房間照片。第一張圖片為主要縮圖。",
+    "addImageUrl": "新增圖片網址",
+    "imageUrlPlaceholder": "https://example.com/room-image.jpg",
+    "addImage": "新增",
+    "removeImage": "移除圖片",
+    "primaryImage": "主要",
+    "atLeastOneImageRequired": "至少需要一張圖片",
+    "imageRequiredError": "儲存前請至少新增一張圖片",
+    "noImagesAdded": "尚未新增圖片",
+    "dragToReorder": "拖曳重新排序（即將推出）"
   },
   "adminPanel": {
     "title": "員工管理儀表板",
@@ -374,6 +394,7 @@
     "emailAddress": "電子郵件地址",
     "emailPlaceholder": "name@example.com",
     "password": "密碼",
+    "passwordHint": "8個或以上字元，需要英文字母和數字，不可包含空格",
     "forgotPassword": "忘記密碼？",
     "forgotPasswordMsg": "請聯絡接待處重設密碼",
     "signIn": "登入",
@@ -396,6 +417,7 @@
     "phoneNumber": "電話號碼",
     "phonePlaceholder": "電話號碼",
     "password": "密碼",
+    "passwordHint": "8個或以上字元，需要英文字母和數字，不可包含空格",
     "confirmPassword": "確認密碼",
     "createAccountBtn": "創建帳戶",
     "creating": "創建中...",
@@ -403,12 +425,14 @@
     "registerFailed": "註冊失敗",
     "alreadyAccount": "已有帳戶？",
     "login": "登入",
-    "firstNameMinLength": "名必須至少為 2 個字符",
-    "lastNameMinLength": "姓必須至少為 2 個字符",
+    "firstNameMinLength": "名必須至少為 1 個字符",
+    "lastNameMinLength": "姓必須至少為 1 個字符",
     "invalidEmail": "電子郵件格式無效",
     "passwordMinLength": "密碼必須至少為 8 個字符",
+    "passwordNoSpaces": "密碼不可包含空格",
     "passwordMismatch": "密碼不匹配",
-    "phoneRequired": "電話號碼為必填項"
+    "phoneRequired": "電話號碼為必填項",
+    "phoneInvalid": "請輸入有效的電話號碼"
   },
   "homePage": {
     "ourCuratedRooms": "精選客房",

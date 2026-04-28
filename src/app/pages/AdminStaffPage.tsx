@@ -20,7 +20,8 @@ export const AdminStaffPage = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [formData, setFormData] = useState({
-    name: '',
+    first_name: '',
+    last_name: '',
     email: '',
     password: '',
     phone: '',
@@ -122,7 +123,8 @@ export const AdminStaffPage = () => {
     
     // Show confirmation dialog
     setCreateConfirm({
-      name: formData.name,
+      first_name: formData.first_name,
+      last_name: formData.last_name,
       email: formData.email,
       password: formData.password,
       phone: formData.phone || undefined,
@@ -139,7 +141,7 @@ export const AdminStaffPage = () => {
     try {
       await adminAPI.createStaff(createConfirm);
       toast.success(t('adminStaff.createdSuccess'));
-      setFormData({ name: '', email: '', password: '', phone: '' });
+      setFormData({ first_name: '', last_name: '', email: '', password: '', phone: '' });
       setShowCreateForm(false);
       setCreateConfirm(null);
       await fetchStaff();
@@ -227,11 +229,21 @@ export const AdminStaffPage = () => {
               )}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">{t('adminStaff.fullName')}</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">{t('adminStaff.firstName', { defaultValue: 'First Name' })}</label>
                   <input
                     type="text"
-                    value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    value={formData.first_name}
+                    onChange={(e) => setFormData({ ...formData, first_name: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent outline-none"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">{t('adminStaff.lastName', { defaultValue: 'Last Name' })}</label>
+                  <input
+                    type="text"
+                    value={formData.last_name}
+                    onChange={(e) => setFormData({ ...formData, last_name: e.target.value })}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent outline-none"
                     required
                   />
@@ -391,7 +403,7 @@ export const AdminStaffPage = () => {
         onClose={() => setCreateConfirm(null)}
         onConfirm={confirmCreateStaff}
         title={t('adminStaff.createConfirmTitle')}
-        description={t('adminStaff.createConfirmDesc', { name: createConfirm?.name || '', email: createConfirm?.email || '' })}
+        description={t('adminStaff.createConfirmDesc', { name: `${createConfirm?.first_name || ''} ${createConfirm?.last_name || ''}`.trim(), email: createConfirm?.email || '' })}
         confirmText={t('adminStaff.createBtn')}
         variant="default"
         icon={UserPlus}

@@ -22,6 +22,9 @@ def validate_password(password: str) -> Optional[str]:
     """Validate password strength. Returns error message or None if valid."""
     if len(password) < 8:
         return "Password must be at least 8 characters long"
+    # Check for spaces - spaces are not allowed
+    if ' ' in password:
+        return "Password must not contain spaces"
     # Check for non-ASCII characters (Chinese, Japanese, Korean, accented chars, etc.)
     if not all(ord(c) < 128 for c in password):
         return "Password must only contain English letters, digits, and symbols"

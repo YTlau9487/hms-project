@@ -75,7 +75,8 @@ function AppContent() {
         room_id: details.room.id,
         check_in: details.checkIn,
         check_out: details.checkOut,
-        package_name: details.package?.name
+        package_name: details.package?.name,
+        special_requests: details.customer?.specialRequests || null
       });
       
       toast.success('Booking Successful!', {

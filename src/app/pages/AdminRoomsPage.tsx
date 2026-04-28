@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Edit, Trash2, Plus, X, Save, Globe, CheckCircle, Tag, Image as ImageIcon } from 'lucide-react';
+import { Edit, Trash2, Plus, X, Save, Globe, CheckCircle, Tag, Image as ImageIcon, GripVertical } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Room } from '../components/RoomCard';
 import { roomsAPI, getErrorMessage, RoomAdminData, RoomTranslationData, AmenityTranslationData } from '../services/api';
+import { ImageWithFallback } from '../components/ImageWithFallback';
 import { LoadingSpinner } from '../components/LoadingSpinner';
 import { ErrorMessage } from '../components/ErrorMessage';
 import { ConfirmationDialog } from '../components/ConfirmationDialog';
@@ -19,6 +20,7 @@ const LANGUAGES = [
 interface RoomFormState {
   price: number;
   image_url: string;
+  images: string[];
   size_sqm: number | null;
   adults: number;
   children: number;
@@ -38,6 +40,7 @@ const emptyTranslations: RoomTranslationData[] = LANGUAGES.map(l => ({
 const emptyForm: RoomFormState = {
   price: 0,
   image_url: '',
+  images: [],
   size_sqm: null,
   adults: 2,
   children: 0,
@@ -65,6 +68,9 @@ export const AdminRoomsPage = () => {
     roomName: '',
   });
   const [isSaving, setIsSaving] = useState(false);
+  const [newImageUrl, setNewImageUrl] = useState('');
+  const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
+  const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
 
   useEffect(() => {
     fetchRooms();
@@ -99,6 +105,7 @@ export const AdminRoomsPage = () => {
       setFormData({
         price: adminData.price,
         image_url: adminData.image_url || '',
+        images: adminData.images || [],
         size_sqm: adminData.size_sqm,
         adults: adminData.adults,
         children: adminData.children,
@@ -120,6 +127,7 @@ export const AdminRoomsPage = () => {
       setFormData({
         price: room.price,
         image_url: room.image_url || '',
+        images: room.images || [],
         size_sqm: room.size_sqm,
         adults: room.adults,
         children: room.children,
@@ -133,6 +141,60 @@ export const AdminRoomsPage = () => {
     setModalOpen(true);
   };
 
+  const handleAddImage = () => {
+    if (!newImageUrl.trim()) return;
+    setFormData({
+      ...formData,
+      images: [...formData.images, newImageUrl.trim()],
+      image_url: formData.images.length === 0 ? newImageUrl.trim() : formData.image_url,
+    });
+    setNewImageUrl('');
+  };
+
+  const handleRemoveImage = (index: number) => {
+    if (formData.images.length <= 1) return;
+    const newImages = formData.images.filter((_, i) => i !== index);
+    setFormData({
+      ...formData,
+      images: newImages,
+      image_url: index === 0 ? (newImages[0] || '') : formData.image_url,
+    });
+  };
+
+  const handleDragStart = (index: number) => {
+    setDraggedIndex(index);
+  };
+
+  const handleDragOver = (e: React.DragEvent, index: number) => {
+    e.preventDefault();
+    if (draggedIndex === null || draggedIndex === index) return;
+    setDragOverIndex(index);
+  };
+
+  const handleDrop = (e: React.DragEvent, targetIndex: number) => {
+    e.preventDefault();
+    if (draggedIndex === null || draggedIndex === targetIndex) {
+      setDraggedIndex(null);
+      setDragOverIndex(null);
+      return;
+    }
+    const newImages = [...formData.images];
+    const [draggedItem] = newImages.splice(draggedIndex, 1);
+    newImages.splice(targetIndex, 0, draggedItem);
+    setFormData({
+      ...formData,
+      images: newImages,
+      image_url: newImages[0] || formData.image_url,
+    });
+    setDraggedIndex(null);
+    setDragOverIndex(null);
+  };
+
+  const handleDragEnd = () => {
+    setDraggedIndex(null);
+    setDragOverIndex(null);
+  };
+
   const handleSave = async () => {
     const hasAnyName = formData.translations.some(t => t.name.trim());
     if (!hasAnyName || formData.price <= 0) {
@@ -140,11 +202,17 @@ export const AdminRoomsPage = () => {
       return;
     }
 
+    if (formData.images.length === 0) {
+      toast.error(t('manageRooms.atLeastOneImageRequired'));
+      return;
+    }
+
     setIsSaving(true);
     try {
       const payload = {
         price: formData.price,
-        image_url: formData.image_url || undefined,
+        image_url: formData.images[0] || formData.image_url || undefined,
+        images: formData.images,
         size_sqm: formData.size_sqm ? parseInt(String(formData.size_sqm)) : undefined,
         adults: parseInt(String(formData.adults)) || 2,
         children: parseInt(String(formData.children)) || 0,
@@ -440,18 +508,98 @@ export const AdminRoomsPage = () => {
 
               {/* Content */}
               <div className="p-6 space-y-8">
-                {/* Image */}
+                {/* Multi-Image Management Section */}
                 <div>
-                  <label className="flex items-center gap-2 text-sm font-bold mb-3">
-                    <ImageIcon className="w-4 h-4" /> {t('adminRooms.imageUrl')}
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.image_url}
-                    onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
-                    className="w-full px-4 py-2 bg-input-background border border-border rounded-lg focus:ring-2 focus:ring-primary"
-                    placeholder={t('adminRooms.imageUrlPlaceholder')}
-                  />
+                  <div className="flex items-center gap-2 mb-2">
+                    <ImageIcon className="w-4 h-4" />
+                    <h4 className="font-bold text-lg">{t('manageRooms.roomImages')}</h4>
+                  </div>
+                  <p className="text-sm text-muted-foreground mb-4">{t('manageRooms.roomImagesSubtitle')}</p>
+
+                  {/* Add new image input */}
+                  <div className="flex flex-col sm:flex-row gap-2 mb-4">
+                    <input
+                      type="text"
+                      value={newImageUrl}
+                      onChange={(e) => setNewImageUrl(e.target.value)}
+                      onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleAddImage(); } }}
+                      placeholder={t('manageRooms.imageUrlPlaceholder')}
+                      className="flex-1 px-3 py-2 bg-input-background border border-border rounded-lg text-sm focus:ring-2 focus:ring-primary"
+                    />
+                    <button
+                      type="button"
+                      onClick={handleAddImage}
+                      disabled={!newImageUrl.trim()}
+                      className="px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-bold hover:opacity-80 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer flex items-center justify-center gap-1 whitespace-nowrap"
+                    >
+                      <Plus className="w-4 h-4" /> {t('manageRooms.addImage')}
+                    </button>
+                  </div>
+
+                  {/* Image list */}
+                  <div className="space-y-2 max-h-64 overflow-y-auto">
+                    {formData.images.length === 0 ? (
+                      <div className="text-center py-6 text-muted-foreground border-2 border-dashed border-border rounded-lg">
+                        <ImageIcon className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                        <p className="text-sm">{t('manageRooms.noImagesAdded')}</p>
+                      </div>
+                    ) : (
+                      formData.images.map((imgUrl, idx) => (
+                        <div
+                          key={idx}
+                          draggable
+                          onDragStart={() => handleDragStart(idx)}
+                          onDragOver={(e) => handleDragOver(e, idx)}
+                          onDrop={(e) => handleDrop(e, idx)}
+                          onDragEnd={handleDragEnd}
+                          className={`flex items-center gap-3 p-2 rounded-lg border transition-all cursor-grab active:cursor-grabbing ${
+                            dragOverIndex === idx
+                              ? 'border-primary bg-primary/5 ring-2 ring-primary/20'
+                              : draggedIndex === idx
+                              ? 'opacity-50 border-dashed border-primary'
+                              : 'bg-muted/30 border-border'
+                          }`}
+                        >
+                          <GripVertical className="w-4 h-4 text-muted-foreground flex-shrink-0 mt-1 sm:mt-0" />
+                          <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-md overflow-hidden flex-shrink-0 bg-muted">
+                            <ImageWithFallback
+                              src={imgUrl}
+                              alt={`Room image ${idx + 1}`}
+                              className="w-full h-full object-cover"
+                            />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 mb-1">
+                              {idx === 0 && (
+                                <span className="text-xs font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-full">
+                                  {t('manageRooms.primaryImage')}
+                                </span>
+                              )}
+                            </div>
+                            <p className="text-xs text-muted-foreground truncate" title={imgUrl}>
+                              {imgUrl}
+                            </p>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveImage(idx)}
+                            disabled={formData.images.length <= 1}
+                            className="p-1.5 text-red-500 hover:bg-red-50 rounded-md transition-colors disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer flex-shrink-0"
+                            title={formData.images.length <= 1 ? t('manageRooms.atLeastOneImageRequired') : t('manageRooms.removeImage')}
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      ))
+                    )}
+                  </div>
+
+                  {formData.images.length === 0 && (
+                    <p className="text-xs text-destructive mt-2 flex items-center gap-1">
+                      <X className="w-3 h-3" />
+                      {t('manageRooms.atLeastOneImageRequired')}
+                    </p>
+                  )}
                 </div>
 
                 {/* Basic Info */}
