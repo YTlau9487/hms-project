@@ -1,7 +1,15 @@
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, field_validator, Field, model_validator
 from typing import Optional, List
 from datetime import date, datetime
+import math
 from models import UserRole, BookingStatus, RoomStatus, RoomType, NotificationType
+
+
+def sanitize_float_value(value) -> float:
+    """Convert non-finite floats (inf, -inf, NaN) to 0 for safe JSON serialization."""
+    if isinstance(value, float) and not math.isfinite(value):
+        return 0.0
+    return value
 
 
 # Auth schemas
@@ -63,6 +71,11 @@ class RoomLocalizedResponse(BaseModel):
     class Config:
         from_attributes = True
 
+    @field_validator('price', mode='before')
+    @classmethod
+    def sanitize_price(cls, v):
+        return sanitize_float_value(v)
+
 
 # Room schemas - Legacy (kept for backward compat in booking response)
 class RoomResponse(BaseModel):
@@ -80,6 +93,11 @@ class RoomResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+    @field_validator('price', mode='before')
+    @classmethod
+    def sanitize_price(cls, v):
+        return sanitize_float_value(v)
 
 
 # Translation input schemas for admin create/update
@@ -99,7 +117,7 @@ class AmenityInput(BaseModel):
 
 
 class RoomCreate(BaseModel):
-    price: float
+    price: float = Field(gt=0, le=1000000)
     image_url: Optional[str] = None
     size_sqm: Optional[int] = None
     adults: int = 2
@@ -109,10 +127,11 @@ class RoomCreate(BaseModel):
     room_type: RoomType = RoomType.STANDARD
     translations: List[TranslationInput]
     amenities: List[AmenityInput] = []
+    images: Optional[List[str]] = None
 
 
 class RoomUpdate(BaseModel):
-    price: Optional[float] = None
+    price: Optional[float] = Field(default=None, gt=0, le=1000000)
     image_url: Optional[str] = None
     images: Optional[List[str]] = None
     size_sqm: Optional[int] = None
@@ -168,6 +187,11 @@ class RoomAdminResponse(BaseModel):
     class Config:
         from_attributes = True
 
+    @field_validator('price', mode='before')
+    @classmethod
+    def sanitize_price(cls, v):
+        return sanitize_float_value(v)
+
 
 # Booking schemas
 class BookingCreate(BaseModel):
@@ -197,6 +221,11 @@ class BookingResponse(BaseModel):
     class Config:
         from_attributes = True
 
+    @field_validator('total_price', mode='before')
+    @classmethod
+    def sanitize_total_price(cls, v):
+        return sanitize_float_value(v)
+
 
 class BookingUpdate(BaseModel):
     status: Optional[BookingStatus] = None
@@ -219,6 +248,8 @@ class NotificationResponse(BaseModel):
     id: int
     type: NotificationType
     message: str
+    message_key: Optional[str]
+    message_params: Optional[dict]
     booking_id: Optional[int]
     user_id: int
     read: bool
@@ -227,6 +258,18 @@ class NotificationResponse(BaseModel):
     class Config:
         from_attributes = True
 
+    @field_validator('message_params', mode='before')
+    @classmethod
+    def parse_message_params(cls, v):
+        """Parse message_params from JSON string if it's a string."""
+        if isinstance(v, str):
+            import json
+            try:
+                return json.loads(v)
+            except (json.JSONDecodeError, TypeError):
+                return None
+        return v
+
 
 class NotificationReadResponse(BaseModel):
     id: int
@@ -234,6 +277,42 @@ class NotificationReadResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+
+class NotificationReaderResponse(BaseModel):
+    user_id: int
+    name: str
+    first_name: Optional[str]
+    last_name: Optional[str]
+    read: bool
+    read_at: Optional[datetime]
+
+    class Config:
+        from_attributes = True
+
+
+class NotificationReadersResponse(BaseModel):
+    notification_id: int
+    type: str
+    message: str
+    message_key: Optional[str]
+    message_params: Optional[dict]
+    created_at: datetime
+    readers: List[NotificationReaderResponse]
+    read_count: int
+    total_count: int
+
+    @field_validator('message_params', mode='before')
+    @classmethod
+    def parse_message_params(cls, v):
+        """Parse message_params from JSON string if it's a string."""
+        if isinstance(v, str):
+            import json
+            try:
+                return json.loads(v)
+            except (json.JSONDecodeError, TypeError):
+                return None
+        return v
 
 
 # Availability schemas

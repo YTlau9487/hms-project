@@ -9,7 +9,7 @@ import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
 
 export const AccountBookingsPage = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const { user } = useAuth();
   const [bookings, setBookings] = useState<Booking[]>([]);
@@ -21,13 +21,13 @@ export const AccountBookingsPage = () => {
 
   useEffect(() => {
     fetchBookings();
-  }, [page]);
+  }, [page, i18n.language]);
 
   const fetchBookings = async () => {
     try {
       setIsLoading(true);
       setError(null);
-      const data: PaginatedResponse<Booking> = await bookingsAPI.my(undefined, page, pageSize);
+      const data: PaginatedResponse<Booking> = await bookingsAPI.my(i18n.language, page, pageSize);
       setBookings(data.items);
       setTotalPages(data.pages);
     } catch (err) {

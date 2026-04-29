@@ -1,11 +1,33 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Outlet, useNavigate, useLocation, Navigate } from 'react-router';
-import { LayoutDashboard, BedDouble, CalendarCheck, Menu, X, Users, Bell, Shield, LogOut, Languages } from 'lucide-react';
+import { LayoutDashboard, BedDouble, CalendarCheck, Menu, X, Users, Bell, Shield, LogOut, Languages, Clock } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useTranslation } from 'react-i18next';
 
-const ADMIN_IDLE_TIMEOUT = 5 * 60 * 1000; // 5 minutes
-const ADMIN_WARNING_TIMEOUT = 4 * 60 * 1000; // 4 minutes (1 minute warning)
+const ADMIN_SESSION_TIMEOUT = 10 * 60 * 1000; // 10 minutes fallback
+
+// Decode JWT and extract exp claim (Unix timestamp in seconds)
+function decodeJwtExp(token: string): number | null {
+  try {
+    const parts = token.split('.');
+    if (parts.length !== 3) return null;
+    const payload = JSON.parse(atob(parts[1]));
+    return payload.exp || null;
+  } catch {
+    return null;
+  }
+}
+
+// Get initial remaining time from JWT token
+function getInitialRemainingTime(): number {
+  const token = localStorage.getItem('hms_admin_token');
+  if (!token) return ADMIN_SESSION_TIMEOUT;
+  const exp = decodeJwtExp(token);
+  if (!exp) return ADMIN_SESSION_TIMEOUT;
+  const now = Math.floor(Date.now() / 1000);
+  const remaining = exp - now;
+  return remaining > 0 ? remaining * 1000 : 0;
+}
 
 export const AdminLayout = () => {
   const navigate = useNavigate();
@@ -13,13 +35,8 @@ export const AdminLayout = () => {
   const { user, loading, logout } = useAuth();
   const { t, i18n } = useTranslation();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [showWarning, setShowWarning] = useState(false);
-  const [warningTimeLeft, setWarningTimeLeft] = useState(60);
-
-  const resetTimer = useCallback(() => {
-    setShowWarning(false);
-    setWarningTimeLeft(60);
-  }, []);
+  const [remainingTime, setRemainingTime] = useState(getInitialRemainingTime);
+  const remainingTimeRef = useRef(getInitialRemainingTime());
 
   const handleLogout = useCallback(() => {
     logout();
@@ -27,56 +44,47 @@ export const AdminLayout = () => {
   }, [logout]);
 
   useEffect(() => {
-    let idleTimer: ReturnType<typeof setTimeout>;
-    let warningTimer: ReturnType<typeof setTimeout>;
+    let logoutTimer: ReturnType<typeof setTimeout>;
     let countdownInterval: ReturnType<typeof setInterval>;
 
-    const startTimers = () => {
-      resetTimer();
-      
-      // Show warning after 4 minutes
-      warningTimer = setTimeout(() => {
-        setShowWarning(true);
-        setWarningTimeLeft(60);
-        
-        // Countdown for last 60 seconds
-        countdownInterval = setInterval(() => {
-          setWarningTimeLeft(prev => {
-            if (prev <= 1) {
-              clearInterval(countdownInterval);
-              return 0;
-            }
-            return prev - 1;
-          });
-        }, 1000);
-      }, ADMIN_WARNING_TIMEOUT);
+    // Initialize from JWT exp claim
+    const initialTime = getInitialRemainingTime();
+    remainingTimeRef.current = initialTime;
+    setRemainingTime(initialTime);
 
-      // Auto-logout after 5 minutes
-      idleTimer = setTimeout(() => {
-        handleLogout();
-      }, ADMIN_IDLE_TIMEOUT);
-    };
+    // If token is already expired, redirect immediately
+    if (initialTime <= 0) {
+      handleLogout();
+      return () => {};
+    }
 
-    startTimers();
+    // Update remaining time every second
+    countdownInterval = setInterval(() => {
+      remainingTimeRef.current -= 1000;
+      const newTime = Math.max(0, remainingTimeRef.current);
+      setRemainingTime(newTime);
+    }, 1000);
 
-    // Reset timer on user activity
-    const events = ['mousedown', 'keydown', 'scroll', 'touchstart'];
-    const handleActivity = () => {
-      clearTimeout(idleTimer);
-      clearTimeout(warningTimer);
-      clearInterval(countdownInterval);
-      startTimers();
-    };
-
-    events.forEach(event => window.addEventListener(event, handleActivity));
+    // Auto-logout after remaining time
+    logoutTimer = setTimeout(() => {
+      handleLogout();
+    }, initialTime);
 
     return () => {
-      clearTimeout(idleTimer);
-      clearTimeout(warningTimer);
+      clearTimeout(logoutTimer);
       clearInterval(countdownInterval);
-      events.forEach(event => window.removeEventListener(event, handleActivity));
     };
-  }, [handleLogout, resetTimer]);
+  }, [handleLogout]);
+
+  // Format remaining time as MM:SS
+  const formatTime = (ms: number) => {
+    const totalSeconds = Math.floor(ms / 1000);
+    const minutes = Math.floor(totalSeconds / 60);
+    const seconds = totalSeconds % 60;
+    return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+  };
+
+  const isWarning = remainingTime <= 60000; // Warning when under 1 minute
 
   // Show loading state while AuthContext initializes
   if (loading) {
@@ -124,6 +132,15 @@ export const AdminLayout = () => {
           <span className="text-lg font-bold">{t('adminLayout.title')}</span>
         </div>
         <div className="flex items-center gap-3">
+          {/* Session countdown timer */}
+          <div className={`flex items-center gap-1.5 px-2 sm:px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+            isWarning 
+              ? 'bg-red-500/20 text-red-300 animate-pulse' 
+              : 'bg-gray-700/50 text-gray-300'
+          }`}>
+            <Clock className="w-4 h-4" />
+            <span className="font-mono">{formatTime(remainingTime)}</span>
+          </div>
           {/* Language Switcher */}
           <button
             onClick={toggleLanguage}
@@ -207,23 +224,6 @@ export const AdminLayout = () => {
               })}
             </div>
           </nav>
-
-
-
-          {/* Auto-logout warning */}
-          {showWarning && (
-            <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-              <p className="text-xs text-yellow-800 font-medium">
-                {t('adminLayout.sessionExpires')} {warningTimeLeft}s
-              </p>
-              <button
-                onClick={resetTimer}
-                className="mt-2 w-full px-3 py-1 bg-yellow-100 text-yellow-800 text-xs rounded hover:bg-yellow-200 transition-colors cursor-pointer"
-              >
-                {t('adminLayout.stayLoggedIn')}
-              </button>
-            </div>
-          )}
         </aside>
         
         {/* Main content */}

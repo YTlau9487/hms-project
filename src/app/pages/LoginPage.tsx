@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router';
 import { Helmet } from 'react-helmet-async';
-import { Mail, Lock } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff } from 'lucide-react';
 import { PAGE_SEO } from '../utils/seo';
 import { toast } from 'sonner';
 import { useAuth } from '../context/AuthContext';
@@ -27,6 +27,7 @@ export const LoginPage = () => {
   }, [user, navigate]);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [hasError, setHasError] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -76,7 +77,7 @@ export const LoginPage = () => {
           <p className="text-muted-foreground">{t('loginPage.subtitle')}</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4" autoComplete="off">
           <div className="space-y-1">
             <label className="text-sm font-medium">{t('loginPage.emailAddress')}</label>
             <div className="relative">
@@ -88,6 +89,7 @@ export const LoginPage = () => {
                 className="w-full bg-input-background border-none rounded-lg pl-10 pr-4 py-2.5 text-sm focus:ring-2 focus:ring-primary transition-all"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
+                autoComplete="off"
               />
             </div>
           </div>
@@ -100,13 +102,21 @@ export const LoginPage = () => {
             <div className="relative">
               <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <input 
-                type="password" 
+                type={showPassword ? 'text' : 'password'}
                 required
                 placeholder="••••••••"
-                className="w-full bg-input-background border-none rounded-lg pl-10 pr-4 py-2.5 text-sm focus:ring-2 focus:ring-primary transition-all"
+                className="w-full bg-input-background border-none rounded-lg pl-10 pr-12 py-2.5 text-sm focus:ring-2 focus:ring-primary transition-all"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                autoComplete="new-password"
               />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="cursor-pointer absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+              >
+                {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              </button>
             </div>
             <p className="text-xs text-muted-foreground">{t('loginPage.passwordHint')}</p>
           </div>

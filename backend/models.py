@@ -18,6 +18,7 @@ class BookingStatus(str, Enum):
 
 class NotificationType(str, Enum):
     BOOKING_CREATED = "booking_created"
+    BOOKING_CONFIRMED = "booking_confirmed"
     BOOKING_CANCELLED = "booking_cancelled"
     CHECKED_IN = "checked_in"
     CHECKED_OUT = "checked_out"
@@ -132,9 +133,12 @@ class Notification(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
     type: NotificationType
     message: str
+    message_key: Optional[str] = Field(default=None, nullable=True)
+    message_params: Optional[str] = Field(default=None, nullable=True)  # JSON string
     booking_id: Optional[int] = Field(foreign_key="booking.id", nullable=True)
     user_id: int = Field(foreign_key="user.id")
     read: bool = Field(default=False)
+    read_at: Optional[datetime] = Field(default=None)
     created_at: datetime = Field(default_factory=datetime.utcnow)
 
     booking: Optional[Booking] = Relationship(back_populates="notifications")

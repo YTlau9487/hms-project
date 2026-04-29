@@ -12,10 +12,11 @@ import { motion, AnimatePresence } from 'motion/react';
 import { useTranslation } from 'react-i18next';
 import { notificationsAPI, getErrorMessage, Notification as APINotification } from '../services/api';
 import { toast } from 'sonner';
+import { getNotificationMessage } from '../utils/notifications';
 
 export interface Notification {
   id: string;
-  type: 'check-in' | 'check-out' | 'cancellation' | 'booking_created' | 'booking_cancelled' | 'checked_in' | 'checked_out';
+  type: 'check-in' | 'check-out' | 'cancellation' | 'booking_created' | 'booking_confirmed' | 'booking_cancelled' | 'checked_in' | 'checked_out';
   message: string;
   customerName: string;
   bookingId: string;
@@ -155,6 +156,8 @@ export const NotificationDropdown = ({
         return <XCircle className="w-4 h-4 text-red-600" />;
       case 'booking_created':
         return <CheckCircle className="w-4 h-4 text-green-600" />;
+      case 'booking_confirmed':
+        return <CheckCircle className="w-4 h-4 text-green-600" />;
       default:
         return <Bell className="w-4 h-4" />;
     }
@@ -173,14 +176,19 @@ export const NotificationDropdown = ({
         return 'bg-red-50 border-red-200';
       case 'booking_created':
         return 'bg-green-50 border-green-200';
+      case 'booking_confirmed':
+        return 'bg-green-50 border-green-200';
       default:
         return 'bg-muted border-border';
     }
   };
 
   const formatTimestamp = (dateStr: string) => {
-    const date = new Date(dateStr);
+    // Parse the date as UTC to ensure consistent time comparison
+    const dateStrWithTz = dateStr.endsWith('Z') || dateStr.includes('+') ? dateStr : dateStr + 'Z';
+    const date = new Date(dateStrWithTz);
     const now = new Date();
+    // Use UTC time for consistent comparison across timezones
     const diffMs = now.getTime() - date.getTime();
     const diffMins = Math.floor(diffMs / 60000);
     const diffHours = Math.floor(diffMs / 3600000);
@@ -220,7 +228,7 @@ export const NotificationDropdown = ({
           {displayNotifications.length > 0 && (
             <button
               onClick={handleClearAll}
-              className="text-xs text-primary hover:underline font-normal"
+              className="text-xs text-primary hover:underline font-normal cursor-pointer"
             >
               {t('notifications.clearAll')}
             </button>
@@ -244,7 +252,9 @@ export const NotificationDropdown = ({
                 ['booking_created', 'booking_cancelled', 'checked_in', 'checked_out'].includes(notification.type);
               const id = isApi ? (notification as APINotification).id : (notification as Notification).id;
               const type = notification.type;
-              const message = notification.message;
+              const message = isApi
+                ? getNotificationMessage(notification as APINotification, t)
+                : (notification as Notification).message;
               const bookingId = isApi 
                 ? (notification as APINotification).booking_id 
                   ? `BK-${(notification as APINotification).booking_id}` 

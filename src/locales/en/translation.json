@@ -127,8 +127,8 @@
       "checkOutRequired": "Check-out date is required",
       "checkOutAfterCheckIn": "Check-out date must be after check-in date",
       "checkOutMaxDate": "Maximum stay is 1 month",
-      "firstNameMin": "First name must be at least 2 characters",
-      "lastNameMin": "Last name must be at least 2 characters",
+      "firstNameMin": "First name must be at least 1 character",
+      "lastNameMin": "Last name must be at least 1 character",
       "emailInvalid": "Please enter a valid email address",
       "phoneRequired": "Phone number is required",
       "phoneInvalid": "Please enter a valid phone number"
@@ -213,8 +213,8 @@
     "phonePlaceholder": "Enter your phone number",
     "notSet": "Not set",
     "infoBox": "Your personal information is securely stored and used only for booking confirmations and communication regarding your stay. We take your privacy seriously.",
-    "firstNameMinLength": "First name must be at least 2 characters",
-    "lastNameMinLength": "Last name must be at least 2 characters",
+    "firstNameMinLength": "First name must be at least 1 character",
+    "lastNameMinLength": "Last name must be at least 1 character",
     "phoneInvalid": "Please enter a valid phone number",
     "profileUpdated": "Profile updated successfully!",
     "updateFailed": "Failed to update profile",
@@ -345,12 +345,13 @@
   },
   "notifications": {
     "title": "Notifications",
-    "clearAll": "Clear all",
+    "clearAll": "Mark all as read",
     "noNotifications": "No new notifications",
     "justNow": "Just now",
     "loading": "Loading notifications..."
   },
   "common": {
+    "to": "to",
     "loading": "Loading...",
     "error": "An error occurred",
     "errorTitle": "Error Occurred",
@@ -399,6 +400,10 @@
     "emailPlaceholder": "name@example.com",
     "password": "Password",
     "passwordHint": "8+ characters, English letters and numbers required, no spaces",
+    "passwordCheckLength": "At least 8 characters",
+    "passwordCheckLetter": "Contains at least one English letter",
+    "passwordCheckDigit": "Contains at least one digit",
+    "passwordCheckNoSpaces": "No spaces allowed",
     "forgotPassword": "Forgot password?",
     "forgotPasswordMsg": "Please contact reception to reset your password",
     "signIn": "Sign In",
@@ -436,7 +441,11 @@
     "passwordNoSpaces": "Password must not contain spaces",
     "passwordMismatch": "Passwords do not match",
     "phoneRequired": "Phone number is required",
-    "phoneInvalid": "Please enter a valid phone number"
+    "phoneInvalid": "Please enter a valid phone number",
+    "passwordCheckLength": "At least 8 characters",
+    "passwordCheckLetter": "Contains at least one English letter",
+    "passwordCheckDigit": "Contains at least one digit",
+    "passwordCheckNoSpaces": "No spaces allowed"
   },
   "homePage": {
     "ourCuratedRooms": "Our Curated Rooms",
@@ -516,6 +525,7 @@
     "roomDeleted": "Room deleted successfully",
     "deleteFailed": "Failed to delete room",
     "nameAndPriceRequired": "Room name and price are required",
+    "invalidPrice": "Please enter a valid price between 0 and 1,000,000",
     "nameLabel": "Name *",
     "namePlaceholder": "Room name",
     "descriptionLabel": "Description",
@@ -523,7 +533,19 @@
     "roomType": "Room Type",
     "addAmenity": "Add Amenity",
     "noAmenities": "No amenities added yet. Click \"Add Amenity\" to add one.",
-    "viewOnly": "View only"
+    "viewOnly": "View only",
+    "removeImageTitle": "Remove Image",
+    "removeImageDesc": "Are you sure you want to remove this image? This action cannot be undone.",
+    "removeImageBtn": "Remove Image",
+    "addImageTitle": "Add Image",
+    "addImageDesc": "Add the image URL \"{{url}}\" to the room?",
+    "addImageBtn": "Add Image",
+    "saveConfirmTitleEdit": "Save Changes",
+    "saveConfirmTitleCreate": "Create Room",
+    "saveConfirmDescEdit": "Are you sure you want to save changes to \"{{name}}\"?",
+    "saveConfirmDescCreate": "Create this new room with the specified details?",
+    "saveConfirmBtnEdit": "Save Changes",
+    "saveConfirmBtnCreate": "Create Room"
   },
   "adminBookings": {
     "title": "Booking Management",
@@ -831,6 +853,14 @@
     "searchPlaceholder": "Search country or code...",
     "noCountriesFound": "No countries found"
   },
+  "notificationMessages": {
+    "bookingCreated": "New booking #{{bookingId}} created by {{userName}}",
+    "bookingConfirmed": "Booking #{{bookingId}} has been confirmed by staff",
+    "bookingCancelled": "Booking #{{bookingId}} has been cancelled",
+    "bookingCancelledByStaff": "Booking #{{bookingId}} has been cancelled by staff",
+    "checkedIn": "Booking #{{bookingId}} has been checked in",
+    "checkedOut": "Booking #{{bookingId}} has been checked out"
+  },
   "adminNotifications": {
     "title": "Notification Management",
     "subtitle": "View and manage all system notifications",
@@ -851,6 +881,7 @@
     },
     "types": {
       "bookingCreated": "Booking Created",
+      "bookingConfirmed": "Booking Confirmed",
       "bookingCancelled": "Booking Cancelled",
       "checkedIn": "Checked In",
       "checkedOut": "Checked Out",
@@ -867,7 +898,12 @@
     "status": {
       "read": "Read",
       "unread": "Unread"
-    }
+    },
+    "readSummary": "{{readCount}} / {{totalCount}} read",
+    "viewReaders": "View readers",
+    "readersTitle": "Who read this",
+    "readersEmpty": "No staff users have been notified for this notification",
+    "readAt": "Read at"
   },
   "staffRooms": {
     "title": "Room Overview",

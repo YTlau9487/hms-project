@@ -17,7 +17,7 @@ interface ConfirmationDialogProps {
   onClose: () => void;
   onConfirm: () => void;
   title: string;
-  description?: string;
+  description?: ReactNode;
   children?: ReactNode;
   confirmText?: string;
   cancelText?: string;

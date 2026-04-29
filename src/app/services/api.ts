@@ -162,12 +162,35 @@ export interface Booking {
 
 export interface Notification {
   id: number;
-  type: 'booking_created' | 'booking_cancelled' | 'checked_in' | 'checked_out' | 'broadcast';
+  type: 'booking_created' | 'booking_confirmed' | 'booking_cancelled' | 'checked_in' | 'checked_out' | 'broadcast';
   message: string;
+  message_key: string | null;
+  message_params: Record<string, any> | null;
   booking_id: number | null;
   user_id: number;
   read: boolean;
   created_at: string;
+}
+
+export interface NotificationReader {
+  user_id: number;
+  name: string;
+  first_name: string | null;
+  last_name: string | null;
+  read: boolean;
+  read_at: string | null;
+}
+
+export interface NotificationReadersResponse {
+  notification_id: number;
+  type: string;
+  message: string;
+  message_key: string | null;
+  message_params: Record<string, any> | null;
+  created_at: string;
+  readers: NotificationReader[];
+  read_count: number;
+  total_count: number;
 }
 
 export interface CheckInOutResponse {
@@ -398,6 +421,9 @@ export const notificationsAPI = {
       method: 'POST',
       body: JSON.stringify(message),
     }),
+
+  getReaders: (notificationId: number) =>
+    fetchAPI<NotificationReadersResponse>(`/notifications/admin/${notificationId}/readers`),
 };
 
 // Admin API

@@ -1,11 +1,13 @@
+import json
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlmodel import Session, select
 from typing import List
 from pydantic import BaseModel
+from datetime import datetime, timezone
 
 from database import get_session
 from models import Notification, NotificationType, User
-from schemas import NotificationResponse
+from schemas import NotificationResponse, NotificationReadersResponse, NotificationReaderResponse
 from routers.auth import get_current_staff, get_current_admin
 
 
@@ -21,6 +23,8 @@ def create_notification(
     message: str,
     booking_id: int | None,
     user_id: int,
+    message_key: str | None = None,
+    message_params: dict | None = None,
 ) -> Notification:
     """Create a notification, preventing duplicates for same booking+type+user."""
     if booking_id is not None:
@@ -37,6 +41,8 @@ def create_notification(
     notification = Notification(
         type=notification_type,
         message=message,
+        message_key=message_key,
+        message_params=json.dumps(message_params) if message_params else None,
         booking_id=booking_id,
         user_id=user_id,
     )
@@ -86,6 +92,7 @@ def mark_notification_read(
             detail="Not enough permissions",
         )
     notification.read = True
+    notification.read_at = datetime.now(timezone.utc)
     session.add(notification)
     session.commit()
     session.refresh(notification)
@@ -106,6 +113,7 @@ def mark_all_notifications_read(
     ).all()
     for notification in notifications:
         notification.read = True
+        notification.read_at = datetime.now(timezone.utc)
     session.commit()
     return {"message": "All notifications marked as read"}
 
@@ -116,11 +124,94 @@ def get_all_notifications_admin(
     current_user=Depends(get_current_admin),
     session: Session = Depends(get_session),
 ):
-    """Get all notifications (admin only)."""
+    """Get all notifications for staff users only (admin only)."""
     notifications = session.exec(
-        select(Notification).order_by(Notification.created_at.desc())
+        select(Notification)
+        .join(User, Notification.user_id == User.id)
+        .where(User.role == "staff")
+        .order_by(Notification.created_at.desc())
     ).all()
     return notifications
+
+
+@router.get("/admin/{notification_id}/readers", response_model=NotificationReadersResponse)
+def get_notification_readers(
+    notification_id: int,
+    current_user=Depends(get_current_admin),
+    session: Session = Depends(get_session),
+):
+    """Get all staff users with their read status for a specific notification (admin only).
+
+    Groups notifications by booking_id (for booking-related) or message (for broadcasts)
+    and returns per-staff read status.
+    """
+    # Get the target notification
+    target_notification = session.get(Notification, notification_id)
+    if not target_notification:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Notification not found",
+        )
+
+    # Find all staff notifications with the same booking_id or message
+    if target_notification.booking_id is not None:
+        # Group by booking_id for booking-related notifications
+        related_notifications = session.exec(
+            select(Notification)
+            .join(User, Notification.user_id == User.id)
+            .where(
+                User.role == "staff",
+                Notification.booking_id == target_notification.booking_id,
+                Notification.type == target_notification.type,
+            )
+        ).all()
+    else:
+        # Group by message for broadcast notifications
+        related_notifications = session.exec(
+            select(Notification)
+            .join(User, Notification.user_id == User.id)
+            .where(
+                User.role == "staff",
+                Notification.message == target_notification.message,
+                Notification.type == target_notification.type,
+            )
+        ).all()
+
+    # Build readers list
+    readers = []
+    for notif in related_notifications:
+        user = session.get(User, notif.user_id)
+        if user:
+            readers.append(NotificationReaderResponse(
+                user_id=user.id,
+                name=user.name,
+                first_name=user.first_name,
+                last_name=user.last_name,
+                read=notif.read,
+                read_at=notif.read_at,
+            ))
+
+    read_count = sum(1 for r in readers if r.read)
+
+    # Parse message_params from JSON string
+    message_params = None
+    if target_notification.message_params:
+        try:
+            message_params = json.loads(target_notification.message_params)
+        except json.JSONDecodeError:
+            message_params = None
+
+    return NotificationReadersResponse(
+        notification_id=notification_id,
+        type=target_notification.type,
+        message=target_notification.message,
+        message_key=target_notification.message_key,
+        message_params=message_params,
+        created_at=target_notification.created_at,
+        readers=readers,
+        read_count=read_count,
+        total_count=len(readers),
+    )
 
 
 @router.delete("/admin/{notification_id}")
