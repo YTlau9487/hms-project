@@ -331,6 +331,17 @@ def create_room(
         session.add(link)
         created_amenities.append(amenity)
 
+    # Create room images if provided
+    if room_data.images:
+        for order, image_url in enumerate(room_data.images):
+            if image_url and image_url.strip():
+                room_image = RoomImage(
+                    room_id=room.id,
+                    image_url=image_url.strip(),
+                    order=order
+                )
+                session.add(room_image)
+
     session.commit()
 
     # Return admin response

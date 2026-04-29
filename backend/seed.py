@@ -119,12 +119,33 @@ def add_special_requests_column():
     conn.close()
 
 
+def add_notification_read_at_column():
+    """Add read_at column to notification table if it doesn't exist."""
+    import sqlite3
+    db_path = "hotel.db"
+    if not os.path.exists(db_path):
+        print("Database not found. Skipping migration.")
+        return
+    conn = sqlite3.connect(db_path)
+    cursor = conn.cursor()
+    cursor.execute("PRAGMA table_info(notification)")
+    columns = [row[1] for row in cursor.fetchall()]
+    if "read_at" not in columns:
+        cursor.execute("ALTER TABLE notification ADD COLUMN read_at DATETIME")
+        conn.commit()
+        print("✅ Added read_at column to notification table.")
+    else:
+        print("✅ read_at column already exists.")
+    conn.close()
+
+
 def seed_database():
     """Seed database with test data"""
     print("🌱 Starting database seeding...")
 
-    # Run migration for existing databases
+    # Run migrations for existing databases
     add_special_requests_column()
+    add_notification_read_at_column()
 
     # Initialize database tables
     init_db()

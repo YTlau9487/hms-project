@@ -54,11 +54,11 @@ export const UserProfile = ({ user, onBack, onUpdate }: UserProfileProps) => {
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
 
-    if (formData.first_name.trim().length < 2) {
+    if (formData.first_name.trim().length < 1) {
       newErrors.first_name = t('userProfile.firstNameMinLength');
     }
 
-    if (formData.last_name.trim().length < 2) {
+    if (formData.last_name.trim().length < 1) {
       newErrors.last_name = t('userProfile.lastNameMinLength');
     }
 

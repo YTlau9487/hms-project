@@ -216,6 +216,6 @@ input[type="password"]::-webkit-inner-spin-button {
 }
 
 ::selection {
-  background-color: #3b82f6 !important;
-  color: inherit !important;
+  background-color: #1d4ed8 !important;
+  color: #ffffff !important;
 }

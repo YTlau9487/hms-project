@@ -6,10 +6,11 @@ import math
 import time
 
 from database import get_session
-from models import User, Booking, BookingStatus, Room, UserRole
+from models import User, Booking, BookingStatus, Room, UserRole, NotificationType
 from schemas import BookingResponse, BookingUpdate, UserResponse, StaffCreate, StaffResponse, PaginatedBookingResponse
-from routers.auth import get_current_staff, get_current_admin
+from routers.auth import get_current_staff, get_current_admin, validate_password
 from routers.rooms import build_localized_room
+from routers.notifications import create_notification
 
 ph = PasswordHasher()
 
@@ -139,6 +140,34 @@ def update_booking_status(
     session.commit()
     session.refresh(booking)
     
+    # Create notification if booking was confirmed
+    if booking_data.status == BookingStatus.CONFIRMED:
+        staff_users = session.exec(select(User).where(User.role.in_(["staff", "admin"]))).all()
+        for staff_user in staff_users:
+            create_notification(
+                session,
+                NotificationType.BOOKING_CONFIRMED,
+                f"Booking #{booking.id} has been confirmed by staff",
+                booking.id,
+                staff_user.id,
+                message_key="notificationMessages.bookingConfirmed",
+                message_params={"bookingId": booking.id},
+            )
+    
+    # Create notification if booking was cancelled
+    if booking_data.status == BookingStatus.CANCELLED:
+        staff_users = session.exec(select(User).where(User.role.in_(["staff", "admin"]))).all()
+        for staff_user in staff_users:
+            create_notification(
+                session,
+                NotificationType.BOOKING_CANCELLED,
+                f"Booking #{booking.id} has been cancelled by staff",
+                booking.id,
+                staff_user.id,
+                message_key="notificationMessages.bookingCancelledByStaff",
+                message_params={"bookingId": booking.id},
+            )
+    
     return build_booking_response(booking, lang, session)
 
 
@@ -204,6 +233,14 @@ def create_staff_account(
     session: Session = Depends(get_session)
 ):
     """Create a new staff account (admin only)"""
+    # Validate password strength (same rules as customer registration)
+    password_error = validate_password(staff_data.password)
+    if password_error:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=password_error
+        )
+
     # Check if email already exists
     existing_user = session.exec(select(User).where(User.email == staff_data.email)).first()
     if existing_user:

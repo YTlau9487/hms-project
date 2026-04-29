@@ -1,15 +1,27 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { roomsAPI, Room, getErrorMessage } from '../services/api';
 import { LoadingSpinner } from '../components/LoadingSpinner';
 import { ErrorMessage } from '../components/ErrorMessage';
-import { BedDouble, Wifi, Users, Maximize } from 'lucide-react';
+import { BedDouble, Wifi, Users, Maximize, X } from 'lucide-react';
 
 export const StaffRoomsPage = () => {
   const { t, i18n } = useTranslation();
   const [rooms, setRooms] = useState<Room[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [expandedRoomId, setExpandedRoomId] = useState<number | null>(null);
+  const popoverRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (popoverRef.current && !popoverRef.current.contains(event.target as Node)) {
+        setExpandedRoomId(null);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   useEffect(() => {
     fetchRooms();
@@ -89,23 +101,53 @@ export const StaffRoomsPage = () => {
                 <span className="text-sm text-muted-foreground">{t('staffRooms.perNight')}</span>
               </div>
 
-              {room.amenities && room.amenities.length > 0 && (
-                <div className="mt-3 pt-3 border-t border-border">
-                  <p className="text-xs font-medium text-muted-foreground mb-2">{t('staffRooms.amenities')}</p>
-                  <div className="flex flex-wrap gap-1">
-                    {room.amenities.slice(0, 4).map((amenity, index) => (
-                      <span key={index} className="px-2 py-1 bg-muted rounded-full text-xs">
-                        {amenity}
-                      </span>
-                    ))}
-                    {room.amenities.length > 4 && (
-                      <span className="px-2 py-1 bg-muted rounded-full text-xs">
-                        +{room.amenities.length - 4}
-                      </span>
-                    )}
-                  </div>
-                </div>
-              )}
+               {room.amenities && room.amenities.length > 0 && (
+                 <div className="mt-3 pt-3 border-t border-border relative">
+                   <p className="text-xs font-medium text-muted-foreground mb-2">{t('staffRooms.amenities')}</p>
+                   <div className="flex flex-wrap gap-1">
+                     {room.amenities.slice(0, 6).map((amenity, index) => (
+                       <span key={index} className="px-2 py-1 bg-muted rounded-full text-xs truncate max-w-[120px]" title={amenity}>
+                         {amenity}
+                       </span>
+                     ))}
+                     {room.amenities.length > 6 && (
+                       <button
+                         onClick={(e) => {
+                           e.stopPropagation();
+                           setExpandedRoomId(expandedRoomId === room.id ? null : room.id);
+                         }}
+                         className="px-2 py-1 bg-primary/10 text-primary rounded-full text-xs font-medium hover:bg-primary/20 transition-colors cursor-pointer"
+                       >
+                         +{room.amenities.length - 6} {t('staffRooms.more', { defaultValue: 'more' })}
+                       </button>
+                     )}
+                   </div>
+
+                   {expandedRoomId === room.id && (
+                     <div
+                       ref={popoverRef}
+                       className="absolute z-50 top-full left-0 mt-2 w-64 bg-background border border-border rounded-lg shadow-lg p-4"
+                     >
+                       <div className="flex items-center justify-between mb-3">
+                         <h4 className="text-sm font-bold">{t('staffRooms.amenities')}</h4>
+                         <button
+                           onClick={() => setExpandedRoomId(null)}
+                           className="p-1 hover:bg-muted rounded transition-colors cursor-pointer"
+                         >
+                           <X className="w-4 h-4" />
+                         </button>
+                       </div>
+                       <div className="flex flex-wrap gap-1">
+                         {room.amenities.map((amenity, index) => (
+                           <span key={index} className="px-2 py-1 bg-muted rounded-full text-xs" title={amenity}>
+                             {amenity}
+                           </span>
+                         ))}
+                       </div>
+                     </div>
+                   )}
+                 </div>
+               )}
             </div>
           </div>
         ))}

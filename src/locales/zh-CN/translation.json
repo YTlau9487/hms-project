@@ -124,8 +124,8 @@
       "checkInRequired": "请选择入住日期",
       "checkOutRequired": "请选择退房日期",
       "checkOutAfterCheckIn": "退房日期必须晚于入住日期",
-      "firstNameMin": "名至少需要2个字符",
-      "lastNameMin": "姓至少需要2个字符",
+      "firstNameMin": "名至少需要1个字符",
+      "lastNameMin": "姓至少需要1个字符",
       "emailInvalid": "请输入有效的电子邮件地址",
       "phoneRequired": "电话号码为必填项",
       "phoneInvalid": "请输入有效的电话号码"
@@ -210,8 +210,8 @@
     "phonePlaceholder": "请输入您的电话号码",
     "notSet": "未设置",
     "infoBox": "您的个人信息安全存储，仅用于预订确认和住宿相关沟通。我们非常重视您的隐私。",
-    "firstNameMinLength": "名至少需要2个字符",
-    "lastNameMinLength": "姓至少需要2个字符",
+    "firstNameMinLength": "名至少需要1个字符",
+    "lastNameMinLength": "姓至少需要1个字符",
     "phoneInvalid": "请输入有效的电话号码",
     "profileUpdated": "个人资料更新成功！",
     "updateFailed": "更新个人资料失败",
@@ -341,12 +341,13 @@
   },
   "notifications": {
     "title": "通知",
-    "clearAll": "清除全部",
+    "clearAll": "全部标记为已读",
     "noNotifications": "暂无新通知",
     "justNow": "刚刚",
     "loading": "加载通知中..."
   },
   "common": {
+    "to": "至",
     "loading": "加载中...",
     "error": "发生错误",
     "errorTitle": "发生错误",
@@ -395,6 +396,10 @@
     "emailPlaceholder": "name@example.com",
     "password": "密码",
     "passwordHint": "8个或以上字符，需要英文字母和数字，不可包含空格",
+    "passwordCheckLength": "至少8个字符",
+    "passwordCheckLetter": "包含至少一个英文字母",
+    "passwordCheckDigit": "包含至少一个数字",
+    "passwordCheckNoSpaces": "不可包含空格",
     "forgotPassword": "忘记密码？",
     "forgotPasswordMsg": "请联系接待处重置密码",
     "signIn": "登录",
@@ -432,7 +437,11 @@
     "passwordNoSpaces": "密码不可包含空格",
     "passwordMismatch": "密码不匹配",
     "phoneRequired": "电话号码为必填项",
-    "phoneInvalid": "请输入有效的电话号码"
+    "phoneInvalid": "请输入有效的电话号码",
+    "passwordCheckLength": "至少8个字符",
+    "passwordCheckLetter": "包含至少一个英文字母",
+    "passwordCheckDigit": "包含至少一个数字",
+    "passwordCheckNoSpaces": "不可包含空格"
   },
   "homePage": {
     "ourCuratedRooms": "精选客房",
@@ -511,6 +520,7 @@
     "roomDeleted": "客房删除成功",
     "deleteFailed": "删除客房失败",
     "nameAndPriceRequired": "客房名称和价格为必填项",
+    "invalidPrice": "请输入 0 到 1,000,000 之间的有效价格",
     "nameLabel": "名称 *",
     "namePlaceholder": "客房名称",
     "descriptionLabel": "描述",
@@ -518,7 +528,19 @@
     "roomType": "客房类型",
     "addAmenity": "添加设施",
     "noAmenities": "尚未添加设施。点击「添加设施」来添加。",
-    "viewOnly": "仅供查看"
+    "viewOnly": "仅供查看",
+    "removeImageTitle": "移除图片",
+    "removeImageDesc": "您确定要移除此图片吗？此操作无法撤消。",
+    "removeImageBtn": "移除图片",
+    "addImageTitle": "添加图片",
+    "addImageDesc": "将图片网址「{{url}}」添加至房间？",
+    "addImageBtn": "添加图片",
+    "saveConfirmTitleEdit": "保存更改",
+    "saveConfirmTitleCreate": "创建房间",
+    "saveConfirmDescEdit": "您确定要保存「{{name}}」的更改吗？",
+    "saveConfirmDescCreate": "使用指定的详细信息创建此新房间？",
+    "saveConfirmBtnEdit": "保存更改",
+    "saveConfirmBtnCreate": "创建房间"
   },
   "adminBookings": {
     "title": "预订管理",
@@ -826,6 +848,14 @@
     "searchPlaceholder": "搜索国家或代码...",
     "noCountriesFound": "未找到国家"
   },
+  "notificationMessages": {
+    "bookingCreated": "新预订 #{{bookingId}} 由 {{userName}} 创建",
+    "bookingConfirmed": "预订 #{{bookingId}} 已由员工确认",
+    "bookingCancelled": "预订 #{{bookingId}} 已取消",
+    "bookingCancelledByStaff": "预订 #{{bookingId}} 已由员工取消",
+    "checkedIn": "预订 #{{bookingId}} 已入住",
+    "checkedOut": "预订 #{{bookingId}} 已退房"
+  },
   "staffRooms": {
     "title": "客房概览",
     "subtitle": "查看所有客房类型及其详情",
@@ -926,6 +956,7 @@
     },
     "types": {
       "bookingCreated": "预订已创建",
+      "bookingConfirmed": "预订已确认",
       "bookingCancelled": "预订已取消",
       "checkedIn": "已入住",
       "checkedOut": "已退房",
@@ -942,7 +973,12 @@
     "status": {
       "read": "已读",
       "unread": "未读"
-    }
+    },
+    "readSummary": "{{readCount}} / {{totalCount}} 已读",
+    "viewReaders": "查看读者",
+    "readersTitle": "谁读了此通知",
+    "readersEmpty": "没有员工用户收到此通知",
+    "readAt": "阅读时间"
   },
   "stayManagement": {
     "checkInTitle": "入住管理",

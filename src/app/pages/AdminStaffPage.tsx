@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { Users, Plus, Trash2, AlertCircle, X, Loader2, UserPlus } from 'lucide-react';
+import { Users, Plus, Trash2, AlertCircle, X, Loader2, UserPlus, Check, X as XIcon } from 'lucide-react';
 import { useNavigate } from 'react-router';
 import { useAuth } from '../context/AuthContext';
 import { adminAPI, StaffCreate, StaffMember } from '../services/api';
@@ -9,8 +9,8 @@ import { ConfirmationDialog } from '../components/ConfirmationDialog';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 
-const AUTO_LOGOUT_TIME = 5 * 60 * 1000; // 5 minutes
-const WARNING_TIME = 4 * 60 * 1000; // 4 minutes
+const AUTO_LOGOUT_TIME = 30 * 60 * 1000; // 30 minutes
+const WARNING_TIME = 29 * 60 * 1000; // 29 minutes (1 minute warning)
 
 export const AdminStaffPage = () => {
   const { t } = useTranslation();
@@ -25,6 +25,12 @@ export const AdminStaffPage = () => {
     email: '',
     password: '',
     phone: '',
+  });
+  const [passwordChecks, setPasswordChecks] = useState({
+    minLength: false,
+    hasLetter: false,
+    hasDigit: false,
+    noSpaces: true,
   });
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -99,6 +105,15 @@ export const AdminStaffPage = () => {
     fetchStaff();
   }, [user, navigate]);
 
+  useEffect(() => {
+    setPasswordChecks({
+      minLength: formData.password.length >= 8,
+      hasLetter: /[A-Za-z]/.test(formData.password),
+      hasDigit: /\d/.test(formData.password),
+      noSpaces: !formData.password.includes(' '),
+    });
+  }, [formData.password]);
+
   const fetchStaff = async () => {
     try {
       setIsLoading(true);
@@ -114,6 +129,20 @@ export const AdminStaffPage = () => {
   const handleCreateSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+
+    // Password validation (same rules as customer registration)
+    if (formData.password.length < 8) {
+      setError(t('registerPage.passwordMinLength'));
+      return;
+    }
+    if (formData.password.includes(' ')) {
+      setError(t('registerPage.passwordNoSpaces'));
+      return;
+    }
+    if (!/(?=.*[A-Za-z])(?=.*\d)/.test(formData.password)) {
+      setError(t('registerPage.passwordMinLength'));
+      return;
+    }
 
     // Client-side validation
     if (formData.phone && !isValidPhoneNumber(formData.phone)) {
@@ -266,8 +295,26 @@ export const AdminStaffPage = () => {
                     onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent outline-none"
                     required
-                    minLength={6}
+                    minLength={8}
                   />
+                   <div className="space-y-1 mt-2">
+                      <div className="flex items-center gap-2 text-xs">
+                        {passwordChecks.minLength ? <Check className="w-3.5 h-3.5 text-green-500 flex-shrink-0" /> : <XIcon className="w-3.5 h-3.5 text-red-500 flex-shrink-0" />}
+                        <span className={passwordChecks.minLength ? 'text-green-600' : 'text-gray-500'}>{t('registerPage.passwordCheckLength')}</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-xs">
+                        {passwordChecks.hasLetter ? <Check className="w-3.5 h-3.5 text-green-500 flex-shrink-0" /> : <XIcon className="w-3.5 h-3.5 text-red-500 flex-shrink-0" />}
+                        <span className={passwordChecks.hasLetter ? 'text-green-600' : 'text-gray-500'}>{t('registerPage.passwordCheckLetter')}</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-xs">
+                        {passwordChecks.hasDigit ? <Check className="w-3.5 h-3.5 text-green-500 flex-shrink-0" /> : <XIcon className="w-3.5 h-3.5 text-red-500 flex-shrink-0" />}
+                        <span className={passwordChecks.hasDigit ? 'text-green-600' : 'text-gray-500'}>{t('registerPage.passwordCheckDigit')}</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-xs">
+                        {passwordChecks.noSpaces ? <Check className="w-3.5 h-3.5 text-green-500 flex-shrink-0" /> : <XIcon className="w-3.5 h-3.5 text-red-500 flex-shrink-0" />}
+                        <span className={passwordChecks.noSpaces ? 'text-green-600' : 'text-gray-500'}>{t('registerPage.passwordCheckNoSpaces')}</span>
+                      </div>
+                    </div>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">{t('adminStaff.phone')}</label>

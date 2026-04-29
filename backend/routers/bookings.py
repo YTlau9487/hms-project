@@ -13,6 +13,22 @@ from routers.notifications import create_notification
 
 router = APIRouter(prefix="/api/bookings", tags=["bookings"])
 
+# Package prices must match frontend BookingModal.tsx package prices
+PACKAGE_PRICES = {
+    # English
+    "Standard Stay": 0,
+    "Breakfast Delight": 45,
+    "VIP Experience": 120,
+    # Traditional Chinese (zh-TW)
+    "標準住宿": 0,
+    "早餐套餐": 45,
+    "VIP體驗": 120,
+    # Simplified Chinese (zh-CN)
+    "标准住宿": 0,
+    "早餐套餐": 45,
+    "VIP体验": 120,
+}
+
 
 def build_booking_response(booking: Booking, lang: str, session: Session) -> BookingResponse:
     """Build booking response with room and user data."""
@@ -163,8 +179,17 @@ def create_booking(
     
     # Calculate total price
     nights = (booking_data.check_out - booking_data.check_in).days
-    total_price = room.price * nights
-    
+    base_price = room.price * nights
+    package_surcharge = PACKAGE_PRICES.get(booking_data.package_name, 0)
+    total_price = base_price + package_surcharge
+
+    # Guard against non-finite total_price (overflow protection)
+    if not math.isfinite(total_price):
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="Invalid price calculation. Please contact support."
+        )
+
     # Create booking
     booking = Booking(
         user_id=current_user.id,
@@ -181,8 +206,8 @@ def create_booking(
     session.commit()
     session.refresh(booking)
     
-    # Create notification for all staff users
-    staff_users = session.exec(select(User).where(User.role == "staff")).all()
+    # Create notification for all staff and admin users
+    staff_users = session.exec(select(User).where(User.role.in_(["staff", "admin"]))).all()
     for staff_user in staff_users:
         create_notification(
             session,
@@ -190,6 +215,8 @@ def create_booking(
             f"New booking #{booking.id} created by {current_user.name}",
             booking.id,
             staff_user.id,
+            message_key="notificationMessages.bookingCreated",
+            message_params={"bookingId": booking.id, "userName": current_user.name},
         )
     
     return build_booking_response(booking, lang, session)
@@ -243,6 +270,34 @@ def update_booking(
     session.commit()
     session.refresh(booking)
     
+    # Create notification if booking was confirmed
+    if booking_data.status == BookingStatus.CONFIRMED:
+        staff_users = session.exec(select(User).where(User.role.in_(["staff", "admin"]))).all()
+        for staff_user in staff_users:
+            create_notification(
+                session,
+                NotificationType.BOOKING_CONFIRMED,
+                f"Booking #{booking.id} has been confirmed by staff",
+                booking.id,
+                staff_user.id,
+                message_key="notificationMessages.bookingConfirmed",
+                message_params={"bookingId": booking.id},
+            )
+    
+    # Create notification if booking was cancelled
+    if booking_data.status == BookingStatus.CANCELLED:
+        staff_users = session.exec(select(User).where(User.role.in_(["staff", "admin"]))).all()
+        for staff_user in staff_users:
+            create_notification(
+                session,
+                NotificationType.BOOKING_CANCELLED,
+                f"Booking #{booking.id} has been cancelled by staff",
+                booking.id,
+                staff_user.id,
+                message_key="notificationMessages.bookingCancelledByStaff",
+                message_params={"bookingId": booking.id},
+            )
+    
     return build_booking_response(booking, lang, session)
 
 
@@ -277,8 +332,8 @@ def cancel_booking(
     session.add(booking)
     session.commit()
     
-    # Create notification for all staff users
-    staff_users = session.exec(select(User).where(User.role == "staff")).all()
+    # Create notification for all staff and admin users
+    staff_users = session.exec(select(User).where(User.role.in_(["staff", "admin"]))).all()
     for staff_user in staff_users:
         create_notification(
             session,
@@ -286,6 +341,8 @@ def cancel_booking(
             f"Booking #{booking.id} has been cancelled",
             booking.id,
             staff_user.id,
+            message_key="notificationMessages.bookingCancelled",
+            message_params={"bookingId": booking.id},
         )
 
 
@@ -326,8 +383,8 @@ def check_in_booking(
     session.commit()
     session.refresh(booking)
     
-    # Create notification for all staff users
-    staff_users = session.exec(select(User).where(User.role == "staff")).all()
+    # Create notification for all staff and admin users
+    staff_users = session.exec(select(User).where(User.role.in_(["staff", "admin"]))).all()
     for staff_user in staff_users:
         create_notification(
             session,
@@ -335,6 +392,8 @@ def check_in_booking(
             f"Booking #{booking.id} has been checked in",
             booking.id,
             staff_user.id,
+            message_key="notificationMessages.checkedIn",
+            message_params={"bookingId": booking.id},
         )
     
     return CheckInOutResponse(
@@ -377,8 +436,8 @@ def check_out_booking(
     session.commit()
     session.refresh(booking)
     
-    # Create notification for all staff users
-    staff_users = session.exec(select(User).where(User.role == "staff")).all()
+    # Create notification for all staff and admin users
+    staff_users = session.exec(select(User).where(User.role.in_(["staff", "admin"]))).all()
     for staff_user in staff_users:
         create_notification(
             session,
@@ -386,6 +445,8 @@ def check_out_booking(
             f"Booking #{booking.id} has been checked out",
             booking.id,
             staff_user.id,
+            message_key="notificationMessages.checkedOut",
+            message_params={"bookingId": booking.id},
         )
     
     return CheckInOutResponse(

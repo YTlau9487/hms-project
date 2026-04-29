@@ -71,6 +71,11 @@ export const AdminRoomsPage = () => {
   const [newImageUrl, setNewImageUrl] = useState('');
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
+  const [removeImageConfirm, setRemoveImageConfirm] = useState<number | null>(null);
+  const [addImageConfirm, setAddImageConfirm] = useState(false);
+  const [showSaveConfirm, setShowSaveConfirm] = useState(false);
+  const [touchDragIndex, setTouchDragIndex] = useState<number | null>(null);
+  const [touchOverIndex, setTouchOverIndex] = useState<number | null>(null);
 
   useEffect(() => {
     fetchRooms();
@@ -90,10 +95,18 @@ export const AdminRoomsPage = () => {
     }
   };
 
-  const openCreateModal = () => {
+  const resetForm = () => {
     setEditingRoom(null);
     setFormData({ ...emptyForm, translations: emptyTranslations.map(t => ({ ...t })) });
     setActiveLangTab('en');
+    setNewImageUrl('');
+    setRemoveImageConfirm(null);
+    setAddImageConfirm(false);
+    setShowSaveConfirm(false);
+  };
+
+  const openCreateModal = () => {
+    resetForm();
     setModalOpen(true);
   };
 
@@ -143,12 +156,18 @@ export const AdminRoomsPage = () => {
 
   const handleAddImage = () => {
     if (!newImageUrl.trim()) return;
+    setAddImageConfirm(true);
+  };
+
+  const confirmAddImage = () => {
+    if (!newImageUrl.trim()) return;
     setFormData({
       ...formData,
       images: [...formData.images, newImageUrl.trim()],
       image_url: formData.images.length === 0 ? newImageUrl.trim() : formData.image_url,
     });
     setNewImageUrl('');
+    setAddImageConfirm(false);
   };
 
   const handleRemoveImage = (index: number) => {
@@ -159,6 +178,7 @@ export const AdminRoomsPage = () => {
       images: newImages,
       image_url: index === 0 ? (newImages[0] || '') : formData.image_url,
     });
+    setRemoveImageConfirm(null);
   };
 
   const handleDragStart = (index: number) => {
@@ -195,10 +215,52 @@ export const AdminRoomsPage = () => {
     setDragOverIndex(null);
   };
 
+  // Touch event handlers for mobile drag-and-drop
+  const handleTouchStart = (e: React.TouchEvent, index: number) => {
+    e.preventDefault();
+    setTouchDragIndex(index);
+    setTouchOverIndex(index);
+  };
+
+  const handleTouchMove = (e: React.TouchEvent, index: number) => {
+    e.preventDefault();
+    if (touchDragIndex === null) return;
+    setTouchOverIndex(index);
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent, targetIndex: number) => {
+    e.preventDefault();
+    if (touchDragIndex === null || touchDragIndex === targetIndex) {
+      setTouchDragIndex(null);
+      setTouchOverIndex(null);
+      return;
+    }
+    const newImages = [...formData.images];
+    const [draggedItem] = newImages.splice(touchDragIndex, 1);
+    newImages.splice(targetIndex, 0, draggedItem);
+    setFormData({
+      ...formData,
+      images: newImages,
+      image_url: newImages[0] || formData.image_url,
+    });
+    setTouchDragIndex(null);
+    setTouchOverIndex(null);
+  };
+
+  const handleSaveClick = () => {
+    setShowSaveConfirm(true);
+  };
+
   const handleSave = async () => {
     const hasAnyName = formData.translations.some(t => t.name.trim());
     if (!hasAnyName || formData.price <= 0) {
       toast.error(t('adminRooms.nameAndPriceRequired'));
+      return;
+    }
+
+    // Validate price is a valid finite number within acceptable range
+    if (!Number.isFinite(formData.price) || formData.price > 1000000) {
+      toast.error(t('adminRooms.invalidPrice'));
       return;
     }
 
@@ -230,6 +292,7 @@ export const AdminRoomsPage = () => {
         await roomsAPI.create(payload);
         toast.success(t('common.roomCreated'));
       }
+      resetForm();
       setModalOpen(false);
       await fetchRooms();
     } catch (err) {
@@ -499,7 +562,7 @@ export const AdminRoomsPage = () => {
                   </p>
                 </div>
                 <button
-                  onClick={() => setModalOpen(false)}
+                  onClick={() => { resetForm(); setModalOpen(false); }}
                   className="p-2 hover:bg-muted rounded-lg transition-colors cursor-pointer hover:opacity-80"
                 >
                   <X className="w-5 h-5" />
@@ -552,10 +615,14 @@ export const AdminRoomsPage = () => {
                           onDragOver={(e) => handleDragOver(e, idx)}
                           onDrop={(e) => handleDrop(e, idx)}
                           onDragEnd={handleDragEnd}
+                          onTouchStart={(e) => handleTouchStart(e, idx)}
+                          onTouchMove={(e) => handleTouchMove(e, idx)}
+                          onTouchEnd={(e) => handleTouchEnd(e, idx)}
+                          style={{ userSelect: 'none', WebkitUserSelect: 'none', touchAction: 'none' }}
                           className={`flex items-center gap-3 p-2 rounded-lg border transition-all cursor-grab active:cursor-grabbing ${
-                            dragOverIndex === idx
+                            (dragOverIndex === idx || touchOverIndex === idx)
                               ? 'border-primary bg-primary/5 ring-2 ring-primary/20'
-                              : draggedIndex === idx
+                              : (draggedIndex === idx || touchDragIndex === idx)
                               ? 'opacity-50 border-dashed border-primary'
                               : 'bg-muted/30 border-border'
                           }`}
@@ -582,7 +649,7 @@ export const AdminRoomsPage = () => {
                           </div>
                           <button
                             type="button"
-                            onClick={() => handleRemoveImage(idx)}
+                            onClick={() => setRemoveImageConfirm(idx)}
                             disabled={formData.images.length <= 1}
                             className="p-1.5 text-red-500 hover:bg-red-50 rounded-md transition-colors disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer flex-shrink-0"
                             title={formData.images.length <= 1 ? t('manageRooms.atLeastOneImageRequired') : t('manageRooms.removeImage')}
@@ -813,7 +880,7 @@ export const AdminRoomsPage = () => {
               {/* Footer */}
               <div className="sticky bottom-0 bg-background border-t border-border p-6 flex gap-4">
                 <button
-                  onClick={handleSave}
+                  onClick={handleSaveClick}
                   disabled={isSaving}
                   className="flex-1 px-6 py-3 bg-primary text-primary-foreground rounded-lg font-bold hover:opacity-80 transition-opacity cursor-pointer flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
@@ -821,7 +888,7 @@ export const AdminRoomsPage = () => {
                   {isSaving ? t('adminRooms.saving') : editingRoom ? t('adminRooms.saveChanges') : t('adminRooms.createRoom')}
                 </button>
                 <button
-                  onClick={() => setModalOpen(false)}
+                  onClick={() => { resetForm(); setModalOpen(false); }}
                   className="px-6 py-3 bg-muted text-foreground rounded-lg font-bold hover:opacity-80 transition-opacity cursor-pointer"
                 >
                   {t('adminRooms.cancel')}
@@ -842,6 +909,44 @@ export const AdminRoomsPage = () => {
         confirmText={t('adminRooms.deleteRoomBtn')}
         cancelText={t('adminRooms.cancel')}
         variant="destructive"
+      />
+
+      {/* Remove Image Confirmation */}
+      <ConfirmationDialog
+        isOpen={removeImageConfirm !== null}
+        onClose={() => setRemoveImageConfirm(null)}
+        onConfirm={() => removeImageConfirm !== null && handleRemoveImage(removeImageConfirm)}
+        title={t('adminRooms.removeImageTitle')}
+        description={t('adminRooms.removeImageDesc')}
+        confirmText={t('adminRooms.removeImageBtn')}
+        cancelText={t('adminRooms.cancel')}
+        variant="destructive"
+      />
+
+      {/* Add Image Confirmation */}
+      <ConfirmationDialog
+        isOpen={addImageConfirm}
+        onClose={() => setAddImageConfirm(false)}
+        onConfirm={confirmAddImage}
+        title={t('adminRooms.addImageTitle')}
+        description={
+          <span className="break-all">{t('adminRooms.addImageDesc', { url: newImageUrl })}</span>
+        }
+        confirmText={t('adminRooms.addImageBtn')}
+        cancelText={t('adminRooms.cancel')}
+        variant="default"
+      />
+
+      {/* Save Changes Confirmation */}
+      <ConfirmationDialog
+        isOpen={showSaveConfirm}
+        onClose={() => setShowSaveConfirm(false)}
+        onConfirm={() => { setShowSaveConfirm(false); handleSave(); }}
+        title={editingRoom ? t('adminRooms.saveConfirmTitleEdit') : t('adminRooms.saveConfirmTitleCreate')}
+        description={editingRoom ? t('adminRooms.saveConfirmDescEdit', { name: editingRoom.name }) : t('adminRooms.saveConfirmDescCreate')}
+        confirmText={editingRoom ? t('adminRooms.saveConfirmBtnEdit') : t('adminRooms.saveConfirmBtnCreate')}
+        cancelText={t('adminRooms.cancel')}
+        variant="default"
       />
     </div>
   );

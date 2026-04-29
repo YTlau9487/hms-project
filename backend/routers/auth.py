@@ -46,7 +46,7 @@ SECRET_KEY = "your-secret-key-change-in-production"
 ALGORITHM = "HS256"
 
 # Role-based token expiration times (in minutes)
-TOKEN_EXPIRE_ADMIN = 5       # 5 minutes for admin
+TOKEN_EXPIRE_ADMIN = 10      # 10 minutes for admin
 TOKEN_EXPIRE_STAFF = 30      # 30 minutes for staff
 TOKEN_EXPIRE_CUSTOMER = 240  # 4 hours for customer
 

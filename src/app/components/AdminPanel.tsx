@@ -228,7 +228,7 @@ export const AdminPanel = ({
                           <td className="px-6 py-4">
                             <div className="flex flex-col">
                               <span>{booking.check_in}</span>
-                              <span className="text-[10px] text-muted-foreground font-mono">to {booking.check_out}</span>
+                              <span className="text-[10px] text-muted-foreground font-mono">{t('common.to')} {booking.check_out}</span>
                             </div>
                           </td>
                           <td className="px-6 py-4">
