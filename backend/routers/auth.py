@@ -8,6 +8,7 @@ from typing import Optional
 from collections import defaultdict
 import re
 
+from utils import track_performance
 from database import get_session
 from models import User, UserRole
 from schemas import UserRegister, UserLogin, Token, UserResponse, UserUpdate
@@ -94,7 +95,8 @@ def get_current_user(
     except JWTError:
         raise credentials_exception
     
-    user = session.exec(select(User).where(User.email == email)).first()
+    with track_performance():
+        user = session.exec(select(User).where(User.email == email)).first()
     if user is None:
         raise credentials_exception
     return user
@@ -148,7 +150,8 @@ def register(user_data: UserRegister, session: Session = Depends(get_session)):
         )
     
     # Check if email already exists
-    existing_user = session.exec(select(User).where(User.email == user_data.email)).first()
+    with track_performance():
+        existing_user = session.exec(select(User).where(User.email == user_data.email)).first()
     if existing_user:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -196,7 +199,8 @@ def login(
         )
     
     # Find user by email
-    user = session.exec(select(User).where(User.email == user_data.email)).first()
+    with track_performance():
+        user = session.exec(select(User).where(User.email == user_data.email)).first()
     if not user:
         record_login_attempt(client_ip)
         raise HTTPException(

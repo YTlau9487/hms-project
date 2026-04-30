@@ -10,6 +10,7 @@ from schemas import BookingCreate, BookingResponse, BookingUpdate, CheckInOutRes
 from routers.auth import get_current_user, get_current_staff
 from routers.rooms import build_localized_room
 from routers.notifications import create_notification
+from utils import track_performance
 
 router = APIRouter(prefix="/api/bookings", tags=["bookings"])
 
@@ -65,20 +66,22 @@ def get_my_bookings(
 ):
     """Get current user's bookings with pagination"""
     # Get total count
-    total = session.exec(
-        select(Booking).where(Booking.user_id == current_user.id)
-    ).all()
+    with track_performance():
+        total = session.exec(
+            select(Booking).where(Booking.user_id == current_user.id)
+        ).all()
     total_count = len(total)
     pages = math.ceil(total_count / page_size) if total_count > 0 else 1
 
     # Get paginated bookings
-    bookings = session.exec(
-        select(Booking)
-        .where(Booking.user_id == current_user.id)
-        .order_by(Booking.created_at.desc())
-        .offset((page - 1) * page_size)
-        .limit(page_size)
-    ).all()
+    with track_performance():
+        bookings = session.exec(
+            select(Booking)
+            .where(Booking.user_id == current_user.id)
+            .order_by(Booking.created_at.desc())
+            .offset((page - 1) * page_size)
+            .limit(page_size)
+        ).all()
 
     # Batch load rooms and users to avoid N+1
     room_ids = list(set(b.room_id for b in bookings))
@@ -86,12 +89,14 @@ def get_my_bookings(
     
     # Guard against empty IN() clauses which SQLite doesn't support
     if room_ids:
-        rooms = {r.id: r for r in session.exec(select(Room).where(Room.id.in_(room_ids))).all()}
+        with track_performance():
+            rooms = {r.id: r for r in session.exec(select(Room).where(Room.id.in_(room_ids))).all()}
     else:
         rooms = {}
     
     if user_ids:
-        users = {u.id: u for u in session.exec(select(User).where(User.id.in_(user_ids))).all()}
+        with track_performance():
+            users = {u.id: u for u in session.exec(select(User).where(User.id.in_(user_ids))).all()}
     else:
         users = {}
 
@@ -207,7 +212,8 @@ def create_booking(
     session.refresh(booking)
     
     # Create notification for all staff and admin users
-    staff_users = session.exec(select(User).where(User.role.in_(["staff", "admin"]))).all()
+    with track_performance():
+        staff_users = session.exec(select(User).where(User.role.in_(["staff", "admin"]))).all()
     for staff_user in staff_users:
         create_notification(
             session,
@@ -272,7 +278,8 @@ def update_booking(
     
     # Create notification if booking was confirmed
     if booking_data.status == BookingStatus.CONFIRMED:
-        staff_users = session.exec(select(User).where(User.role.in_(["staff", "admin"]))).all()
+        with track_performance():
+            staff_users = session.exec(select(User).where(User.role.in_(["staff", "admin"]))).all()
         for staff_user in staff_users:
             create_notification(
                 session,
@@ -286,7 +293,8 @@ def update_booking(
     
     # Create notification if booking was cancelled
     if booking_data.status == BookingStatus.CANCELLED:
-        staff_users = session.exec(select(User).where(User.role.in_(["staff", "admin"]))).all()
+        with track_performance():
+            staff_users = session.exec(select(User).where(User.role.in_(["staff", "admin"]))).all()
         for staff_user in staff_users:
             create_notification(
                 session,
@@ -333,7 +341,8 @@ def cancel_booking(
     session.commit()
     
     # Create notification for all staff and admin users
-    staff_users = session.exec(select(User).where(User.role.in_(["staff", "admin"]))).all()
+    with track_performance():
+        staff_users = session.exec(select(User).where(User.role.in_(["staff", "admin"]))).all()
     for staff_user in staff_users:
         create_notification(
             session,
@@ -384,7 +393,8 @@ def check_in_booking(
     session.refresh(booking)
     
     # Create notification for all staff and admin users
-    staff_users = session.exec(select(User).where(User.role.in_(["staff", "admin"]))).all()
+    with track_performance():
+        staff_users = session.exec(select(User).where(User.role.in_(["staff", "admin"]))).all()
     for staff_user in staff_users:
         create_notification(
             session,
@@ -437,7 +447,8 @@ def check_out_booking(
     session.refresh(booking)
     
     # Create notification for all staff and admin users
-    staff_users = session.exec(select(User).where(User.role.in_(["staff", "admin"]))).all()
+    with track_performance():
+        staff_users = session.exec(select(User).where(User.role.in_(["staff", "admin"]))).all()
     for staff_user in staff_users:
         create_notification(
             session,
